@@ -3,7 +3,6 @@ using ApplicationCore.ModelsDto;
 using ApplicationCore.ViewModels;
 using Common.Constants;
 using Infrastructure.Models;
-using Org.BouncyCastle.Crypto.Generators;
 using Services.Interface;
 
 namespace Services.Implement
@@ -39,7 +38,7 @@ namespace Services.Implement
 
         private string HashPassword(string password)
         {
-            return BCrypt.HashPassword(password, 12);
+            return HashPassword(password, 12);
         }
 
 
