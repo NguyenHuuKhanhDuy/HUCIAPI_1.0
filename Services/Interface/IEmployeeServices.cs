@@ -5,6 +5,6 @@ namespace Services.Interface
 {
     public interface IEmployeeServices
     {
-        Task<EmployeeDto> Login(UserVM userVM, string Key);
+        Task<EmployeeDto> Login(UserVM userVM);
     }
 }

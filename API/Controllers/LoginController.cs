@@ -1,4 +1,6 @@
-﻿using ApplicationCore.Helper;
+﻿using ApplicationCore.Exceptions;
+using ApplicationCore.Helper;
+using ApplicationCore.ModelsDto;
 using ApplicationCore.ViewModels;
 using Common.Constants;
 using Microsoft.AspNetCore.Http;
@@ -12,29 +14,53 @@ namespace API.Controllers
     public class LoginController : ControllerBase
     {
         private readonly IEmployeeServices _employeeServices;
-        private readonly IConfiguration _config;
-        private readonly ILogger _logger;
+        //private readonly ILogger _logger;
 
-        public LoginController(IEmployeeServices employeeServices, IConfiguration config, ILogger logger)
+        public LoginController(IEmployeeServices employeeServices/*, ILogger logger*/)
         {
             _employeeServices = employeeServices;
-            _config = config;
-            _logger = logger;
+            //_logger = logger;
         }
 
         [HttpGet("[action]")]
         public async Task<IActionResult> Login(UserVM userVM)
         {
-            int statusCode = StatusCodeConstants.STATUS_SUCCESS;
-            if (userVM == null)
+            try
             {
-                statusCode = StatusCodeConstants.STATUS_EXP_VALIDATE;
-                return StatusCode(statusCode, new DataResponse(userVM, LoginConstants.USER_EMPTY, statusCode));
+                int statusCode = StatusCodeConstants.STATUS_SUCCESS;
+
+                if (userVM == null)
+                {
+                    statusCode = StatusCodeConstants.STATUS_EXP_VALIDATE;
+                    return StatusCode(statusCode, new DataResponse(userVM, LoginConstants.USER_EMPTY, statusCode));
+                }
+
+                EmployeeDto employeeDto = await _employeeServices.Login(userVM);
+
+                return StatusCode(statusCode, new DataResponse(employeeDto, StatusCodeConstants.MESSAGE_SUCCESS, statusCode));
             }
+            catch (Exception ex)
+            {
+                DataResponse response = new DataResponse(null, StatusCodeConstants.STRING_EMPTY, StatusCodeConstants.STATUS_SUCCESS);
+                switch (ex)
+                {
+                    case ValidateException:
+                        response.status = StatusCodeConstants.STATUS_EXP_VALIDATE;
+                        response.massage = ex.Message;
+                        break;
+                    case BusinessException:
+                        response.status = StatusCodeConstants.STATUS_EXP_BUSINESS;
+                        response.massage = ex.Message;
+                        break;
+                    default:
+                        response.status = StatusCodeConstants.STATUS_INTERNAL_SERVER_ERROR;
+                        response.massage = ex.Message;
+                        break;
+                }
 
-            var employeeDto = 
-
-            return Ok();
+                //response data for FE.
+                return StatusCode(StatusCodeConstants.STATUS_SUCCESS, response);
+            }
         }
     }
 }

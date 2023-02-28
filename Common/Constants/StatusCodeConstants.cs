@@ -14,5 +14,6 @@ namespace Common.Constants
         public const int STATUS_NOT_FOUND = 404;
         public const int STATUS_INTERNAL_SERVER_ERROR = 500;
         public const string STRING_EMPTY = "";
+        public const string MESSAGE_SUCCESS = "Success";
     }
 }

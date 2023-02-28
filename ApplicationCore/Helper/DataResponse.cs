@@ -11,7 +11,7 @@ namespace ApplicationCore.Helper
         public Object? data { get; set; }
         public string massage { get; set; }
         public int status { get; set; }
-        public DataResponse(object data, string massage, int status)
+        public DataResponse(Object data, string massage, int status)
         {
             this.data = data;
             this.massage = massage;
