@@ -49,6 +49,8 @@ public partial class Employee
 
     public string Password { get; set; } = null!;
 
+    public string? Image { get; set; }
+
     public virtual ICollection<Customer> Customers { get; } = new List<Customer>();
 
     public virtual Location District { get; set; } = null!;

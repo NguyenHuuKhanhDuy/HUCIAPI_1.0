@@ -14,16 +14,14 @@ namespace API.Controllers
     public class LoginController : ControllerBase
     {
         private readonly IEmployeeServices _employeeServices;
-        //private readonly ILogger _logger;
 
-        public LoginController(IEmployeeServices employeeServices/*, ILogger logger*/)
+        public LoginController(IEmployeeServices employeeServices)
         {
             _employeeServices = employeeServices;
-            //_logger = logger;
         }
 
-        [HttpGet("[action]")]
-        public async Task<IActionResult> Login(UserVM userVM)
+        [HttpPost("[action]")]
+        public async Task<IActionResult> Login([FromBody] UserVM userVM)
         {
             try
             {
@@ -41,25 +39,7 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                DataResponse response = new DataResponse(null, StatusCodeConstants.STRING_EMPTY, StatusCodeConstants.STATUS_SUCCESS);
-                switch (ex)
-                {
-                    case ValidateException:
-                        response.status = StatusCodeConstants.STATUS_EXP_VALIDATE;
-                        response.massage = ex.Message;
-                        break;
-                    case BusinessException:
-                        response.status = StatusCodeConstants.STATUS_EXP_BUSINESS;
-                        response.massage = ex.Message;
-                        break;
-                    default:
-                        response.status = StatusCodeConstants.STATUS_INTERNAL_SERVER_ERROR;
-                        response.massage = ex.Message;
-                        break;
-                }
-
-                //response data for FE.
-                return StatusCode(StatusCodeConstants.STATUS_SUCCESS, response);
+                return Ok();
             }
         }
     }

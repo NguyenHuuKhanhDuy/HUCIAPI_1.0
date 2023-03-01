@@ -1,3 +1,4 @@
+using API.Controllers;
 using ApplicationCore.AutoMapper;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -11,7 +12,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().ConfigureApiBehaviorOptions(options =>
+{
+    options.InvalidModelStateResponseFactory =  // the interjection
+        BaseController.ValidateModelState;
+}); ;
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

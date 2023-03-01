@@ -148,6 +148,7 @@ public partial class HucidbContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasDefaultValueSql("('')");
+            entity.Property(e => e.Image).IsUnicode(false);
             entity.Property(e => e.Name).HasDefaultValueSql("('')");
             entity.Property(e => e.Notes).HasDefaultValueSql("('')");
             entity.Property(e => e.Password)
