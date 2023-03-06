@@ -30,7 +30,7 @@ var connectionString = builder.Configuration.GetConnectionString("HUCIDB");
 builder.Services.AddDbContext<HucidbContext>(options => options.UseSqlServer(connectionString));
 
 //add scope
-builder.Services.AddScoped<IEmployeeServices, EmployeeImp>();
+builder.Services.AddTransient<IEmployeeServices, EmployeeImp>();
 
 
 

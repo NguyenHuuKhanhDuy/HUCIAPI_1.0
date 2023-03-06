@@ -3,9 +3,9 @@ using Common.Constants;
 using Microsoft.AspNetCore.Http;
 using System.ComponentModel.DataAnnotations;
 
-namespace ApplicationCore.ViewModels
+namespace ApplicationCore.ViewModels.Employee
 {
-    public class EmployeeVM : IValidatableObject
+    public class EmployeeVM /*: IValidatableObject*/
     {
         [Required]
         public string? Name { get; set; } = null!;
@@ -16,46 +16,49 @@ namespace ApplicationCore.ViewModels
         [RegularExpression(RegexConstants.REGEX_PHONE, ErrorMessage = EmployeeConstants.INVAILD_PHONE)]
         public string? Phone { get; set; }
 
-        [RegularExpression(RegexConstants.REGEX_BIRTHDAY, ErrorMessage = EmployeeConstants.INVAILD_BIRTHDAY)]
-        public string Birthday { get; set; }
+        //[RegularExpression(RegexConstants.REGEX_BIRTHDAY, ErrorMessage = EmployeeConstants.INVAILD_BIRTHDAY)]
+        public DateTime? Birthday { get; set; }
 
-        [Range(0,2, ErrorMessage = EmployeeConstants.INVAILD_GENGER)]
-        public int Gender { get; set; }
+        [Range(0, 2, ErrorMessage = EmployeeConstants.INVAILD_GENGER)]
+        public int? Gender { get; set; }
 
         [Range(0, int.MaxValue, ErrorMessage = EmployeeConstants.INVAILD_PROVINCE)]
-        public int ProvinceId { get; set; }
+        public int? ProvinceId { get; set; }
 
         [Range(0, int.MaxValue, ErrorMessage = EmployeeConstants.INVAILD_DISTRICT)]
-        public int DistrictId { get; set; }
+        public int? DistrictId { get; set; }
 
         [Range(0, int.MaxValue, ErrorMessage = EmployeeConstants.INVAILD_WARD)]
-        public int WardId { get; set; }
+        public int? WardId { get; set; }
 
-        public string Notes { get; set; } = null!;
+        public string? Notes { get; set; } = null!;
 
         [Range(0, int.MaxValue, ErrorMessage = EmployeeConstants.INVAILD_SALARY)]
-        public int Salary { get; set; }
+        public int? Salary { get; set; }
 
         [Range(0, 1, ErrorMessage = EmployeeConstants.INVAILD_SALARY_TYPE)]
-        public int SalaryTypeId { get; set; }
+        public int? SalaryTypeId { get; set; }
 
         [Range(0, 3, ErrorMessage = EmployeeConstants.INVAILD_RULE)]
-        public int RuleId { get; set; }
+        public int? RuleId { get; set; }
 
         [RegularExpression(RegexConstants.REGEX_GUID, ErrorMessage = EmployeeConstants.INVAILD_USER_CREATE)]
+        [Required]
         public Guid CreateUserId { get; set; }
 
         public string? Address { get; set; }
 
+        [Required]
         public string Username { get; set; } = null!;
 
+        [Required]
         public string Password { get; set; } = null!;
-        public IFormFile Image { get; set; }
+        public IFormFile? Image { get; set; }
 
-        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-        {
-            DataResponse response = new DataResponse(null, "", 3);
-            yield return new ValidationResult("hihi");
-        }
+        //public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        //{
+        //    DataResponse response = new DataResponse(null, "", 3);
+        //    yield return new ValidationResult("hihi");
+        //}
     }
 }

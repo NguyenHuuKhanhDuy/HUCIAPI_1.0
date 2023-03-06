@@ -69,6 +69,8 @@ public partial class Employee
 
     public virtual Rule Rule { get; set; } = null!;
 
+    public virtual SalaryType SalaryType { get; set; } = null!;
+
     public virtual ICollection<Supplier> Suppliers { get; } = new List<Supplier>();
 
     public virtual ICollection<Voucher> Vouchers { get; } = new List<Voucher>();

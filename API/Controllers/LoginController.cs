@@ -1,9 +1,7 @@
-﻿using ApplicationCore.Exceptions;
-using ApplicationCore.Helper;
+﻿using ApplicationCore.Helper;
 using ApplicationCore.ModelsDto;
-using ApplicationCore.ViewModels;
+using ApplicationCore.ViewModels.Employee;
 using Common.Constants;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Services.Interface;
 
@@ -11,7 +9,7 @@ namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class LoginController : ControllerBase
+    public class LoginController : BaseController
     {
         private readonly IEmployeeServices _employeeServices;
 
@@ -39,7 +37,7 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                return Ok();
+                return HandleException(ex);
             }
         }
     }

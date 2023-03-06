@@ -8,7 +8,7 @@ namespace API.Controllers
 {
     public abstract class BaseController : ControllerBase
     {
-        public IActionResult HandleException(Exception ex)
+        protected IActionResult HandleException(Exception ex)
         {
             DataResponse response = new DataResponse(null, StatusCodeConstants.STRING_EMPTY, StatusCodeConstants.STATUS_SUCCESS);
             switch (ex)
@@ -29,6 +29,11 @@ namespace API.Controllers
 
             //response data for FE.
             return StatusCode(response.status, response);
+        }
+
+        protected IActionResult HandleResponse(Object o, string massage, int statusCode)
+        {
+            return StatusCode(statusCode, new DataResponse(o, massage, statusCode));
         }
 
         public static IActionResult ValidateModelState(ActionContext context)

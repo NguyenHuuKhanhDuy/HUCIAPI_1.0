@@ -6,7 +6,6 @@ namespace Infrastructure.Models;
 
 public partial class HucidbContext : DbContext
 {
-
     public HucidbContext(DbContextOptions<HucidbContext> options)
         : base(options)
     {
@@ -41,6 +40,8 @@ public partial class HucidbContext : DbContext
     public virtual DbSet<Product> Products { get; set; }
 
     public virtual DbSet<Rule> Rules { get; set; }
+
+    public virtual DbSet<SalaryType> SalaryTypes { get; set; }
 
     public virtual DbSet<ShipingMethod> ShipingMethods { get; set; }
 
@@ -179,6 +180,11 @@ public partial class HucidbContext : DbContext
                 .HasForeignKey(d => d.RuleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Employee_Rule");
+
+            entity.HasOne(d => d.SalaryType).WithMany(p => p.Employees)
+                .HasForeignKey(d => d.SalaryTypeId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Employee_SalaryType");
 
             entity.HasOne(d => d.Ward).WithMany(p => p.EmployeeWards)
                 .HasForeignKey(d => d.WardId)
@@ -466,6 +472,14 @@ public partial class HucidbContext : DbContext
             entity.ToTable("Rule");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
+        });
+
+        modelBuilder.Entity<SalaryType>(entity =>
+        {
+            entity.ToTable("SalaryType");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.Name).HasMaxLength(50);
         });
 
         modelBuilder.Entity<ShipingMethod>(entity =>

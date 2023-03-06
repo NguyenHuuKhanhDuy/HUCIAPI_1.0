@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ApplicationCore.ViewModels
+namespace ApplicationCore.ViewModels.Employee
 {
     public class UserVM
     {
