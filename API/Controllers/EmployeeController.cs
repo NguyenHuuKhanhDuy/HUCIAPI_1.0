@@ -8,7 +8,7 @@ namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    //[Authorize]
+    [Authorize]
     public class EmployeeController : BaseController
     {
         private readonly IEmployeeServices _employeeService;
@@ -79,8 +79,36 @@ namespace API.Controllers
         {
             try
             {
-                var employee = await _employeeService.UpdateEmployee(employeeVM);
+                var employee = await _employeeService.UpdateEmployeeAsync(employeeVM);
                 return HandleResponse(employee, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
+            }
+            catch(Exception ex)
+            {
+                return HandleException(ex);
+            }
+        }
+
+        [HttpDelete("[action]")]
+        public async Task<IActionResult> DeleteEmployeeById(Guid employeeId)
+        {
+            try
+            {
+                await _employeeService.DeleteEmployeeByIdAsync(employeeId);
+                return HandleResponse(null, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
+            }
+            catch(Exception ex)
+            {
+                return HandleException(ex);
+            }
+        }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetDataForCreateEmployee()
+        {
+            try
+            {
+                var data = await _employeeService.DataForCreateEmployeeAsync();
+                return HandleResponse(data, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
             }
             catch(Exception ex)
             {

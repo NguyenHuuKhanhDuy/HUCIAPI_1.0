@@ -1,5 +1,6 @@
 ﻿using ApplicationCore.Exceptions;
 using ApplicationCore.ModelsDto;
+using ApplicationCore.ModelsDto.Employee;
 using ApplicationCore.ViewModels.Employee;
 using AutoMapper;
 using Common.Constants;
@@ -7,6 +8,7 @@ using Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.VisualBasic;
 using Services.Interface;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -217,7 +219,7 @@ namespace Services.Implement
             return employeeDto;
         }
 
-        public async Task<EmployeeDto> UpdateEmployee(EmployeeUpdateVM employeeVM)
+        public async Task<EmployeeDto> UpdateEmployeeAsync(EmployeeUpdateVM employeeVM)
         {
             var employee = await _dbContext.Employees.FindAsync(employeeVM.Id);
             if(employee == null || employee.IsDeleted)
@@ -250,6 +252,35 @@ namespace Services.Implement
             
             EmployeeDto employeeDto = _mapper.Map<EmployeeDto>(employee);
             return employeeDto;
+        }
+
+        /// <summary>
+        /// Delete Employee By Id
+        /// </summary>
+        /// <param name="employeeId"></param>
+        /// <returns></returns>
+        public async Task DeleteEmployeeByIdAsync(Guid employeeId)
+        {
+            var employee = await _dbContext.Employees.FindAsync(employeeId);
+            if(employee == null || employee.IsDeleted)
+            {
+                throw new BusinessException(EmployeeConstants.EMPLOYEE_NOT_EXIST);
+            }
+
+            employee.IsDeleted = true;
+            employee.Name = employee.Name + BaseConstants.DELETE;
+
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task<DataForCreateEmployeeDto> DataForCreateEmployeeAsync()
+        {
+            DataForCreateEmployeeDto data = new DataForCreateEmployeeDto();
+
+            data.SalaryTypes = await _dbContext.SalaryTypes.Where(x => x.Id != 0).ToListAsync();
+            data.Rules = await _dbContext.Rules.Where(x => x.Id != 0).ToListAsync();
+
+            return data;
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using ApplicationCore.ModelsDto;
+using ApplicationCore.ModelsDto.Employee;
 using ApplicationCore.ViewModels.Employee;
 using Infrastructure.Models;
 
@@ -14,6 +15,10 @@ namespace Services.Interface
 
         Task<EmployeeDto> GetEmployeeByIdAsync(Guid idEmployee);
 
-        Task<EmployeeDto> UpdateEmployee(EmployeeUpdateVM employeeVM);
+        Task<EmployeeDto> UpdateEmployeeAsync(EmployeeUpdateVM employeeVM);
+
+        Task DeleteEmployeeByIdAsync(Guid employeeId);
+
+        Task<DataForCreateEmployeeDto> DataForCreateEmployeeAsync();
     }
 }

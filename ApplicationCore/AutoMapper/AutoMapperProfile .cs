@@ -1,4 +1,5 @@
 ﻿using ApplicationCore.ModelsDto;
+using ApplicationCore.ModelsDto.Brand;
 using ApplicationCore.ViewModels.Employee;
 using AutoMapper;
 using Infrastructure.Models;
@@ -13,6 +14,10 @@ namespace ApplicationCore.AutoMapper
             CreateMap<EmployeeVM, Employee>();
             CreateMap<EmployeeUpdateVM, EmployeeVM>();
             CreateMap<EmployeeUpdateVM, Employee>();
+
+            //Brand
+            CreateMap<Brand, BrandDto>();
+
         }
     }
 }
