@@ -36,9 +36,4 @@
     <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="ModelsDto\Category\" />
-    <Folder Include="ViewModels\Catogory\" />
-  </ItemGroup>
-
 </Project>

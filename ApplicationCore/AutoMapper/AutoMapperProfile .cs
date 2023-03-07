@@ -1,5 +1,6 @@
 ﻿using ApplicationCore.ModelsDto;
 using ApplicationCore.ModelsDto.Brand;
+using ApplicationCore.ModelsDto.Category;
 using ApplicationCore.ViewModels.Employee;
 using AutoMapper;
 using Infrastructure.Models;
@@ -18,6 +19,8 @@ namespace ApplicationCore.AutoMapper
             //Brand
             CreateMap<Brand, BrandDto>();
 
+            //Category
+            CreateMap<Category, CategoryDto>();
         }
     }
 }

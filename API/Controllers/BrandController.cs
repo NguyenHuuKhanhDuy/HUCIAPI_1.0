@@ -1,6 +1,5 @@
 ﻿using ApplicationCore.ViewModels.Brand;
 using Common.Constants;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Services.Interface;
 
@@ -13,7 +12,7 @@ namespace API.Controllers
         private readonly IBrandServices _brandService;
 
         public BrandController(IBrandServices brandService)
-        {
+        {  
             _brandService = brandService;
         }
 
@@ -45,7 +44,7 @@ namespace API.Controllers
             }
         }
 
-        [HttpDelete("action")]
+        [HttpDelete("[action]")]
         public async Task<IActionResult> DeleteBrand(Guid brandId)
         {
             try
@@ -54,6 +53,20 @@ namespace API.Controllers
                 return HandleResponse(null, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
             }
             catch (Exception ex)
+            {
+                return HandleException(ex);
+            }
+        }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetAllBrand()
+        {
+            try
+            {
+                var brands = await _brandService.GetAllBrandsAsync();
+                return HandleResponse(brands, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
+            }
+            catch(Exception ex)
             {
                 return HandleException(ex);
             }

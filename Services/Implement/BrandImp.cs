@@ -100,5 +100,14 @@ namespace Services.Implement
                 }
             }
         }
+
+        public async Task<List<BrandDto>> GetAllBrandsAsync()
+        {
+            List<Brand> brands = await _dbContext.Brands.Where(x => !x.IsDeleted).ToListAsync();
+
+            List<BrandDto> result = _mapper.Map<List<BrandDto>>(brands);
+
+            return result;
+        }
     }
 }

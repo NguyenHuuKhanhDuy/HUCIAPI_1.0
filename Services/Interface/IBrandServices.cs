@@ -10,5 +10,7 @@ namespace Services.Interface
         Task<BrandDto> UpdateBrandAsync(BrandUpdateVM brandVM);
 
         Task DeleteBrandAsync(Guid brandId);
+
+        Task<List<BrandDto>> GetAllBrandsAsync();
     }
 }

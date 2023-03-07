@@ -8,7 +8,6 @@ using Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.VisualBasic;
 using Services.Interface;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -16,7 +15,7 @@ using System.Text;
 
 namespace Services.Implement
 {
-    public class EmployeeImp : IEmployeeServices
+    public class EmployeeImp : BaseServices, IEmployeeServices
     {
         private readonly HucidbContext _dbContext;
         private readonly IMapper _mapper;
