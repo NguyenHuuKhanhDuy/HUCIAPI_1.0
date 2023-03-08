@@ -54,11 +54,6 @@ namespace Services.Implement
             return categoryDto;
         }
 
-        public async Task<CategoryDto> UpdateCategory(CategoryVM categoryVM)
-        {
-            var category = await _dbContext.Categories.FindAsync(categoryVM.i);
-        }
-
         public void CheckExistCategory(string categoryName, List<Category> categories)
         {
             var category =  categories.Where(x => x.Name == categoryName && !x.IsDeleted).FirstOrDefault();
@@ -67,6 +62,32 @@ namespace Services.Implement
                 throw new BusinessException(CategoryConstants.EXIST_CATEGORY_NAME);
             }
 
+        }
+
+        public async Task<CategoryDto> UpdateCategoryAsync(CategoryUpdateVM categoryVM)
+        {
+            var category = await _dbContext.Categories.FindAsync(categoryVM.Id);
+            if(category != null)
+            {
+                throw new BusinessException(CategoryConstants.CATEGORY_NOT_EXIST);
+            }
+
+            if (categoryVM.ParentId != Guid.Empty)
+            {
+                var tempCate = await _dbContext.Categories.FindAsync(categoryVM.ParentId);
+                if (tempCate == null || tempCate.IsDeleted)
+                {
+                    throw new BusinessException(CategoryConstants.CATEGORY_PARENT_NOT_EXIST);
+                }
+            }
+
+            category.ParentId = categoryVM.ParentId;
+            category.Name = categoryVM.Name;
+
+            await _dbContext.SaveChangesAsync();
+
+            CategoryDto categoryDto = _mapper.Map<CategoryDto>(category);
+            return categoryDto;
         }
     }
 }
