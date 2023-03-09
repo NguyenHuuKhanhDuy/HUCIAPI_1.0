@@ -9,6 +9,8 @@ namespace Services.Interface
 
         Task<CategoryDto> UpdateCategoryAsync(CategoryUpdateVM categoryVM);
 
-        Task DeleteCategory(string categoryId);
+        Task DeleteCategory(Guid categoryId);
+
+        Task<List<CategoryDto>> GetAllCategoriesAsync();
     }
 }

@@ -67,7 +67,7 @@ namespace Services.Implement
         public async Task<CategoryDto> UpdateCategoryAsync(CategoryUpdateVM categoryVM)
         {
             var category = await _dbContext.Categories.FindAsync(categoryVM.Id);
-            if(category != null)
+            if(category == null || category.IsDeleted)
             {
                 throw new BusinessException(CategoryConstants.CATEGORY_NOT_EXIST);
             }
@@ -93,10 +93,10 @@ namespace Services.Implement
             return categoryDto;
         }
 
-        public  async Task DeleteCategory(string categoryId)
+        public  async Task DeleteCategory(Guid categoryId)
         {
             var category = await _dbContext.Categories.FindAsync(categoryId);
-            if (category != null)
+            if (category == null || category.IsDeleted)
             {
                 throw new BusinessException(CategoryConstants.CATEGORY_NOT_EXIST);
             }
@@ -105,6 +105,15 @@ namespace Services.Implement
             category.IsDeleted = true;
 
             await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task<List<CategoryDto>> GetAllCategoriesAsync()
+        {
+            List<Category> categories = await _dbContext.Categories.Where(x => !x.IsDeleted).ToListAsync();
+
+            List<CategoryDto> categoriesDto = _mapper.Map<List<CategoryDto>>(categories);
+
+            return categoriesDto;
         }
     }
 }

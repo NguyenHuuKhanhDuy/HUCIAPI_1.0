@@ -45,7 +45,7 @@ namespace API.Controllers
         }
 
         [HttpDelete("[action]")]
-        public async Task<IActionResult> DeleteCategory(string categoryId)
+        public async Task<IActionResult> DeleteCategory(Guid categoryId)
         {
             try
             {
@@ -63,7 +63,8 @@ namespace API.Controllers
         {
             try
             {
-                return HandleResponse(null, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
+                var categories = await _categoryServices.GetAllCategoriesAsync();
+                return HandleResponse(categories, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
             }
             catch (Exception ex)
             {
