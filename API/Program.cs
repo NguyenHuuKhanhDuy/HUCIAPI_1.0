@@ -33,6 +33,7 @@ builder.Services.AddDbContext<HucidbContext>(options => options.UseSqlServer(con
 builder.Services.AddTransient<IEmployeeServices, EmployeeImp>();
 builder.Services.AddTransient<IBrandServices, BrandImp>();
 builder.Services.AddTransient<ICategoryServices, CategoryImp>();
+builder.Services.AddTransient<IProductServices, ProductImp>();
 
 //add authen services
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>

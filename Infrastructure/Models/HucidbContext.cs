@@ -39,6 +39,8 @@ public partial class HucidbContext : DbContext
 
     public virtual DbSet<Product> Products { get; set; }
 
+    public virtual DbSet<ProductType> ProductTypes { get; set; }
+
     public virtual DbSet<Rule> Rules { get; set; }
 
     public virtual DbSet<SalaryType> SalaryTypes { get; set; }
@@ -459,10 +461,25 @@ public partial class HucidbContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Product_Category");
 
+            entity.HasOne(d => d.ProductType).WithMany(p => p.Products)
+                .HasForeignKey(d => d.ProductTypeId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Product_ProductType");
+
             entity.HasOne(d => d.UserCreate).WithMany(p => p.Products)
                 .HasForeignKey(d => d.UserCreateId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Product_Employee");
+        });
+
+        modelBuilder.Entity<ProductType>(entity =>
+        {
+            entity.ToTable("ProductType");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.Name)
+                .HasMaxLength(50)
+                .IsUnicode(false);
         });
 
         modelBuilder.Entity<Rule>(entity =>

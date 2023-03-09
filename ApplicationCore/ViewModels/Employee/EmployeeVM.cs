@@ -42,8 +42,8 @@ namespace ApplicationCore.ViewModels.Employee
         [Range(0, 3, ErrorMessage = EmployeeConstants.INVAILD_RULE)]
         public int? RuleId { get; set; }
 
-        [RegularExpression(RegexConstants.REGEX_GUID, ErrorMessage = EmployeeConstants.INVAILD_USER_CREATE)]
         [Required]
+        [RegularExpression(RegexConstants.REGEX_GUID, ErrorMessage = EmployeeConstants.INVAILD_USER_CREATE)]
         public Guid CreateUserId { get; set; }
 
         public string? Address { get; set; }

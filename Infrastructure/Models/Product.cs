@@ -41,5 +41,7 @@ public partial class Product
 
     public virtual Category Category { get; set; } = null!;
 
+    public virtual ProductType ProductType { get; set; } = null!;
+
     public virtual Employee UserCreate { get; set; } = null!;
 }
