@@ -72,6 +72,9 @@ namespace Services.Implement
                 throw new BusinessException(CategoryConstants.CATEGORY_NOT_EXIST);
             }
 
+            var categoryWithoutCurent = await _dbContext.Categories.Where(x => x.Id != category.Id).ToListAsync();
+            CheckExistCategory(categoryVM.Name, categoryWithoutCurent);
+
             if (categoryVM.ParentId != Guid.Empty)
             {
                 var tempCate = await _dbContext.Categories.FindAsync(categoryVM.ParentId);
@@ -88,6 +91,20 @@ namespace Services.Implement
 
             CategoryDto categoryDto = _mapper.Map<CategoryDto>(category);
             return categoryDto;
+        }
+
+        public  async Task DeleteCategory(string categoryId)
+        {
+            var category = await _dbContext.Categories.FindAsync(categoryId);
+            if (category != null)
+            {
+                throw new BusinessException(CategoryConstants.CATEGORY_NOT_EXIST);
+            }
+
+            category.Name += BaseConstants.DELETE;
+            category.IsDeleted = true;
+
+            await _dbContext.SaveChangesAsync();
         }
     }
 }

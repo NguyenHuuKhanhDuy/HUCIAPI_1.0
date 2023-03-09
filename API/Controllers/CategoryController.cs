@@ -43,5 +43,32 @@ namespace API.Controllers
                 return HandleException(ex);
             }
         }
+
+        [HttpDelete("[action]")]
+        public async Task<IActionResult> DeleteCategory(string categoryId)
+        {
+            try
+            {
+                await _categoryServices.DeleteCategory(categoryId);
+                return HandleResponse(null, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex);
+            }
+        }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetAllCategory()
+        {
+            try
+            {
+                return HandleResponse(null, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex);
+            }
+        }
     }
 }
