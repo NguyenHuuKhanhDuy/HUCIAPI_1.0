@@ -1,5 +1,6 @@
 ﻿using ApplicationCore.ViewModels.Brand;
 using Common.Constants;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services.Interface;
 
@@ -7,6 +8,7 @@ namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class BrandController : BaseController
     {
         private readonly IBrandServices _brandService;

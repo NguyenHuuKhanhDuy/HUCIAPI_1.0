@@ -8,7 +8,7 @@ namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    //[Authorize]
+    [Authorize]
     public class EmployeeController : BaseController
     {
         private readonly IEmployeeServices _employeeService;

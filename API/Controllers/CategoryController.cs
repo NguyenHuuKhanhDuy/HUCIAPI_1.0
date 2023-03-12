@@ -1,6 +1,7 @@
 ﻿using ApplicationCore.ViewModels.Brand;
 using ApplicationCore.ViewModels.Catogory;
 using Common.Constants;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services.Interface;
 
@@ -8,6 +9,7 @@ namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class CategoryController : BaseController
     {
         private readonly ICategoryServices _categoryServices;
