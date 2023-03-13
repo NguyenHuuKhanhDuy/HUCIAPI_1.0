@@ -9,6 +9,8 @@ public partial class ComboDetail
 
     public Guid ProductId { get; set; }
 
+    public bool IsDelete { get; set; }
+
     public virtual Product Combo { get; set; } = null!;
 
     public virtual Product Product { get; set; } = null!;

@@ -8,7 +8,7 @@ namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class BrandController : BaseController
     {
         private readonly IBrandServices _brandService;
@@ -18,60 +18,51 @@ namespace API.Controllers
             _brandService = brandService;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="brandVM"></param>
+        /// <returns></returns>
         [HttpPost("[action]")]
         public async Task<IActionResult> CreateBrand([FromBody] BrandVM brandVM)
         {
-            try
-            {
                 var brand = await _brandService.CreateBrandAsync(brandVM);
                 return HandleResponse(brand, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
-            }
-            catch (Exception ex)
-            {
-                return HandleException(ex);
-            }
         }
-
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="brandVM"></param>
+        /// <returns></returns>
         [HttpPut("[action]")]
         public async Task<IActionResult> UpdateBrand([FromBody] BrandUpdateVM brandVM)
         {
-            try
-            {
                 var brand = await _brandService.UpdateBrandAsync(brandVM);
                 return HandleResponse(brand, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
-            }
-            catch (Exception ex)
-            {
-                return HandleException(ex);
-            }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="brandId"></param>
+        /// <returns></returns>
         [HttpDelete("[action]")]
         public async Task<IActionResult> DeleteBrand(Guid brandId)
         {
-            try
-            {
                 await _brandService.DeleteBrandAsync(brandId);
                 return HandleResponse(null, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
-            }
-            catch (Exception ex)
-            {
-                return HandleException(ex);
-            }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllBrand()
         {
-            try
-            {
                 var brands = await _brandService.GetAllBrandsAsync();
                 return HandleResponse(brands, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
-            }
-            catch(Exception ex)
-            {
-                return HandleException(ex);
-            }
         }
     }
 }

@@ -18,60 +18,51 @@ namespace API.Controllers
             _categoryServices = categoryServices;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="categoryVM"></param>
+        /// <returns></returns>
         [HttpPost("[action]")]
         public async Task<IActionResult> CreateCategory([FromBody] CategoryVM categoryVM)
         {
-            try
-            {
-                var category = await _categoryServices.CreateCategoryAsync(categoryVM);
-                return HandleResponse(category, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
-            }
-            catch (Exception ex)
-            {
-                return HandleException(ex);
-            }
+            var category = await _categoryServices.CreateCategoryAsync(categoryVM);
+            return HandleResponse(category, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="categoryVM"></param>
+        /// <returns></returns>
         [HttpPut("[action]")]
         public async Task<IActionResult> UpdateCategory([FromBody] CategoryUpdateVM categoryVM)
         {
-            try
-            {
-                var category = await _categoryServices.UpdateCategoryAsync(categoryVM);
-                return HandleResponse(category, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
-            }
-            catch (Exception ex)
-            {
-                return HandleException(ex);
-            }
+            var category = await _categoryServices.UpdateCategoryAsync(categoryVM);
+            return HandleResponse(category, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="categoryId"></param>
+        /// <returns></returns>
         [HttpDelete("[action]")]
         public async Task<IActionResult> DeleteCategory(Guid categoryId)
         {
-            try
-            {
-                await _categoryServices.DeleteCategory(categoryId);
-                return HandleResponse(null, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
-            }
-            catch (Exception ex)
-            {
-                return HandleException(ex);
-            }
+            await _categoryServices.DeleteCategory(categoryId);
+            return HandleResponse(null, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllCategory()
         {
-            try
-            {
-                var categories = await _categoryServices.GetAllCategoriesAsync();
-                return HandleResponse(categories, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
-            }
-            catch (Exception ex)
-            {
-                return HandleException(ex);
-            }
+            var categories = await _categoryServices.GetAllCategoriesAsync();
+            return HandleResponse(categories, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
         }
     }
 }

@@ -18,11 +18,14 @@ namespace API.Controllers
             _employeeServices = employeeServices;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userVM"></param>
+        /// <returns></returns>
         [HttpPost("[action]")]
         public async Task<IActionResult> Login([FromBody] UserVM userVM)
         {
-            try
-            {
                 int statusCode = StatusCodeConstants.STATUS_SUCCESS;
 
                 if (userVM == null)
@@ -34,11 +37,6 @@ namespace API.Controllers
                 EmployeeDto employeeDto = await _employeeServices.Login(userVM);
 
                 return StatusCode(statusCode, new DataResponse(employeeDto, StatusCodeConstants.MESSAGE_SUCCESS, statusCode));
-            }
-            catch (Exception ex)
-            {
-                return HandleException(ex);
-            }
         }
     }
 }

@@ -1,9 +1,14 @@
 using API.Controllers;
 using ApplicationCore.AutoMapper;
+using ApplicationCore.Helper.HandleException;
+using ApplicationCore.Helper.Logger;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 using Services.Implement;
 using Services.Interface;
 using System.Text;
@@ -28,6 +33,14 @@ builder.Services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
 //add Database
 var connectionString = builder.Configuration.GetConnectionString("HUCIDB");
 builder.Services.AddDbContext<HucidbContext>(options => options.UseSqlServer(connectionString));
+
+// Add services to the container.
+builder.Logging.ClearProviders(); 
+
+builder.Services.TryAddEnumerable(
+ServiceDescriptor.Singleton<ILoggerProvider, ColorConsoleLoggerProvider>());
+LoggerProviderOptions.RegisterProviderOptions
+<ColorConsoleLoggerConfiguration, ColorConsoleLoggerProvider>(builder.Services);
 
 //add scope
 builder.Services.AddTransient<IEmployeeServices, EmployeeImp>();
@@ -61,11 +74,12 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 //if (app.Environment.IsDevelopment())
 //{
-    
+
 //}
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseHttpsRedirection();
+app.ConfigureCustomExceptionMiddleware();
 app.UseCors("corsapp");
 
 app.UseAuthentication();

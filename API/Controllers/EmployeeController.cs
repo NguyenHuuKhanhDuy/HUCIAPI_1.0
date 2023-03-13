@@ -26,20 +26,13 @@ namespace API.Controllers
         [HttpPost("[action]")]
         public async Task<IActionResult> CreateEmployee([FromForm] EmployeeVM employee)
         {
-            try
+            if (employee == null)
             {
-                if(employee == null)
-                {
-                    throw new ArgumentNullException(nameof(employee));
-                }
+                throw new ArgumentNullException(nameof(employee));
+            }
 
-                var employeeDto = await _employeeService.CreateEmployeeAsync(employee);
-                return HandleResponse(employeeDto, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
-            }
-            catch(Exception ex)
-            {
-                return HandleException(ex);
-            }
+            var employeeDto = await _employeeService.CreateEmployeeAsync(employee);
+            return HandleResponse(employeeDto, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
         }
 
         /// <summary>
@@ -49,71 +42,55 @@ namespace API.Controllers
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllEmployee()
         {
-            try
-            {
-                var employees = await _employeeService.GetAllEmployeeAsync();
-                return HandleResponse(employees, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
-            }
-            catch(Exception ex)
-            {
-                return HandleException(ex);
-            }
+            var employees = await _employeeService.GetAllEmployeeAsync();
+            return HandleResponse(employees, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="employeeId"></param>
+        /// <returns></returns>
         [HttpGet("[action]")]
         public async Task<IActionResult> GetEmployeeById(Guid employeeId)
         {
-            try
-            {
-                var employee = await _employeeService.GetEmployeeByIdAsync(employeeId);
-                return HandleResponse(employee, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
-            }
-            catch(Exception ex)
-            {
-                return HandleException(ex);
-            }
+            var employee = await _employeeService.GetEmployeeByIdAsync(employeeId);
+            return HandleResponse(employee, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="employeeVM"></param>
+        /// <returns></returns>
         [HttpPut("[action]")]
         public async Task<IActionResult> UpdateEmpoyee([FromBody] EmployeeUpdateVM employeeVM)
         {
-            try
-            {
-                var employee = await _employeeService.UpdateEmployeeAsync(employeeVM);
-                return HandleResponse(employee, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
-            }
-            catch(Exception ex)
-            {
-                return HandleException(ex);
-            }
+            var employee = await _employeeService.UpdateEmployeeAsync(employeeVM);
+            return HandleResponse(employee, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="employeeId"></param>
+        /// <returns></returns>
         [HttpDelete("[action]")]
         public async Task<IActionResult> DeleteEmployeeById(Guid employeeId)
         {
-            try
-            {
-                await _employeeService.DeleteEmployeeByIdAsync(employeeId);
-                return HandleResponse(null, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
-            }
-            catch(Exception ex)
-            {
-                return HandleException(ex);
-            }
+            await _employeeService.DeleteEmployeeByIdAsync(employeeId);
+            return HandleResponse(null, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("[action]")]
         public async Task<IActionResult> GetDataForCreateEmployee()
         {
-            try
-            {
-                var data = await _employeeService.DataForCreateEmployeeAsync();
-                return HandleResponse(data, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
-            }
-            catch(Exception ex)
-            {
-                return HandleException(ex);
-            }
+            var data = await _employeeService.DataForCreateEmployeeAsync();
+            return HandleResponse(data, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
         }
     }
 }
