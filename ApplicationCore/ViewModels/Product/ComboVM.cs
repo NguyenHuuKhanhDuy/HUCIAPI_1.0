@@ -35,7 +35,7 @@ namespace ApplicationCore.ViewModels.Product
         public Guid UserCreateId { get; set; }
 
         [Required]
-        [RegularExpression(RegexConstants.REGEX_GUID, ErrorMessage = ProductConstants.INVAILD_PRODUCT_ID)]
-        public List<Guid> products { get; set; } = new List<Guid>();
+        //[RegularExpression(RegexConstants.REGEX_GUID, ErrorMessage = ProductConstants.INVAILD_PRODUCT_ID)]
+        public List<Guid> productIds { get; set; } = new List<Guid>();
     }
 }

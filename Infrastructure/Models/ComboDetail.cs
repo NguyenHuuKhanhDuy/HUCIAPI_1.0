@@ -5,6 +5,8 @@ namespace Infrastructure.Models;
 
 public partial class ComboDetail
 {
+    public Guid Id { get; set; }
+
     public Guid ComboId { get; set; }
 
     public Guid ProductId { get; set; }

@@ -20,5 +20,7 @@ namespace Services.Interface
         Task<DataForCreateProductDto> GetDataForCreateProductAsync();
 
         Task DeleteProductAsync(Guid productId);
+
+        Task<ComboDto> CreateComboAsync(ComboVM comboVM);
     }
 }

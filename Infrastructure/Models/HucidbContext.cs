@@ -90,16 +90,16 @@ public partial class HucidbContext : DbContext
 
         modelBuilder.Entity<ComboDetail>(entity =>
         {
-            entity
-                .HasNoKey()
-                .ToTable("ComboDetail");
+            entity.ToTable("ComboDetail");
 
-            entity.HasOne(d => d.Combo).WithMany()
+            entity.Property(e => e.Id).ValueGeneratedNever();
+
+            entity.HasOne(d => d.Combo).WithMany(p => p.ComboDetailCombos)
                 .HasForeignKey(d => d.ComboId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ComboDetail_Product");
 
-            entity.HasOne(d => d.Product).WithMany()
+            entity.HasOne(d => d.Product).WithMany(p => p.ComboDetailProducts)
                 .HasForeignKey(d => d.ProductId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ComboDetail_Product1");

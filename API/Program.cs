@@ -42,6 +42,11 @@ ServiceDescriptor.Singleton<ILoggerProvider, ColorConsoleLoggerProvider>());
 LoggerProviderOptions.RegisterProviderOptions
 <ColorConsoleLoggerConfiguration, ColorConsoleLoggerProvider>(builder.Services);
 
+Log.Logger = new LoggerConfiguration()
+           .WriteTo.File("logs/logs.txt", rollingInterval: RollingInterval.Day) // Configure File sink with daily rotation
+           .CreateLogger();
+builder.Services.AddLogging(configure => configure.AddSerilog());
+
 //add scope
 builder.Services.AddTransient<IEmployeeServices, EmployeeImp>();
 builder.Services.AddTransient<IBrandServices, BrandImp>();

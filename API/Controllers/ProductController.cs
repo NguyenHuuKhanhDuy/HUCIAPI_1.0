@@ -121,23 +121,11 @@ namespace API.Controllers
         /// <returns></returns>
         /// <exception cref="BusinessException"></exception>
         [HttpPost("[action]")]
-        public async Task<IActionResult> CreateComboAsync(/*[FromBody] ComboVM comboVM*/)
+        public async Task<IActionResult> CreateComboAsync([FromBody] ComboVM comboVM)
         {
-            _logger.LogInformation("info nè");
-            _logger.LogInformation("info nè");
-            _logger.LogInformation("info nè");
-            _logger.LogInformation("info nè");
-
-            _logger.LogWarning("warning nè");
-            _logger.LogWarning("warning nè");
-            _logger.LogWarning("warning nè");
-
-            _logger.LogError("error nè");
-            _logger.LogError("error nè");
-            _logger.LogError("error nè");
-            _logger.LogError("error nè");
-
-            return Ok("return");
+            _logger.LogInformation("Start Create Combo....");
+            var comboDto = await _productServices.CreateComboAsync(comboVM);
+            return HandleResponse(comboDto, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
         }
 
     }

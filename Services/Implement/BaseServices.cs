@@ -40,7 +40,43 @@ namespace Services.Implement
             return productDto;
         }
 
+        public void MapFProductTComboDto(Product product, ComboDto comboDto)
+        {
+            comboDto.Id = product.Id;
+            comboDto.ProductNumber = product.ProductNumber;
+            comboDto.Name = product.Name;
+            comboDto.Price = product.Price;
+            comboDto.WholesalePrice = product.WholesalePrice;
+            comboDto.Image = product.Image;
+            comboDto.Quantity = product.Quantity;
+            comboDto.IsActive = product.IsActive.Value;
+            comboDto.BrandId = product.BrandId;
+            comboDto.CategoryId = product.CategoryId;
+            comboDto.Description = product.Description;
+            comboDto.CreateDate = product.CreateDate;
+            comboDto.ProductTypeId = product.ProductTypeId;
+            comboDto.ProductTypeName = product.ProductTypeName;
+            comboDto.UserCreateId = product.UserCreateId;
+        }
+
         public Product MapFProductVMTProduct(ProductVM productVM)
+        {
+            Product product = new Product();
+            product.Name = productVM.Name;
+            product.Price = productVM.Price;
+            product.WholesalePrice = productVM.WholesalePrice;
+            product.Image = productVM.Image;
+            product.Quantity = productVM.Quantity;
+            product.BrandId = productVM.BrandId;
+            product.CategoryId = productVM.CategoryId;
+            product.Description = productVM.Description;
+            product.ProductTypeId = productVM.ProductTypeId;
+            product.UserCreateId = productVM.UserCreateId;
+
+            return product;
+        }
+
+        public Product MapFComboVMTProduct(ComboVM productVM)
         {
             Product product = new Product();
             product.Name = productVM.Name;
@@ -68,7 +104,7 @@ namespace Services.Implement
             product.Description = productUpdateVM.Description;
         }
 
-        public void MapListFProductVMTProduct(List<Product> products, List<ProductDto> productDtos)
+        public void MapListFProductsTProductDtos(List<Product> products, List<ProductDto> productDtos)
         {
             foreach(Product product in products)
             {

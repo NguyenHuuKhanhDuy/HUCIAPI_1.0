@@ -2,15 +2,18 @@
 using Common.Constants;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 
 namespace ApplicationCore.Helper.HandleException
 {
     public class ExceptionMiddleware
     {
         private readonly RequestDelegate _next;
-        public ExceptionMiddleware(RequestDelegate next)
+        private readonly ILogger _logger;
+        public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
         {
             _next = next;
+            _logger = logger;
         }
         public async Task InvokeAsync(HttpContext httpContext)
         {
@@ -25,6 +28,7 @@ namespace ApplicationCore.Helper.HandleException
         }
         private async Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
+            _logger.LogError($"Something wrong: {exception}");
             DataResponse response = new DataResponse(null, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
             switch (exception)
             {

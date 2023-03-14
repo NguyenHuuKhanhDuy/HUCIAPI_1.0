@@ -33,6 +33,7 @@ namespace Services.Implement
             product.ProductNumber = GetNumberProduct();
             product.IsActive = true;
             product.CreateDate = GetDateTimeNow();
+            product.IsDeleted = false;
 
             ProductDto productDto = MapFProductTProductDto(product);
             productDto.BrandName = nameRelationOfProduct.BrandName;
@@ -157,7 +158,7 @@ namespace Services.Implement
 
             List<Product> products = await _dbContext.Products.Where(x => !x.IsDeleted).ToListAsync();
 
-            MapListFProductVMTProduct(products, productDtos);
+            MapListFProductsTProductDtos(products, productDtos);
 
             return productDtos;
         }
@@ -198,7 +199,7 @@ namespace Services.Implement
             var products = await _dbContext.Products.Where(x => x.BrandId == brandId && !x.IsDeleted).ToListAsync();
             List<ProductDto> productDtos = new List<ProductDto>();
 
-            MapListFProductVMTProduct(products, productDtos);
+            MapListFProductsTProductDtos(products, productDtos);
 
             return productDtos;
         }
@@ -213,11 +214,36 @@ namespace Services.Implement
             var products = await _dbContext.Products.Where(x => x.CategoryId == categoryId && !x.IsDeleted).ToListAsync();
             List<ProductDto> productDtos = new List<ProductDto>();
 
-            MapListFProductVMTProduct(products, productDtos);
+            MapListFProductsTProductDtos(products, productDtos);
 
             return productDtos;
         }
 
+        private async Task<List<ProductDto>> GetProductByIdsAsync(List<Guid> productIds)
+        {
+            var products = await _dbContext.Products.Where(x => !x.IsDeleted && productIds.Contains(x.Id)).ToListAsync();
+
+            if(products.Count == 0)
+            {
+                throw new BusinessException(ProductConstants.PRODUCTS_IN_COMBO_NOT_EXIST);
+            }
+
+            List<ProductDto> productDtos = new List<ProductDto>();
+
+            foreach (var productId in productIds)
+            {
+                var product = products.Where(x => x.Id == productId).FirstOrDefault();
+
+                if(product == null)
+                {
+                    throw new BusinessException($"{ProductConstants.PRODUCT_NOT_EXIST} : Id = {productId}");
+                }
+
+                productDtos.Add(MapFProductTProductDto(product));
+            }
+
+            return productDtos;
+        }
         /// <summary>
         /// 
         /// </summary>
@@ -240,5 +266,46 @@ namespace Services.Implement
 
             return dataForCreateProductDto;
         }
+
+        public async Task<ComboDto> CreateComboAsync(ComboVM comboVM)
+        {
+            ComboDto comboDto = new ComboDto();
+            List<ComboDetail> comboDetails = new List<ComboDetail>();
+
+            Product product = MapFComboVMTProduct(comboVM);
+            product.Id = Guid.NewGuid();
+
+            comboDto.products = await GetProductByIdsAsync(comboVM.productIds);
+
+           
+
+            NameRelationOfProduct nameRelationOfProduct = await GetNameRelationOfProduct(comboVM.BrandId, comboVM.CategoryId, comboVM.ProductTypeId, comboVM.UserCreateId, product);
+            product.ProductTypeName = nameRelationOfProduct.ProductTypeName;
+            product.ProductNumber = GetNumberProduct();
+            product.IsActive = true;
+            product.CreateDate = GetDateTimeNow();
+            product.IsDeleted = false;
+
+            await _dbContext.Products.AddAsync(product);
+            await _dbContext.SaveChangesAsync();
+
+            foreach (var item in comboDto.products)
+            {
+                ComboDetail comboDetail = new ComboDetail();
+
+                comboDetail.Id = Guid.NewGuid();
+                comboDetail.ComboId = product.Id;
+                comboDetail.ProductId = item.Id;
+                comboDetail.IsDelete = false;
+                comboDetails.Add(comboDetail);
+            }
+
+            await _dbContext.ComboDetails.AddRangeAsync(comboDetails);
+            await _dbContext.SaveChangesAsync();
+
+            MapFProductTComboDto(product, comboDto);
+
+            return comboDto;
+        }   
     }
 }
