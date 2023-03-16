@@ -37,7 +37,7 @@ namespace ApplicationCore.Helper.HandleException
                     response.message = exception.Message;
                     break;
                 case BusinessException:
-                    response.status = StatusCodeConstants.STATUS_EXP_BUSINESS;
+                    response.status = StatusCodeConstants.STATUS_INTERNAL_SERVER_ERROR;
                     response.message = exception.Message;
                     break;
                 default:

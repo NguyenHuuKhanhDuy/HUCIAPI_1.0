@@ -219,24 +219,32 @@ namespace Services.Implement
             return productDtos;
         }
 
-        private async Task<List<ProductDto>> GetProductByIdsAsync(List<Guid> productIds)
+        private async Task<List<ProductDto>> GetProductByIdsAsync(List<ProductInsideComboVM> productVMs)
         {
-            var products = await _dbContext.Products.Where(x => !x.IsDeleted && productIds.Contains(x.Id)).ToListAsync();
+            var products = await _dbContext.Products.Where(x => !x.IsDeleted && productVMs.Select(y => y.ProductId).Contains(x.Id)).ToListAsync();
 
-            if(products.Count == 0)
+            if (products.Count == 0)
             {
                 throw new BusinessException(ProductConstants.PRODUCTS_IN_COMBO_NOT_EXIST);
             }
 
             List<ProductDto> productDtos = new List<ProductDto>();
 
-            foreach (var productId in productIds)
+            foreach (var productVM in productVMs)
             {
-                var product = products.Where(x => x.Id == productId).FirstOrDefault();
+                var product = products.Where(x => x.Id == productVM.ProductId).FirstOrDefault();
 
-                if(product == null)
+                if (product.ProductTypeId == ProductConstants.PRODUCT_TYPE_COMBO)
                 {
-                    throw new BusinessException($"{ProductConstants.PRODUCT_NOT_EXIST} : Id = {productId}");
+                    throw new BusinessException(ProductConstants.CANNOT_ADD_COMBO_INSIDE_COMBO);
+                }
+                else if (product == null)
+                {
+                    throw new BusinessException($"{ProductConstants.PRODUCT_NOT_EXIST} : Id = {productVM.ProductId}");
+                }
+                else if (product.OnHand == 0)
+                {
+                    throw new BusinessException($"{ProductConstants.PRODUCT_INSIDE_COMBO_QUANTITY_0} : Id = {productVM.ProductId}");
                 }
 
                 productDtos.Add(MapFProductTProductDto(product));
@@ -244,6 +252,7 @@ namespace Services.Implement
 
             return productDtos;
         }
+
         /// <summary>
         /// 
         /// </summary>
@@ -275,9 +284,7 @@ namespace Services.Implement
             Product product = MapFComboVMTProduct(comboVM);
             product.Id = Guid.NewGuid();
 
-            comboDto.products = await GetProductByIdsAsync(comboVM.productIds);
-
-           
+            comboDto.products = await GetProductByIdsAsync(comboVM.products);
 
             NameRelationOfProduct nameRelationOfProduct = await GetNameRelationOfProduct(comboVM.BrandId, comboVM.CategoryId, comboVM.ProductTypeId, comboVM.UserCreateId, product);
             product.ProductTypeName = nameRelationOfProduct.ProductTypeName;
@@ -297,6 +304,7 @@ namespace Services.Implement
                 comboDetail.ComboId = product.Id;
                 comboDetail.ProductId = item.Id;
                 comboDetail.IsDelete = false;
+                comboDetail.Quantity = comboVM.products.Where(y => y.ProductId == comboDetail.ProductId).FirstOrDefault().Quantity;
                 comboDetails.Add(comboDetail);
             }
 
@@ -306,6 +314,63 @@ namespace Services.Implement
             MapFProductTComboDto(product, comboDto);
 
             return comboDto;
-        }   
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="comboVM"></param>
+        /// <returns></returns>
+        public async Task<ComboDto> UpdateComboAsync(ComboUpdateVM comboVM)
+        {
+            Product product = await CheckExistProduct(comboVM.Id);
+            MapFComboUpdateVMTProduct(comboVM, product);
+
+            List<ProductDto> productDtos = await GetProductByIdsAsync(comboVM.products);
+
+            NameRelationOfProduct nameRelationOfProduct = await GetNameRelationOfProduct(comboVM.BrandId, comboVM.CategoryId, product.ProductTypeId, product.UserCreateId, product);
+
+            ComboDto comboDto = new ComboDto();
+            MapFProductTComboDto(product, comboDto);
+
+            List<ComboDetail> comboDetailUpdates = await _dbContext.ComboDetails.Where(x => x.ComboId == product.Id).ToListAsync();
+            comboDto.products = productDtos;
+
+            List<ComboDetail> comboDetailAdds = UpdateProductInsideCombo(productDtos, comboVM.products, comboDetailUpdates, product.Id);
+
+            await _dbContext.ComboDetails.AddRangeAsync(comboDetailAdds);
+            await _dbContext.SaveChangesAsync();
+
+            return comboDto;
+        }
+
+        public List<ComboDetail> UpdateProductInsideCombo(List<ProductDto> productDtos, List<ProductInsideComboVM> productInsideComboVMs, List<ComboDetail> comboDetails, Guid comboId)
+        {
+            List<ComboDetail> comboDetails1 = new List<ComboDetail>();
+
+            foreach (var product in productDtos)
+            {
+                var checkExist = comboDetails.Where(x => x.ProductId == product.Id).FirstOrDefault();
+                if(checkExist == null)
+                {
+                    ComboDetail comboDetail = new ComboDetail();
+                    comboDetail.Id = Guid.NewGuid();
+                    comboDetail.ComboId = comboId;
+                    comboDetail.ProductId = product.Id;
+                    comboDetail.Quantity = productInsideComboVMs.Where(y => y.ProductId == product.Id).FirstOrDefault().Quantity;
+                    comboDetails1.Add(comboDetail);
+                }
+            }
+
+            foreach (var comboDetail in comboDetails)
+            {
+                var checkExist = productDtos.Where(x => x.Id == comboDetail.ProductId).FirstOrDefault();
+                comboDetail.IsDelete = checkExist == null ? true : false;
+                comboDetail.Quantity = productInsideComboVMs.Where(y => y.ProductId == comboDetail.ProductId).FirstOrDefault().Quantity;
+            }
+
+            return comboDetails1;
+        }
+
     }
 }

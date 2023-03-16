@@ -17,7 +17,7 @@ namespace ApplicationCore.ViewModels.Product
         public string Image { get; set; } = null!;
 
         [Range(0, int.MaxValue, ErrorMessage = ProductConstants.INVALID_WHOLESALE_PRICE)]
-        public int Quantity { get; set; }
+        public int OnHand { get; set; }
 
         [RegularExpression(RegexConstants.REGEX_GUID, ErrorMessage = BrandConstants.INVAILD_BRAND_ID)]
         public Guid BrandId { get; set; }

@@ -16,9 +16,6 @@ namespace ApplicationCore.ViewModels.Product
 
         public string Image { get; set; } = null!;
 
-        [Range(0, int.MaxValue, ErrorMessage = ProductConstants.INVALID_WHOLESALE_PRICE)]
-        public int Quantity { get; set; }
-
         [RegularExpression(RegexConstants.REGEX_GUID, ErrorMessage = BrandConstants.INVAILD_BRAND_ID)]
         public Guid BrandId { get; set; }
 
@@ -36,6 +33,6 @@ namespace ApplicationCore.ViewModels.Product
 
         [Required]
         //[RegularExpression(RegexConstants.REGEX_GUID, ErrorMessage = ProductConstants.INVAILD_PRODUCT_ID)]
-        public List<Guid> productIds { get; set; } = new List<Guid>();
+        public List<ProductInsideComboVM> products { get; set; } = new List<ProductInsideComboVM>();
     }
 }

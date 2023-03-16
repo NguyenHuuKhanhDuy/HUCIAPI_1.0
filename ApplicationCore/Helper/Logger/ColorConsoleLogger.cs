@@ -35,6 +35,7 @@ namespace ApplicationCore.Helper.Logger
                 ConsoleColor originalColor = Console.ForegroundColor;
                 string time = DateTime.UtcNow.AddHours(7).ToString("HH:mm dd/MM/yyyy");
                 Console.ForegroundColor = config.LogLevelToColorMap[logLevel];
+                Console.WriteLine();
                 Console.WriteLine($"[{time}: {logLevel}]");
 
                 Console.ForegroundColor = originalColor;

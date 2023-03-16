@@ -63,7 +63,11 @@ namespace API.Controllers
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllProductAsync()
         {
+            _logger.LogInformation("Start Get all product....");
+
             var products = await _productServices.GetAllProductsAsync();
+
+            _logger.LogInformation("End Get all product.");
             return HandleResponse(products, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
         }
 
@@ -75,7 +79,12 @@ namespace API.Controllers
         [HttpGet("[action]")]
         public async Task<IActionResult> GetProductByIdAsync(Guid productId)
         {
+            _logger.LogInformation($"Start get product by Id: {productId}....");
+
             var products = await _productServices.GetProductByIdAsync(productId);
+
+            _logger.LogInformation("End Get product.");
+
             return HandleResponse(products, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
         }
 
@@ -87,7 +96,12 @@ namespace API.Controllers
         [HttpGet("[action]")]
         public async Task<IActionResult> GetProductByBrandIdAsync(Guid brandId)
         {
+            _logger.LogInformation($"Start get product by brand Id: {brandId}....");
+
             var products = await _productServices.GetProductByBrandIdAsync(brandId);
+
+            _logger.LogInformation("End Get product.");
+
             return HandleResponse(products, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
         }
 
@@ -99,7 +113,12 @@ namespace API.Controllers
         [HttpGet("[action]")]
         public async Task<IActionResult> GetProductByCategoryIdAsync(Guid categoryId)
         {
+            _logger.LogInformation($"Start get product by category Id: {categoryId}....");
+
             var products = await _productServices.GetProductByCategoryIdAsync(categoryId);
+
+            _logger.LogInformation("End Get product.");
+
             return HandleResponse(products, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
         }
 
@@ -110,7 +129,12 @@ namespace API.Controllers
         [HttpGet("[action]")]
         public async Task<IActionResult> GetDataForCreateProductAsync()
         {
+            _logger.LogInformation($"Start get data for add product....");
+
             var data = await _productServices.GetDataForCreateProductAsync();
+
+            _logger.LogInformation($"End get data for add product....");
+
             return HandleResponse(data, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
         }
 
@@ -124,7 +148,11 @@ namespace API.Controllers
         public async Task<IActionResult> CreateComboAsync([FromBody] ComboVM comboVM)
         {
             _logger.LogInformation("Start Create Combo....");
+
             var comboDto = await _productServices.CreateComboAsync(comboVM);
+
+            _logger.LogInformation("End Create Combo....");
+
             return HandleResponse(comboDto, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
         }
 

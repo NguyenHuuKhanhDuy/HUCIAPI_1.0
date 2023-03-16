@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ApplicationCore.ViewModels.Product
 {
-    public class ProductUpdateVM
+    public class ComboUpdateVM
     {
         [Required]
         [RegularExpression(RegexConstants.REGEX_GUID, ErrorMessage = ProductConstants.INVAILD_PRODUCT_ID)]
@@ -20,9 +20,6 @@ namespace ApplicationCore.ViewModels.Product
 
         public string Image { get; set; } = null!;
 
-        [Range(0, int.MaxValue, ErrorMessage = ProductConstants.INVALID_QUANTITY)]
-        public int Quantity { get; set; }
-
         [RegularExpression(RegexConstants.REGEX_GUID, ErrorMessage = BrandConstants.INVAILD_BRAND_ID)]
         public Guid BrandId { get; set; }
 
@@ -30,5 +27,9 @@ namespace ApplicationCore.ViewModels.Product
         public Guid CategoryId { get; set; }
 
         public string Description { get; set; } = null!;
+
+        [Required]
+        //[RegularExpression(RegexConstants.REGEX_GUID, ErrorMessage = ProductConstants.INVAILD_PRODUCT_ID)]
+        public List<ProductInsideComboVM> products { get; set; } = new List<ProductInsideComboVM>();
     }
 }
