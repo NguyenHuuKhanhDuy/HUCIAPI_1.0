@@ -156,5 +156,22 @@ namespace API.Controllers
             return HandleResponse(comboDto, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
         }
 
+        //For combo
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="BusinessException"></exception>
+        [HttpPut("[action]")]
+        public async Task<IActionResult> UpdateComboAsync([FromBody] ComboUpdateVM comboVM)
+        {
+            _logger.LogInformation("Start update Combo....");
+
+            var comboDto = await _productServices.UpdateComboAsync(comboVM);
+
+            _logger.LogInformation("End update Combo....");
+
+            return HandleResponse(comboDto, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
+        }
     }
 }

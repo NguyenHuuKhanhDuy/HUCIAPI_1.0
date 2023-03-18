@@ -31,8 +31,8 @@ namespace Services.Implement
             productDto.IsActive = product.IsActive.Value;
             productDto.BrandId = product.BrandId;
             productDto.CategoryId = product.CategoryId;
-            product.Description = product.Description;
-            product.CreateDate = product.CreateDate;
+            productDto.Description = product.Description;
+            productDto.CreateDate = product.CreateDate;
             productDto.ProductTypeId = product.ProductTypeId;
             productDto.ProductTypeName = product.ProductTypeName;
             productDto.UserCreateId = product.UserCreateId;

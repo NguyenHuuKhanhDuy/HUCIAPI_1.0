@@ -26,11 +26,13 @@ namespace Services.Implement
         public async Task<ProductDto> CreateProductAsync(ProductVM productVM)
         {
             Product product = MapFProductVMTProduct(productVM);
+            product.ProductTypeId = ProductConstants.PRODUCT_TYPE_PRODUCT;
+
             NameRelationOfProduct nameRelationOfProduct = await GetNameRelationOfProduct(productVM.BrandId, productVM.CategoryId, productVM.ProductTypeId, productVM.UserCreateId, product);
 
-            product.Id = Guid.NewGuid();
             product.ProductTypeName = nameRelationOfProduct.ProductTypeName;
-            product.ProductNumber = GetNumberProduct();
+            product.Id = Guid.NewGuid();
+            product.ProductNumber = await GetNumberProduct(product.ProductTypeId);
             product.IsActive = true;
             product.CreateDate = GetDateTimeNow();
             product.IsDeleted = false;
@@ -71,6 +73,11 @@ namespace Services.Implement
             return productDto;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="productId"></param>
+        /// <returns></returns>
         public async Task DeleteProductAsync(Guid productId)
         {
             Product product = await CheckExistProduct(productId);
@@ -79,8 +86,19 @@ namespace Services.Implement
             product.ProductNumber += BaseConstants.DELETE;
             product.Name += BaseConstants.DELETE;
 
+            if(product.ProductTypeId == ProductConstants.PRODUCT_TYPE_COMBO)
+            {
+                List<ComboDetail> comboDetails = await _dbContext.ComboDetails.Where(x => x.ComboId == productId).ToListAsync();
+
+                foreach (var checkDetail in comboDetails)
+                {
+                    checkDetail.IsDelete = true;
+                }
+            }
+
             await _dbContext.SaveChangesAsync();
         }
+
         /// <summary>
         /// 
         /// </summary>
@@ -146,10 +164,11 @@ namespace Services.Implement
         /// 
         /// </summary>
         /// <returns></returns>
-        public string GetNumberProduct()
+        public async Task<string> GetNumberProduct(int productTypeId)
         {
             int number = _dbContext.Products.Count() + 1;
-            return ProductConstants.PREFIX_PRODUCT_NUMBER + number;
+            return productTypeId == 0 ? (ProductConstants.PREFIX_PRODUCT_NUMBER + number)
+                                      : (ProductConstants.PREFIX_COMBO_NUMBER + number);
         }
 
         public async Task<List<ProductDto>> GetAllProductsAsync()
@@ -160,7 +179,7 @@ namespace Services.Implement
 
             MapListFProductsTProductDtos(products, productDtos);
 
-            return productDtos;
+            return productDtos.OrderByDescending(x => x.CreateDate).ToList();
         }
 
         /// <summary>
@@ -169,7 +188,7 @@ namespace Services.Implement
         /// <param name="productId"></param>
         /// <returns></returns>
         /// <exception cref="BusinessException"></exception>
-        public async Task<ProductDto> GetProductByIdAsync(Guid productId)
+        public async Task<ComboDto> GetProductByIdAsync(Guid productId)
         {
             var product = await _dbContext.Products.Where(x => x.Id == productId && !x.IsDeleted).FirstOrDefaultAsync();
 
@@ -180,13 +199,21 @@ namespace Services.Implement
 
             NameRelationOfProduct nameRelationOfProduct = await GetNameRelationOfProduct(product.BrandId, product.CategoryId, product.ProductTypeId, product.UserCreateId, product);
 
-            ProductDto productDto = MapFProductTProductDto(product);
-            productDto.BrandName = nameRelationOfProduct.BrandName;
-            productDto.CategoryName = nameRelationOfProduct.CategoryName;
-            productDto.UserCreateName = nameRelationOfProduct.UserCreateName;
-            productDto.ProductTypeName = nameRelationOfProduct.ProductTypeName;
+            ComboDto comboDto = new ComboDto();
+            MapFProductTComboDto(product, comboDto);
+            comboDto.BrandName = nameRelationOfProduct.BrandName;
+            comboDto.CategoryName = nameRelationOfProduct.CategoryName;
+            comboDto.UserCreateName = nameRelationOfProduct.UserCreateName;
+            comboDto.ProductTypeName = nameRelationOfProduct.ProductTypeName;
 
-            return productDto;
+            if (comboDto.ProductTypeId == ProductConstants.PRODUCT_TYPE_COMBO)
+            {
+                var comboDetails = await _dbContext.ComboDetails.Where(x => x.ComboId == product.Id).ToListAsync();
+                List<Guid> productInsideComboIds = comboDetails.Select(x => x.ProductId).ToList();
+                comboDto.products = await GetProductDtoByIdsAsync(productInsideComboIds);
+            }
+
+            return comboDto;
         }
 
         /// <summary>
@@ -219,9 +246,9 @@ namespace Services.Implement
             return productDtos;
         }
 
-        private async Task<List<ProductDto>> GetProductByIdsAsync(List<ProductInsideComboVM> productVMs)
+        private async Task<List<ProductDto>> GetProductDtoByIdsAsync(List<Guid> productVMs)
         {
-            var products = await _dbContext.Products.Where(x => !x.IsDeleted && productVMs.Select(y => y.ProductId).Contains(x.Id)).ToListAsync();
+            var products = await _dbContext.Products.Where(x => !x.IsDeleted && productVMs.Contains(x.Id)).ToListAsync();
 
             if (products.Count == 0)
             {
@@ -232,7 +259,7 @@ namespace Services.Implement
 
             foreach (var productVM in productVMs)
             {
-                var product = products.Where(x => x.Id == productVM.ProductId).FirstOrDefault();
+                var product = products.Where(x => x.Id == productVM).FirstOrDefault();
 
                 if (product.ProductTypeId == ProductConstants.PRODUCT_TYPE_COMBO)
                 {
@@ -240,17 +267,17 @@ namespace Services.Implement
                 }
                 else if (product == null)
                 {
-                    throw new BusinessException($"{ProductConstants.PRODUCT_NOT_EXIST} : Id = {productVM.ProductId}");
+                    throw new BusinessException($"{ProductConstants.PRODUCT_NOT_EXIST} : Id = {productVM}");
                 }
                 else if (product.OnHand == 0)
                 {
-                    throw new BusinessException($"{ProductConstants.PRODUCT_INSIDE_COMBO_QUANTITY_0} : Id = {productVM.ProductId}");
+                    throw new BusinessException($"{ProductConstants.PRODUCT_INSIDE_COMBO_QUANTITY_0} : Id = {productVM}");
                 }
 
                 productDtos.Add(MapFProductTProductDto(product));
             }
 
-            return productDtos;
+            return productDtos.OrderBy(x => x.ProductNumber).ToList();
         }
 
         /// <summary>
@@ -283,12 +310,13 @@ namespace Services.Implement
 
             Product product = MapFComboVMTProduct(comboVM);
             product.Id = Guid.NewGuid();
+            product.ProductTypeId = ProductConstants.PRODUCT_TYPE_COMBO;
 
-            comboDto.products = await GetProductByIdsAsync(comboVM.products);
+            comboDto.products = await GetProductDtoByIdsAsync(comboVM.products.Select(x => x.ProductId).ToList());
 
             NameRelationOfProduct nameRelationOfProduct = await GetNameRelationOfProduct(comboVM.BrandId, comboVM.CategoryId, comboVM.ProductTypeId, comboVM.UserCreateId, product);
             product.ProductTypeName = nameRelationOfProduct.ProductTypeName;
-            product.ProductNumber = GetNumberProduct();
+            product.ProductNumber = await GetNumberProduct(product.ProductTypeId);
             product.IsActive = true;
             product.CreateDate = GetDateTimeNow();
             product.IsDeleted = false;
@@ -326,7 +354,7 @@ namespace Services.Implement
             Product product = await CheckExistProduct(comboVM.Id);
             MapFComboUpdateVMTProduct(comboVM, product);
 
-            List<ProductDto> productDtos = await GetProductByIdsAsync(comboVM.products);
+            List<ProductDto> productDtos = await GetProductDtoByIdsAsync(comboVM.products.Select(x => x.ProductId).ToList());
 
             NameRelationOfProduct nameRelationOfProduct = await GetNameRelationOfProduct(comboVM.BrandId, comboVM.CategoryId, product.ProductTypeId, product.UserCreateId, product);
 
@@ -351,7 +379,7 @@ namespace Services.Implement
             foreach (var product in productDtos)
             {
                 var checkExist = comboDetails.Where(x => x.ProductId == product.Id).FirstOrDefault();
-                if(checkExist == null)
+                if (checkExist == null)
                 {
                     ComboDetail comboDetail = new ComboDetail();
                     comboDetail.Id = Guid.NewGuid();
@@ -365,12 +393,18 @@ namespace Services.Implement
             foreach (var comboDetail in comboDetails)
             {
                 var checkExist = productDtos.Where(x => x.Id == comboDetail.ProductId).FirstOrDefault();
-                comboDetail.IsDelete = checkExist == null ? true : false;
-                comboDetail.Quantity = productInsideComboVMs.Where(y => y.ProductId == comboDetail.ProductId).FirstOrDefault().Quantity;
+                if (checkExist != null)
+                {
+                    comboDetail.IsDelete = false;
+                    comboDetail.Quantity = (int)productInsideComboVMs.Where(y => y.ProductId == comboDetail.ProductId).FirstOrDefault()?.Quantity;
+                }
+                else
+                {
+                    comboDetail.IsDelete = true;
+                }
             }
 
             return comboDetails1;
         }
-
     }
 }

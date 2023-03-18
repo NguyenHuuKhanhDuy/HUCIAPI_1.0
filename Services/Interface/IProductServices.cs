@@ -11,7 +11,7 @@ namespace Services.Interface
 
         Task<List<ProductDto>> GetAllProductsAsync();
 
-        Task<ProductDto> GetProductByIdAsync(Guid productId);
+        Task<ComboDto> GetProductByIdAsync(Guid productId);
 
         Task<List<ProductDto>> GetProductByBrandIdAsync(Guid brandId);
 
@@ -22,5 +22,7 @@ namespace Services.Interface
         Task DeleteProductAsync(Guid productId);
 
         Task<ComboDto> CreateComboAsync(ComboVM comboVM);
+
+        Task<ComboDto> UpdateComboAsync(ComboUpdateVM comboVM);
     }
 }
