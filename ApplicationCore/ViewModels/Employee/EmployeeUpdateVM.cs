@@ -6,7 +6,6 @@ namespace ApplicationCore.ViewModels.Employee
 {
     public class EmployeeUpdateVM
     {
-        [RegularExpression(RegexConstants.REGEX_GUID, ErrorMessage = EmployeeConstants.INVAILD_USER_CREATE)]
         [Required]
         public Guid Id { get; set; }
 

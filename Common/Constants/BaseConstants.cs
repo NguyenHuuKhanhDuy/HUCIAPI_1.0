@@ -12,5 +12,8 @@ namespace Common.Constants
 
         //format datetime
         public const string FORMAT_DATETIME_DOB = "dd/MM/yyyy";
+
+        public const string USER_CREATE_NOT_EXIST = "User create not exist";
+
     }
 }

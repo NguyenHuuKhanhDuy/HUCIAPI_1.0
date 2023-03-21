@@ -13,7 +13,7 @@ namespace Services.Implement
     {
         private readonly HucidbContext _dbContext;
         private readonly IMapper _mapper;
-        public CategoryImp(HucidbContext dbContext, IMapper mapper)
+        public CategoryImp(HucidbContext dbContext, IMapper mapper) : base(dbContext)
         {
             _dbContext = dbContext;
             _mapper = mapper;

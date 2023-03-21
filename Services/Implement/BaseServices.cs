@@ -1,11 +1,42 @@
-﻿using ApplicationCore.ModelsDto.Product;
+﻿using ApplicationCore.Exceptions;
+using ApplicationCore.ModelsDto.Customer;
+using ApplicationCore.ModelsDto.Product;
+using ApplicationCore.ViewModels.Customer;
 using ApplicationCore.ViewModels.Product;
+using Common.Constants;
 using Infrastructure.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Services.Implement
 {
     public abstract class BaseServices
     {
+        private readonly HucidbContext _dbContext;
+        public BaseServices(HucidbContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
+
+        public async Task CheckUserCreate(Guid? userCreateId)
+        {
+            var userCreate = await _dbContext.Employees.AsNoTracking().FirstOrDefaultAsync(x => x.Id == userCreateId && !x.IsDeleted);
+            if (userCreate == null)
+            {
+                throw new BusinessException(BaseConstants.USER_CREATE_NOT_EXIST);
+            }
+        }
+
+        /// <summary>
+        /// Get Location By Id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>name of location</returns>
+        public async Task<string> GetNameLocationById(int id)
+        {
+            var location = await _dbContext.Locations.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+            return location.Name;
+        }
+
         public string FormatDateTime(DateTime dt, string format)
         {
             return dt.ToString(format);
@@ -124,5 +155,60 @@ namespace Services.Implement
             }
         }
 
+        //Map customer
+        public void MapFCustomerVMTCustomer(Customer customer, CustomerVM customerVM)
+        {
+            customer.Name = customerVM.Name;
+            customer.Email = customerVM.Email;
+            customer.Phone = customerVM.Phone;
+            customer.Birthday = customerVM.Birthday;
+            customer.ProvinceId = customerVM.ProvinceId;
+            customer.DistrictId = customerVM.DistrictId;
+            customer.WardId = customerVM.WardId;
+            customer.Notes = customerVM.Notes;
+            customer.CreateUserId = customerVM.CreateUserId;
+            customer.IpV4 = customerVM.IpV4;
+            customer.Address = customerVM.Address;
+        }
+
+        public void MapFCustomerUpdateVMTCustomer(Customer customer, CustomerUpdateVM customerVM)
+        {
+            customer.Name = customerVM.Name;
+            customer.Email = customerVM.Email;
+            customer.Phone = customerVM.Phone;
+            customer.Birthday = customerVM.Birthday;
+            customer.ProvinceId = customerVM.ProvinceId;
+            customer.DistrictId = customerVM.DistrictId;
+            customer.WardId = customerVM.WardId;
+            customer.Notes = customerVM.Notes;
+            customer.IpV4 = customerVM.IpV4;
+            customer.Address = customerVM.Address;
+        }
+
+        public CustomerDto MapFCustomerTCustomerDto(Customer customer)
+        {
+            CustomerDto dto = new CustomerDto();
+            dto.Id = customer.Id;
+            dto.Name = customer.Name;
+            dto.Email = customer.Email;
+            dto.Phone = customer.Phone;
+            dto.Birthday = customer.Birthday;
+            dto.Gender = customer.Gender;
+            dto.ProvinceId = customer.ProvinceId;
+            dto.ProvinceName = customer.ProvinceName;
+            dto.DistrictId = customer.DistrictId;
+            dto.DistrictName = customer.DistrictName;
+            dto.WardId = customer.WardId;
+            dto.WardName = customer.WardName;
+            dto.Notes = customer.Notes;
+            dto.OrderCount = customer.OrderCount;
+            dto.CreateUserId = customer.CreateUserId;
+            dto.CreateUserName = customer.CreateUserName;
+            dto.IpV4 = customer.IpV4;
+            dto.CreateDate = customer.CreateDate;
+            dto.Address = customer.Address;
+
+            return dto;
+        }
     }
 }

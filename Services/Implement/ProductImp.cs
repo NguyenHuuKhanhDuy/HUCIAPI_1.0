@@ -16,7 +16,7 @@ namespace Services.Implement
         private readonly IMapper _mapper;
         private readonly IBrandServices _brandServices;
         private readonly ICategoryServices _categoryServices;
-        public ProductImp(HucidbContext dbContext, IBrandServices brandServices, ICategoryServices categoryServices)
+        public ProductImp(HucidbContext dbContext, IBrandServices brandServices, ICategoryServices categoryServices) : base(dbContext)
         {
             _dbContext = dbContext;
             _brandServices = brandServices;

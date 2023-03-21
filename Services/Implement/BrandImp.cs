@@ -13,7 +13,7 @@ namespace Services.Implement
     {
         private readonly HucidbContext _dbContext;
         private readonly IMapper _mapper;
-        public BrandImp(HucidbContext dbContext, IMapper mapper)
+        public BrandImp(HucidbContext dbContext, IMapper mapper) : base(dbContext)
         {
             _dbContext = dbContext;
             _mapper = mapper;
@@ -91,13 +91,9 @@ namespace Services.Implement
                 throw new BusinessException(BrandConstants.EXIST_BRAND_NAME);
             }
 
-            if(userCreateId!= null)
+            if(userCreateId != null)
             {
-                var userCreate = await _dbContext.Employees.FindAsync(userCreateId);
-                if (userCreate == null || userCreate.IsDeleted)
-                {
-                    throw new BusinessException(EmployeeConstants.EMPLOYEE_NOT_EXIST);
-                }
+                await CheckUserCreate(userCreateId);
             }
         }
 

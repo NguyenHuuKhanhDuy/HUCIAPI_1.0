@@ -21,7 +21,7 @@ namespace Services.Implement
         private readonly IMapper _mapper;
         private readonly IConfiguration _config;
 
-        public EmployeeImp(HucidbContext dbContext, IMapper mapper, IConfiguration config)
+        public EmployeeImp(HucidbContext dbContext, IMapper mapper, IConfiguration config) : base(dbContext)
         {
             _dbContext = dbContext;
             _mapper = mapper;
@@ -129,18 +129,7 @@ namespace Services.Implement
             employee.Address = $"{employee.Address}, {employee.WardName}, {employee.DistrictName}, {employee.ProvinceName}";
             employee.Password = HashPassword(employee.Password);
         }
-
-        /// <summary>
-        /// Get Location By Id
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns>name of location</returns>
-        public async Task<string> GetNameLocationById(int id)
-        {
-            var location = await _dbContext.Locations.FindAsync(id);
-            return location.Name;
-        }
-
+        
         /// <summary>
         /// 
         /// </summary>
