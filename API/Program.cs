@@ -53,6 +53,7 @@ builder.Services.AddTransient<IBrandServices, BrandImp>();
 builder.Services.AddTransient<ICategoryServices, CategoryImp>();
 builder.Services.AddTransient<IProductServices, ProductImp>();
 builder.Services.AddTransient<ICustomerServices, CustomerImp>();
+builder.Services.AddTransient<ISupplierServices, SupplierImp>();
 
 //add authen services
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>

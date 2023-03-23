@@ -7,6 +7,8 @@ public partial class Supplier
 {
     public Guid Id { get; set; }
 
+    public string? SupplierNumber { get; set; }
+
     public string Name { get; set; } = null!;
 
     public DateTime CreateDate { get; set; }

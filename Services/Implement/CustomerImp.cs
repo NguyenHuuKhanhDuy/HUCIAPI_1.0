@@ -20,13 +20,14 @@ namespace Services.Implement
         public async Task<CustomerDto> CreateCustomerAsync(CustomerVM customerVM)
         {
             List<Customer> customers = await _dbContext.Customers.AsNoTracking().Where(x => !x.IsDeleted).ToListAsync();
-            CheckCustomerInformation(customerVM, customers);
+            CheckCustomerInformation(customerVM.Email, customerVM.Phone, customers);
             await CheckUserCreate(customerVM.CreateUserId);
 
             Customer customer = new Customer();
             MapFCustomerVMTCustomer(customer, customerVM);
 
             customer.Id = Guid.NewGuid();
+            customer.CustomerNumber = await GetNumberCustomer();
             customer.IsDeleted = false;
             customer.ProvinceName = await GetNameLocationById(customer.ProvinceId);
             customer.DistrictName = await GetNameLocationById(customer.DistrictId);
@@ -40,6 +41,16 @@ namespace Services.Implement
 
             CustomerDto dto = MapFCustomerTCustomerDto(customer);
             return dto;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public async Task<string> GetNumberCustomer()
+        {
+            int number = _dbContext.Customers.Count() + 1;
+            return CustomerConstants.PREFIX_CUSTOMER_NUMBER + number;
         }
 
         public async Task CheckCustomerId(Guid customerId)
@@ -56,32 +67,86 @@ namespace Services.Implement
         /// <param name="employeeVM"></param>
         /// <param name="employees"></param>
         /// <exception cref="BusinessException"></exception>
-        public void CheckCustomerInformation(CustomerVM customerVM, List<Customer> customers)
+        public void CheckCustomerInformation(string email, string phone, List<Customer> customers)
         {
-            var exist = customers.Where(x => x.Email == customerVM.Email).FirstOrDefault();
+            var exist = customers.Where(x => x.Email == email).FirstOrDefault();
             if (exist != null)
             {
                 throw new BusinessException(EmployeeConstants.EXIST_EMAIL);
             }
 
-            exist = customers.Where(x => x.Phone == customerVM.Phone).FirstOrDefault();
+            exist = customers.Where(x => x.Phone == phone).FirstOrDefault();
             if (exist != null)
             {
                 throw new BusinessException(EmployeeConstants.EXIST_PHONE);
             }
         }
 
-        public Task DeleteCustomerAsync(Guid customerId)
+        public async Task DeleteCustomerAsync(Guid customerId)
         {
-            throw new NotImplementedException();
+            await CheckCustomerId(customerId);
+            Customer customer = await _dbContext.Customers.FindAsync(customerId);
+
+            customer.IsDeleted = true;
+            customer.CustomerNumber += BaseConstants.DELETE;
+            customer.Name += BaseConstants.DELETE;
+
+            await _dbContext.SaveChangesAsync();
         }
 
-        //public async Task<CustomerDto> UpdateCustomerAsync(CustomerUpdateVM customerVM)
-        //{
-        //    await CheckCustomerId(customerVM.Id);
-        //    Customer customer = await _dbContext.Customers.FindAsync(customerVM.Id);
+        public async Task<CustomerDto> UpdateCustomerAsync(CustomerUpdateVM customerVM)
+        {
+            await CheckCustomerId(customerVM.Id);
 
-        //    Map
-        //}
+            List<Customer> customers = await _dbContext.Customers.AsNoTracking().Where(x => x.Id != customerVM.Id && !x.IsDeleted).ToListAsync();
+            CheckCustomerInformation(customerVM.Email, customerVM.Phone, customers);
+
+            Customer customer = await _dbContext.Customers.FindAsync(customerVM.Id);
+
+            MapFCustomerUpdateVMTCustomer(customer, customerVM);
+
+            customer.IsDeleted = false;
+            customer.ProvinceName = await GetNameLocationById(customer.ProvinceId);
+            customer.DistrictName = await GetNameLocationById(customer.DistrictId);
+            customer.WardName = await GetNameLocationById(customer.WardId);
+            customer.Address = $"{customer.Address}, {customer.WardName}, {customer.DistrictName}, {customer.ProvinceName}";
+
+            await _dbContext.SaveChangesAsync();
+
+            CustomerDto dto = MapFCustomerTCustomerDto(customer);
+            return dto;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="customerId"></param>
+        /// <returns></returns>
+        public async Task<CustomerDto> GetCustomerByIdAsync(Guid customerId)
+        {
+            await CheckCustomerId(customerId);
+            Customer customer = await _dbContext.Customers.FindAsync(customerId);
+
+            CustomerDto dto = MapFCustomerTCustomerDto(customer);
+            return dto;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="customerId"></param>
+        /// <returns></returns>
+        public async Task<List<CustomerDto>> GetAllCustomerAsync()
+        {
+            var customers = await _dbContext.Customers.Where(x => !x.IsDeleted).ToListAsync();
+
+
+            List<CustomerDto> dtos = new List<CustomerDto>();
+            foreach(Customer customer in customers)
+            {
+                dtos.Add(MapFCustomerTCustomerDto(customer));
+            }
+            return dtos;
+        }
     }
 }

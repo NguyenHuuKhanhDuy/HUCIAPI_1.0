@@ -118,6 +118,9 @@ public partial class HucidbContext : DbContext
                 .HasDefaultValueSql("(format(getdate(),'yyyy-MM-dd HH:mm'))")
                 .HasColumnType("datetime");
             entity.Property(e => e.CreateUserName).HasDefaultValueSql("('')");
+            entity.Property(e => e.CustomerNumber)
+                .HasMaxLength(10)
+                .IsUnicode(false);
             entity.Property(e => e.DistrictName).HasDefaultValueSql("('')");
             entity.Property(e => e.Email)
                 .IsUnicode(false)
@@ -555,6 +558,9 @@ public partial class HucidbContext : DbContext
                 .IsUnicode(false)
                 .HasDefaultValueSql("('')");
             entity.Property(e => e.ProvinceName).HasDefaultValueSql("('')");
+            entity.Property(e => e.SupplierNumber)
+                .HasMaxLength(10)
+                .IsUnicode(false);
 
             entity.HasOne(d => d.CreateUser).WithMany(p => p.Suppliers)
                 .HasForeignKey(d => d.CreateUserId)
