@@ -548,6 +548,7 @@ public partial class HucidbContext : DbContext
             entity.Property(e => e.CreateDate)
                 .HasDefaultValueSql("(format(getdate(),'yyyy-MM-dd HH:mm'))")
                 .HasColumnType("datetime");
+            entity.Property(e => e.CreateUserName).HasDefaultValueSql("('')");
             entity.Property(e => e.Email)
                 .HasMaxLength(50)
                 .IsUnicode(false)

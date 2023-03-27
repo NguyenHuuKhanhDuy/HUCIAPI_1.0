@@ -1,8 +1,10 @@
 ﻿using ApplicationCore.Exceptions;
 using ApplicationCore.ModelsDto.Customer;
 using ApplicationCore.ModelsDto.Product;
+using ApplicationCore.ModelsDto.Supplier;
 using ApplicationCore.ViewModels.Customer;
 using ApplicationCore.ViewModels.Product;
+using ApplicationCore.ViewModels.Supplier;
 using Common.Constants;
 using Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
@@ -207,6 +209,54 @@ namespace Services.Implement
             dto.IpV4 = customer.IpV4;
             dto.CreateDate = customer.CreateDate;
             dto.Address = customer.Address;
+
+            return dto;
+        }
+
+        //Map Supplier
+        public void MapFSupplierVMTSupplier(Supplier supplier, SupplierVM supplierVM)
+        {
+            supplier.Name = supplierVM.Name;
+            supplier.Email = supplierVM.Email;
+            supplier.Phone = supplierVM.Phone;
+            supplier.ProvinceId = supplierVM.ProvinceId;
+            supplier.DistrictId = supplierVM.DistrictId;
+            supplier.WardId = supplierVM.WardId;
+            supplier.Notes = supplierVM.Notes;
+            supplier.CreateUserId = supplierVM.CreateUserId;
+            supplier.Address = supplierVM.Address;
+        }
+
+        public void MapFSupplierUpdateVMTSupplier(Supplier supplier, SupplierUpdateVM supplierVM)
+        {
+            supplier.Name = supplierVM.Name;
+            supplier.Email = supplierVM.Email;
+            supplier.Phone = supplierVM.Phone;
+            supplier.ProvinceId = supplierVM.ProvinceId;
+            supplier.DistrictId = supplierVM.DistrictId;
+            supplier.WardId = supplierVM.WardId;
+            supplier.Notes = supplierVM.Notes;
+            supplier.Address = supplierVM.Address;
+        }
+
+        public SupplierDto MapFSupplierTSupplierDto(Supplier supplier)
+        {
+            SupplierDto dto = new SupplierDto();
+            dto.Id = supplier.Id;
+            dto.Name = supplier.Name;
+            dto.Email = supplier.Email;
+            dto.Phone = supplier.Phone;
+            dto.ProvinceId = supplier.ProvinceId;
+            dto.ProvinceName = supplier.ProvinceName;
+            dto.DistrictId = supplier.DistrictId;
+            dto.DistrictName = supplier.DistrictName;
+            dto.WardId = supplier.WardId;
+            dto.WardName = supplier.WardName;
+            dto.Notes = supplier.Notes;
+            dto.CreateUserId = supplier.CreateUserId;
+            dto.CreateUserName = supplier.CreateUserName;
+            dto.CreateDate = supplier.CreateDate;
+            dto.Address = supplier.Address;
 
             return dto;
         }

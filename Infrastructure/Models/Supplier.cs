@@ -35,6 +35,8 @@ public partial class Supplier
 
     public Guid CreateUserId { get; set; }
 
+    public string CreateUserName { get; set; } = null!;
+
     public string Address { get; set; } = null!;
 
     public virtual Employee CreateUser { get; set; } = null!;

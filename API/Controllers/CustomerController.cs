@@ -1,5 +1,6 @@
 ﻿using ApplicationCore.ViewModels.Customer;
 using Common.Constants;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services.Interface;
 
@@ -7,6 +8,7 @@ namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class CustomerController : BaseController
     {
         private readonly ICustomerServices _customerServices;

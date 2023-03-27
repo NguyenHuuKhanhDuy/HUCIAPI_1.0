@@ -12,6 +12,11 @@ namespace API.Controllers
             return StatusCode(statusCode, new DataResponse(o, massage, statusCode));
         }
 
+        protected IActionResult HandleResponseStatusOk(Object o)
+        {
+            return StatusCode(StatusCodeConstants.STATUS_SUCCESS, new DataResponse(o, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS));
+        }
+
         public static IActionResult ValidateModelState(ActionContext context)
         {
             (string fieldName, ModelStateEntry entry) = context.ModelState
