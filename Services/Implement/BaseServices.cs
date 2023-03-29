@@ -3,6 +3,7 @@ using ApplicationCore.ModelsDto.Customer;
 using ApplicationCore.ModelsDto.Product;
 using ApplicationCore.ModelsDto.Supplier;
 using ApplicationCore.ViewModels.Customer;
+using ApplicationCore.ViewModels.Order;
 using ApplicationCore.ViewModels.Product;
 using ApplicationCore.ViewModels.Supplier;
 using Common.Constants;
@@ -260,5 +261,28 @@ namespace Services.Implement
 
             return dto;
         }
+
+        //Map Order
+        public void MapFOrderVMTOrder(Order order, OrderVM orderVM)
+        {
+            order.CustomerId = orderVM.CustomerId;
+            order.CustomerName = orderVM.CustomerName;
+            order.CustomerPhone = orderVM.CustomerPhone;
+            order.CustomerEmail = orderVM.CustomerEmail;
+            order.CustomerAddress = orderVM.CustomerAddress;
+            order.ProvinceId = orderVM.ProvinceId;
+            order.DistrictId = orderVM.DistrictId;
+            order.WardId = orderVM.WardId;
+            order.VoucherId = orderVM.VoucherId;
+            order.OrderDiscount = orderVM.OrderDiscount;
+            order.OrderStatusId = orderVM.OrderStatusId;
+            order.OrderStatusPaymentId = orderVM.OrderStatusPaymentId;
+            order.OrderStatusShippingId = orderVM.OrderStatusShippingId;
+            order.OrderShippingMethodId = orderVM.OrderShippingMethodId;
+            order.OrderSourceId = orderVM.OrderSourceId;
+            order.OrderNote = orderVM.OrderNote;
+            order.CreateEmployeeId = orderVM.CreateEmployeeId;
+        }
+
     }
 }

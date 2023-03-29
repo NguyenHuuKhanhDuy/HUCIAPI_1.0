@@ -31,9 +31,6 @@ namespace ApplicationCore.ViewModels.Order
         public int WardId { get; set; }
 
         [Range(0, int.MaxValue, ErrorMessage = OrderConstants.INVALID_TOTAL_ORDER)]
-        public int OrderTotal { get; set; }
-
-        [Range(0, int.MaxValue, ErrorMessage = OrderConstants.INVALID_TOTAL_ORDER)]
         public Guid? VoucherId { get; set; }
 
         [Range(0, int.MaxValue, ErrorMessage = OrderConstants.INVALID_ORDER_DISCOUNT)]
@@ -46,10 +43,13 @@ namespace ApplicationCore.ViewModels.Order
         public int OrderStatusPaymentId { get; set; }
 
         [Range(0, int.MaxValue, ErrorMessage = OrderConstants.INVALID_SHIPPING_STATUS_ID)]
-        public int OrderStatusShipingId { get; set; }
+        public int OrderStatusShippingId { get; set; }
 
         [Range(0, int.MaxValue, ErrorMessage = OrderConstants.INVALID_SHIPPING_METHOD_ID)]
-        public int OrderShipingMethodId { get; set; }
+        public int OrderShippingMethodId { get; set; }
+
+        [Range(0, int.MaxValue, ErrorMessage = OrderConstants.INVALID_SOURCE_ORDER_ID)]
+        public int OrderSourceId { get; set; }
 
         public string OrderNote { get; set; } = null!;
 
@@ -57,6 +57,6 @@ namespace ApplicationCore.ViewModels.Order
         [RegularExpression(RegexConstants.REGEX_GUID, ErrorMessage = EmployeeConstants.INVALID_USER_CREATE)]
         public Guid CreateEmployeeId { get; set; }
 
-        public List<ProductInsideComboVM> products { get; set; } = new List<ProductInsideComboVM>();
+        public List<ProductInsideOrderVM> products { get; set; } = new List<ProductInsideOrderVM>();
     }
 }

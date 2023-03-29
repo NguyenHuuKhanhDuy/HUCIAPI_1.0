@@ -15,5 +15,7 @@ namespace Common.Constants
 
         public const string USER_CREATE_NOT_EXIST = "User create not exist";
 
+        public const int INT_DEFAULT = 0;
+
     }
 }

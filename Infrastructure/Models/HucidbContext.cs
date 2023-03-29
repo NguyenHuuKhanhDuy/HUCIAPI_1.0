@@ -37,6 +37,8 @@ public partial class HucidbContext : DbContext
 
     public virtual DbSet<OrderDetail> OrderDetails { get; set; }
 
+    public virtual DbSet<OrderSource> OrderSources { get; set; }
+
     public virtual DbSet<Product> Products { get; set; }
 
     public virtual DbSet<ProductType> ProductTypes { get; set; }
@@ -45,7 +47,7 @@ public partial class HucidbContext : DbContext
 
     public virtual DbSet<SalaryType> SalaryTypes { get; set; }
 
-    public virtual DbSet<ShipingMethod> ShipingMethods { get; set; }
+    public virtual DbSet<ShippingMethod> ShippingMethods { get; set; }
 
     public virtual DbSet<StatusImport> StatusImports { get; set; }
 
@@ -53,7 +55,7 @@ public partial class HucidbContext : DbContext
 
     public virtual DbSet<StatusPayment> StatusPayments { get; set; }
 
-    public virtual DbSet<StatusShiping> StatusShipings { get; set; }
+    public virtual DbSet<StatusShipping> StatusShippings { get; set; }
 
     public virtual DbSet<Supplier> Suppliers { get; set; }
 
@@ -348,14 +350,15 @@ public partial class HucidbContext : DbContext
             entity.Property(e => e.OrderNumber)
                 .HasMaxLength(10)
                 .IsUnicode(false);
-            entity.Property(e => e.OrderShipingMethodId).HasDefaultValueSql("((1))");
-            entity.Property(e => e.OrderShipingMethodName).HasDefaultValueSql("('')");
+            entity.Property(e => e.OrderShippingMethodId).HasDefaultValueSql("((1))");
+            entity.Property(e => e.OrderShippingMethodName).HasDefaultValueSql("('')");
+            entity.Property(e => e.OrderSourceName).HasDefaultValueSql("('')");
             entity.Property(e => e.OrderStatusId).HasDefaultValueSql("((1))");
             entity.Property(e => e.OrderStatusName).HasDefaultValueSql("('')");
             entity.Property(e => e.OrderStatusPaymentId).HasDefaultValueSql("((1))");
             entity.Property(e => e.OrderStatusPaymentName).HasDefaultValueSql("('')");
-            entity.Property(e => e.OrderStatusShipingId).HasDefaultValueSql("((1))");
-            entity.Property(e => e.OrderStatusShipingName).HasDefaultValueSql("('')");
+            entity.Property(e => e.OrderStatusShippingId).HasDefaultValueSql("((1))");
+            entity.Property(e => e.OrderStatusShippingName).HasDefaultValueSql("('')");
             entity.Property(e => e.ProvinceName).HasDefaultValueSql("('')");
             entity.Property(e => e.VoucherName).HasDefaultValueSql("('')");
             entity.Property(e => e.WardName).HasDefaultValueSql("('')");
@@ -375,10 +378,15 @@ public partial class HucidbContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Order_Location");
 
-            entity.HasOne(d => d.OrderShipingMethod).WithMany(p => p.Orders)
-                .HasForeignKey(d => d.OrderShipingMethodId)
+            entity.HasOne(d => d.OrderShippingMethod).WithMany(p => p.Orders)
+                .HasForeignKey(d => d.OrderShippingMethodId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Order_ShipingMethod");
+
+            entity.HasOne(d => d.OrderSource).WithMany(p => p.Orders)
+                .HasForeignKey(d => d.OrderSourceId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Order_OrderSource");
 
             entity.HasOne(d => d.OrderStatus).WithMany(p => p.Orders)
                 .HasForeignKey(d => d.OrderStatusId)
@@ -390,8 +398,8 @@ public partial class HucidbContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Order_StatusPayment");
 
-            entity.HasOne(d => d.OrderStatusShiping).WithMany(p => p.Orders)
-                .HasForeignKey(d => d.OrderStatusShipingId)
+            entity.HasOne(d => d.OrderStatusShipping).WithMany(p => p.Orders)
+                .HasForeignKey(d => d.OrderStatusShippingId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Order_StatusShiping");
 
@@ -432,6 +440,14 @@ public partial class HucidbContext : DbContext
                 .HasForeignKey(d => d.ProductId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_OrderDetail_Product");
+        });
+
+        modelBuilder.Entity<OrderSource>(entity =>
+        {
+            entity.ToTable("OrderSource");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.SourceName).HasDefaultValueSql("('')");
         });
 
         modelBuilder.Entity<Product>(entity =>
@@ -502,9 +518,11 @@ public partial class HucidbContext : DbContext
             entity.Property(e => e.Name).HasMaxLength(50);
         });
 
-        modelBuilder.Entity<ShipingMethod>(entity =>
+        modelBuilder.Entity<ShippingMethod>(entity =>
         {
-            entity.ToTable("ShipingMethod");
+            entity.HasKey(e => e.Id).HasName("PK_ShipingMethod");
+
+            entity.ToTable("ShippingMethod");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
         });
@@ -532,9 +550,11 @@ public partial class HucidbContext : DbContext
             entity.Property(e => e.Id).ValueGeneratedNever();
         });
 
-        modelBuilder.Entity<StatusShiping>(entity =>
+        modelBuilder.Entity<StatusShipping>(entity =>
         {
-            entity.ToTable("StatusShiping");
+            entity.HasKey(e => e.Id).HasName("PK_StatusShiping");
+
+            entity.ToTable("StatusShipping");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
         });

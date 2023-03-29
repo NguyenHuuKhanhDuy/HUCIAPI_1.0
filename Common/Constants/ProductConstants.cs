@@ -3,6 +3,7 @@
     public static class ProductConstants
     {
         public const string INVALID_PRICE = "Invalid price"; 
+        public const string INVALID_DISCOUNT = "Invalid discount of product";
         public const string INVALID_WHOLESALE_PRICE = "Invalid whole sale price";
         public const string INVALID_QUANTITY = "Invalid quantity";
         public const string INVALID_PRODUCT_TYPE = "Invalid product type id";

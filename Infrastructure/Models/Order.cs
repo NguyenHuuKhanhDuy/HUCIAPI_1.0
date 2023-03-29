@@ -55,13 +55,13 @@ public partial class Order
 
     public string OrderStatusPaymentName { get; set; } = null!;
 
-    public int OrderStatusShipingId { get; set; }
+    public int OrderStatusShippingId { get; set; }
 
-    public string OrderStatusShipingName { get; set; } = null!;
+    public string OrderStatusShippingName { get; set; } = null!;
 
-    public int OrderShipingMethodId { get; set; }
+    public int OrderShippingMethodId { get; set; }
 
-    public string OrderShipingMethodName { get; set; } = null!;
+    public string OrderShippingMethodName { get; set; } = null!;
 
     public string OrderNote { get; set; } = null!;
 
@@ -71,19 +71,25 @@ public partial class Order
 
     public string CreateEmployeeName { get; set; } = null!;
 
+    public int OrderSourceId { get; set; }
+
+    public string OrderSourceName { get; set; } = null!;
+
     public virtual Employee CreateEmployee { get; set; } = null!;
 
     public virtual Customer Customer { get; set; } = null!;
 
     public virtual Location District { get; set; } = null!;
 
-    public virtual ShipingMethod OrderShipingMethod { get; set; } = null!;
+    public virtual ShippingMethod OrderShippingMethod { get; set; } = null!;
+
+    public virtual OrderSource OrderSource { get; set; } = null!;
 
     public virtual StatusOrder OrderStatus { get; set; } = null!;
 
     public virtual StatusPayment OrderStatusPayment { get; set; } = null!;
 
-    public virtual StatusShiping OrderStatusShiping { get; set; } = null!;
+    public virtual StatusShipping OrderStatusShipping { get; set; } = null!;
 
     public virtual Location Province { get; set; } = null!;
 
