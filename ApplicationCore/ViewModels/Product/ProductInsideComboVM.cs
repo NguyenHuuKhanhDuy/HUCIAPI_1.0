@@ -5,7 +5,7 @@ namespace ApplicationCore.ViewModels.Product
 {
     public class ProductInsideComboVM
     {
-        [RegularExpression(RegexConstants.REGEX_GUID, ErrorMessage = ProductConstants.INVAILD_PRODUCT_ID)]
+        [RegularExpression(RegexConstants.REGEX_GUID, ErrorMessage = ProductConstants.INVALID_PRODUCT_ID)]
         public Guid ProductId { get; set; }
 
         [Range(0, int.MaxValue, ErrorMessage = ProductConstants.INVALID_QUANTITY)]

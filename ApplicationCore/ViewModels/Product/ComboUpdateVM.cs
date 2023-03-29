@@ -6,7 +6,7 @@ namespace ApplicationCore.ViewModels.Product
     public class ComboUpdateVM
     {
         [Required]
-        [RegularExpression(RegexConstants.REGEX_GUID, ErrorMessage = ProductConstants.INVAILD_PRODUCT_ID)]
+        [RegularExpression(RegexConstants.REGEX_GUID, ErrorMessage = ProductConstants.INVALID_PRODUCT_ID)]
         public Guid Id { get; set; }
 
         [Required]
@@ -20,16 +20,16 @@ namespace ApplicationCore.ViewModels.Product
 
         public string Image { get; set; } = null!;
 
-        [RegularExpression(RegexConstants.REGEX_GUID, ErrorMessage = BrandConstants.INVAILD_BRAND_ID)]
+        [RegularExpression(RegexConstants.REGEX_GUID, ErrorMessage = BrandConstants.INVALID_BRAND_ID)]
         public Guid BrandId { get; set; }
 
-        [RegularExpression(RegexConstants.REGEX_GUID, ErrorMessage = CategoryConstants.INVAILD_CATEGORY_ID)]
+        [RegularExpression(RegexConstants.REGEX_GUID, ErrorMessage = CategoryConstants.INVALID_CATEGORY_ID)]
         public Guid CategoryId { get; set; }
 
         public string Description { get; set; } = null!;
 
         [Required]
-        //[RegularExpression(RegexConstants.REGEX_GUID, ErrorMessage = ProductConstants.INVAILD_PRODUCT_ID)]
+        //[RegularExpression(RegexConstants.REGEX_GUID, ErrorMessage = ProductConstants.INVALID_PRODUCT_ID)]
         public List<ProductInsideComboVM> products { get; set; } = new List<ProductInsideComboVM>();
     }
 }

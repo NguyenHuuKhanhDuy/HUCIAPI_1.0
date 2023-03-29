@@ -19,10 +19,10 @@ namespace ApplicationCore.ViewModels.Product
         [Range(0, int.MaxValue, ErrorMessage = ProductConstants.INVALID_WHOLESALE_PRICE)]
         public int OnHand { get; set; }
 
-        [RegularExpression(RegexConstants.REGEX_GUID, ErrorMessage = BrandConstants.INVAILD_BRAND_ID)]
+        [RegularExpression(RegexConstants.REGEX_GUID, ErrorMessage = BrandConstants.INVALID_BRAND_ID)]
         public Guid BrandId { get; set; }
 
-        [RegularExpression(RegexConstants.REGEX_GUID, ErrorMessage = CategoryConstants.INVAILD_CATEGORY_ID)]
+        [RegularExpression(RegexConstants.REGEX_GUID, ErrorMessage = CategoryConstants.INVALID_CATEGORY_ID)]
         public Guid CategoryId { get; set; }
 
         public string Description { get; set; } = null!;
@@ -31,7 +31,7 @@ namespace ApplicationCore.ViewModels.Product
         public int ProductTypeId { get; set; }
 
         [Required]
-        [RegularExpression(RegexConstants.REGEX_GUID, ErrorMessage = EmployeeConstants.INVAILD_USER_CREATE)]
+        [RegularExpression(RegexConstants.REGEX_GUID, ErrorMessage = EmployeeConstants.INVALID_USER_CREATE)]
         public Guid UserCreateId { get; set; }
     }
 }

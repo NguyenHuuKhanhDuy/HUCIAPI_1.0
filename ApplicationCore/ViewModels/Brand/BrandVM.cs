@@ -9,7 +9,7 @@ namespace ApplicationCore.ViewModels.Brand
         public string Name { get; set; } = null!;
 
         [Required]
-        [RegularExpression(RegexConstants.REGEX_GUID, ErrorMessage = EmployeeConstants.INVAILD_USER_CREATE)]
+        [RegularExpression(RegexConstants.REGEX_GUID, ErrorMessage = EmployeeConstants.INVALID_USER_CREATE)]
         public Guid UserCreateId { get; set; }
     }
 }

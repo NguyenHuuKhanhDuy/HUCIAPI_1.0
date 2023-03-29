@@ -6,7 +6,7 @@ namespace ApplicationCore.ViewModels.Brand
     public class BrandUpdateVM
     {
         [Required]
-        [RegularExpression(RegexConstants.REGEX_GUID, ErrorMessage = BrandConstants.INVAILD_BRAND_ID)]
+        [RegularExpression(RegexConstants.REGEX_GUID, ErrorMessage = BrandConstants.INVALID_BRAND_ID)]
         public Guid Id { get; set; }
 
         [Required]

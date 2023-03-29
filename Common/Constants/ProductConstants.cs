@@ -11,8 +11,8 @@
         public const string PRODUCT_TYPE_NOT_EXIST = "Product type not exists";
         public const string PRODUCT_NOT_EXIST = "Product not exists";
         public const string PRODUCTS_IN_COMBO_NOT_EXIST = "Don't have any product with ids";
-        public const string INVAILD_USER_CREATE = "Invalid id of user create";
-        public const string INVAILD_PRODUCT_ID = "Invalid id of product";
+        public const string INVALID_USER_CREATE = "Invalid id of user create";
+        public const string INVALID_PRODUCT_ID = "Invalid id of product";
         public const string CANNOT_ADD_COMBO_INSIDE_COMBO = "Can't add combo inside combo";
         public const string PRODUCT_INSIDE_COMBO_QUANTITY_0 = "Can't add combo with quantity of product = 0";
 
