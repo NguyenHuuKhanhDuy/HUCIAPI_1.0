@@ -14,7 +14,7 @@
 
         public string Image { get; set; } = null!;
 
-        public int Quantity { get; set; }
+        public int OnHand { get; set; }
 
         public bool IsActive { get; set; }
 

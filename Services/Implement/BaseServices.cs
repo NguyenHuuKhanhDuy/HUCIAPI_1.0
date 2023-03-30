@@ -61,7 +61,7 @@ namespace Services.Implement
             productDto.Price = product.Price;
             productDto.WholesalePrice = product.WholesalePrice;
             productDto.Image = product.Image;
-            productDto.Quantity = product.OnHand;
+            productDto.OnHand = product.OnHand;
             productDto.IsActive = product.IsActive.Value;
             productDto.BrandId = product.BrandId;
             productDto.CategoryId = product.CategoryId;

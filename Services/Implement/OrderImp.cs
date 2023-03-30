@@ -2,6 +2,7 @@
 using ApplicationCore.ModelsDto.Order;
 using ApplicationCore.ModelsDto.Product;
 using ApplicationCore.ViewModels.Order;
+using ApplicationCore.ViewModels.Product;
 using Common.Constants;
 using Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
@@ -32,9 +33,74 @@ namespace Services.Implement
             order.Id = Guid.NewGuid();
             order.OrderNumber = await GetOrderNumber();
             order.OrderDate = GetDateTimeNow();
+            order.ProvinceName = nameRelationOfOrder.Province;
+            order.DistrictName = nameRelationOfOrder.District;
+            order.WardName = nameRelationOfOrder.Ward;
+            order.VoucherName = nameRelationOfOrder.Voucher;
+            order.OrderStatusName = nameRelationOfOrder.OrderStatus;
+            order.OrderStatusPaymentName = nameRelationOfOrder.PaymentStatus;
+            order.OrderStatusShippingName = nameRelationOfOrder.ShippingStatus;
+            order.OrderShippingMethodName = nameRelationOfOrder.ShippingMethod;
+            order.CreateEmployeeName = nameRelationOfOrder.Employee;
+            order.OrderSourceName = nameRelationOfOrder.Source;
+
+            List<ProductDto> productDtos = await GetProductDtoByIdsAsync(orderVM.products.Select(x => x.ProductId).ToList());
+
             return null;
         }
 
+        private async Task CalculatePrice(Order order, List<ProductDto> productDtos, List<ProductInsideOrderVM> discounts)
+        {
+            int total = 0;
+            int voucherDiscount = 0;
+            int productDiscount = 0;
+
+            total = productDtos.Sum(x => x.Price);
+
+            foreach (ProductInsideOrderVM discount in discounts)
+            {
+                var product = productDtos.FirstOrDefault(x => x.Id == discount.ProductId);
+                if (product != null)
+                {
+                    productDiscount += discount.Discount * discount.Quantity;
+                    total += product.Price * discount.Quantity;
+                }
+            }
+
+            order.OrderTotal = total;
+            var voucher = await _dbContext.Vouchers.FirstOrDefaultAsync(x => x.Id == order.VoucherId);
+
+            if (voucher != null)
+            {
+                if (voucher.DiscountPrice != 0)
+                {
+                    voucherDiscount = voucher.DiscountPrice;
+
+                    if (voucherDiscount > total)
+                    {
+                        order.TotalPayment = 0;
+                    }
+                }
+                else if(voucher.DiscountPercent != 0)
+                {
+                    voucherDiscount = (int)(((double) voucher.DiscountPercent / 100.0) * (total - productDiscount));
+
+                    if (voucherDiscount > total)
+                    {
+                        order.TotalPayment = 0;
+                    }
+                }
+
+                order.TotalOrderDiscount = voucherDiscount + productDiscount + order.OrderDiscount;
+
+                return;
+            }
+
+            order.VoucherDiscount = voucherDiscount;
+            order.TotalOrderDiscount = voucherDiscount + productDiscount + order.OrderDiscount;
+            order.TotalPayment = total - order.TotalOrderDiscount;
+
+        }
         public async Task<string> GetOrderNumber()
         {
             int number = await _dbContext.Orders.CountAsync() + 1;
@@ -51,6 +117,10 @@ namespace Services.Implement
                 throw new BusinessException(OrderConstants.VOUCHER_NOT_EXISTS);
             }
 
+            if (voucher.Quantity == 0)
+            {
+                throw new BusinessException(OrderConstants.VOUCHER_EXCEED);
+            }
             nameRelationOfOrder.Voucher = voucher.Name;
 
             var status = await _dbContext.StatusOrders.FirstOrDefaultAsync(x => x.Id == orderVM.OrderStatusId);

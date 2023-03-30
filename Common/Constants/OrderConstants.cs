@@ -24,6 +24,8 @@
         public const string DISTRICT_NOT_EXISTS = "Source order not exists";
         public const string WARD_NOT_EXISTS = "Source order not exists";
 
+        public const string VOUCHER_EXCEED = "voucher exceeds the number of uses";
+
         public const string PREFIX_ORDER_NUMBER = "DH0";
 
     }

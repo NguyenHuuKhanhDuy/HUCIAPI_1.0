@@ -86,7 +86,7 @@ namespace Services.Implement
             product.ProductNumber += BaseConstants.DELETE;
             product.Name += BaseConstants.DELETE;
 
-            if(product.ProductTypeId == ProductConstants.PRODUCT_TYPE_COMBO)
+            if (product.ProductTypeId == ProductConstants.PRODUCT_TYPE_COMBO)
             {
                 List<ComboDetail> comboDetails = await _dbContext.ComboDetails.Where(x => x.ComboId == productId).ToListAsync();
 
@@ -208,9 +208,24 @@ namespace Services.Implement
 
             if (comboDto.ProductTypeId == ProductConstants.PRODUCT_TYPE_COMBO)
             {
+                int min = int.MaxValue;
+                int? temp = 0;
                 var comboDetails = await _dbContext.ComboDetails.Where(x => x.ComboId == product.Id).ToListAsync();
                 List<Guid> productInsideComboIds = comboDetails.Select(x => x.ProductId).ToList();
                 comboDto.products = await GetProductDtoByIdsAsync(productInsideComboIds);
+
+                foreach (var pd in comboDto.products)
+                {
+                    temp = pd.OnHand / comboDetails.FirstOrDefault(x => x.ProductId == pd.Id)?.Quantity;
+                    if (min > temp)
+                    {
+                        min = temp.Value;
+                    }
+
+                    pd.OnHand = comboDetails.FirstOrDefault(x => x.ProductId == pd.Id).Quantity;
+                }
+
+                comboDto.OnHand = min;
             }
 
             return comboDto;
