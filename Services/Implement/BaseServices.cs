@@ -1,5 +1,6 @@
 ﻿using ApplicationCore.Exceptions;
 using ApplicationCore.ModelsDto.Customer;
+using ApplicationCore.ModelsDto.Order;
 using ApplicationCore.ModelsDto.Product;
 using ApplicationCore.ModelsDto.Supplier;
 using ApplicationCore.ViewModels.Customer;
@@ -82,7 +83,7 @@ namespace Services.Implement
             comboDto.Price = product.Price;
             comboDto.WholesalePrice = product.WholesalePrice;
             comboDto.Image = product.Image;
-            comboDto.Quantity = product.OnHand;
+            comboDto.OnHand = product.OnHand;
             comboDto.IsActive = product.IsActive.Value;
             comboDto.BrandId = product.BrandId;
             comboDto.CategoryId = product.CategoryId;
@@ -284,5 +285,47 @@ namespace Services.Implement
             order.CreateEmployeeId = orderVM.CreateEmployeeId;
         }
 
+        public OrderDto MapFOrderTOrderDto(Order order)
+        {
+            OrderDto orderDto = new OrderDto
+            {
+                Id = order.Id,
+                OrderNumber = order.OrderNumber, 
+                OrderDate = order.OrderDate,
+                CustomerId = order.CustomerId,
+                CustomerName = order.CustomerName,
+                CustomerPhone = order.CustomerPhone,
+                CustomerEmail = order.CustomerEmail,
+                CustomerAddress = order.CustomerAddress,
+                ProvinceId = order.ProvinceId,
+                ProvinceName = order.ProvinceName,
+                DistrictId = order.DistrictId,
+                DistrictName = order.DistrictName,
+                WardId = order.WardId,
+                WardName = order.WardName,
+                OrderTotal = order.OrderTotal,
+                VoucherId = order.VoucherId,
+                VoucherName = order.VoucherName,
+                VoucherDiscount = order.VoucherDiscount,
+                OrderDiscount = order.OrderDiscount,
+                TotalOrderDiscount = order.TotalOrderDiscount,
+                TotalPayment = order.TotalPayment,
+                OrderStatusId = order.OrderStatusId,
+                OrderStatusName = order.OrderStatusName,
+                OrderStatusPaymentId = order.OrderStatusPaymentId,
+                OrderStatusPaymentName = order.OrderStatusPaymentName,
+                OrderStatusShippingId = order.OrderStatusShippingId,
+                OrderStatusShippingName = order.OrderStatusShippingName,
+                OrderShippingMethodId = order.OrderShippingMethodId,
+                OrderShippingMethodName = order.OrderShippingMethodName,
+                OrderNote = order.OrderNote,
+                CreateEmployeeId = order.CreateEmployeeId,
+                CreateEmployeeName = order.CreateEmployeeName,
+                OrderSourceId = order.OrderSourceId,
+                OrderSourceName = order.OrderSourceName,
+            };
+
+            return orderDto;
+        }
     }
 }

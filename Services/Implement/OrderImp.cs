@@ -43,19 +43,28 @@ namespace Services.Implement
             order.OrderShippingMethodName = nameRelationOfOrder.ShippingMethod;
             order.CreateEmployeeName = nameRelationOfOrder.Employee;
             order.OrderSourceName = nameRelationOfOrder.Source;
-
+            
             List<ProductDto> productDtos = await GetProductDtoByIdsAsync(orderVM.products.Select(x => x.ProductId).ToList());
+            List<OrderDetail> orderDetails = await GetOrderDetailsAndCalculatePrice(order, productDtos, orderVM.products);
 
-            return null;
+            await _dbContext.Orders.AddAsync(order);
+            await _dbContext.SaveChangesAsync();
+
+            await _dbContext.OrderDetails.AddRangeAsync(orderDetails);
+            await _dbContext.SaveChangesAsync();
+
+            OrderDto dto = MapFOrderTOrderDto(order);
+            dto.products = orderDetails;
+            return dto;
         }
 
-        private async Task CalculatePrice(Order order, List<ProductDto> productDtos, List<ProductInsideOrderVM> discounts)
+        private async Task<List<OrderDetail>> GetOrderDetailsAndCalculatePrice(Order order, List<ProductDto> productDtos, List<ProductInsideOrderVM> discounts)
         {
             int total = 0;
             int voucherDiscount = 0;
             int productDiscount = 0;
+            List<OrderDetail> orderDetails = new List<OrderDetail>();
 
-            total = productDtos.Sum(x => x.Price);
 
             foreach (ProductInsideOrderVM discount in discounts)
             {
@@ -64,11 +73,25 @@ namespace Services.Implement
                 {
                     productDiscount += discount.Discount * discount.Quantity;
                     total += product.Price * discount.Quantity;
+
+                    orderDetails.Add(new OrderDetail
+                    {
+                        Id = Guid.NewGuid(),
+                        OrderId = order.Id,
+                        ProductId = product.Id,
+                        ProductNumber = product.ProductNumber,
+                        ProductName = product.Name,
+                        ProductImage = product.Image,
+                        ProductPrice = product.Price,
+                        Discount = discount.Discount,
+                        SubTotal = product.Price - discount.Discount,
+                        Quantity = discount.Quantity
+                    });
                 }
             }
 
             order.OrderTotal = total;
-            var voucher = await _dbContext.Vouchers.FirstOrDefaultAsync(x => x.Id == order.VoucherId);
+            var voucher = await _dbContext.Vouchers.FirstOrDefaultAsync(x => x.Id == order.VoucherId && x.Id != Guid.Empty);
 
             if (voucher != null)
             {
@@ -93,13 +116,14 @@ namespace Services.Implement
 
                 order.TotalOrderDiscount = voucherDiscount + productDiscount + order.OrderDiscount;
 
-                return;
+                return orderDetails;
             }
 
             order.VoucherDiscount = voucherDiscount;
             order.TotalOrderDiscount = voucherDiscount + productDiscount + order.OrderDiscount;
             order.TotalPayment = total - order.TotalOrderDiscount;
 
+            return orderDetails;
         }
         public async Task<string> GetOrderNumber()
         {
@@ -123,7 +147,7 @@ namespace Services.Implement
             }
             nameRelationOfOrder.Voucher = voucher.Name;
 
-            var status = await _dbContext.StatusOrders.FirstOrDefaultAsync(x => x.Id == orderVM.OrderStatusId);
+            var status = await _dbContext.StatusOrders.AsNoTracking().FirstOrDefaultAsync(x => x.Id == orderVM.OrderStatusId);
 
             if (status == null)
             {
@@ -132,7 +156,7 @@ namespace Services.Implement
 
             nameRelationOfOrder.OrderStatus = status.Name;
 
-            var paymentStatus = await _dbContext.StatusPayments.FirstOrDefaultAsync(x => x.Id == orderVM.OrderStatusPaymentId);
+            var paymentStatus = await _dbContext.StatusPayments.AsNoTracking().FirstOrDefaultAsync(x => x.Id == orderVM.OrderStatusPaymentId);
 
             if (paymentStatus == null)
             {

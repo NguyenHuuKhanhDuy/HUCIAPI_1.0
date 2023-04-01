@@ -5,6 +5,8 @@ namespace Infrastructure.Models;
 
 public partial class ImportDetail
 {
+    public Guid Id { get; set; }
+
     public Guid ImportId { get; set; }
 
     public Guid ProductId { get; set; }

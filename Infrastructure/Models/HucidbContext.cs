@@ -6,6 +6,10 @@ namespace Infrastructure.Models;
 
 public partial class HucidbContext : DbContext
 {
+    public HucidbContext()
+    {
+    }
+
     public HucidbContext(DbContextOptions<HucidbContext> options)
         : base(options)
     {
@@ -66,6 +70,10 @@ public partial class HucidbContext : DbContext
     public virtual DbSet<Voucher> Vouchers { get; set; }
 
     public virtual DbSet<VoucherStatus> VoucherStatuses { get; set; }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Data Source=localhost, 1433;Initial Catalog=HUCIDB;TrustServerCertificate=True;Trusted_Connection=True");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -300,22 +308,21 @@ public partial class HucidbContext : DbContext
 
         modelBuilder.Entity<ImportDetail>(entity =>
         {
-            entity
-                .HasNoKey()
-                .ToTable("ImportDetail");
+            entity.ToTable("ImportDetail");
 
+            entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.ProductName).HasDefaultValueSql("('')");
             entity.Property(e => e.ProductNumber)
                 .HasMaxLength(10)
                 .HasDefaultValueSql("('')")
                 .IsFixedLength();
 
-            entity.HasOne(d => d.Import).WithMany()
+            entity.HasOne(d => d.Import).WithMany(p => p.ImportDetails)
                 .HasForeignKey(d => d.ImportId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ImportDetail_Import");
 
-            entity.HasOne(d => d.Product).WithMany()
+            entity.HasOne(d => d.Product).WithMany(p => p.ImportDetails)
                 .HasForeignKey(d => d.ProductId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ImportDetail_Product");
@@ -350,14 +357,10 @@ public partial class HucidbContext : DbContext
             entity.Property(e => e.OrderNumber)
                 .HasMaxLength(10)
                 .IsUnicode(false);
-            entity.Property(e => e.OrderShippingMethodId).HasDefaultValueSql("((1))");
             entity.Property(e => e.OrderShippingMethodName).HasDefaultValueSql("('')");
             entity.Property(e => e.OrderSourceName).HasDefaultValueSql("('')");
-            entity.Property(e => e.OrderStatusId).HasDefaultValueSql("((1))");
             entity.Property(e => e.OrderStatusName).HasDefaultValueSql("('')");
-            entity.Property(e => e.OrderStatusPaymentId).HasDefaultValueSql("((1))");
             entity.Property(e => e.OrderStatusPaymentName).HasDefaultValueSql("('')");
-            entity.Property(e => e.OrderStatusShippingId).HasDefaultValueSql("((1))");
             entity.Property(e => e.OrderStatusShippingName).HasDefaultValueSql("('')");
             entity.Property(e => e.ProvinceName).HasDefaultValueSql("('')");
             entity.Property(e => e.VoucherName).HasDefaultValueSql("('')");
@@ -420,10 +423,9 @@ public partial class HucidbContext : DbContext
 
         modelBuilder.Entity<OrderDetail>(entity =>
         {
-            entity
-                .HasNoKey()
-                .ToTable("OrderDetail");
+            entity.ToTable("OrderDetail");
 
+            entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.ProductImage).HasDefaultValueSql("('')");
             entity.Property(e => e.ProductName).HasDefaultValueSql("('')");
             entity.Property(e => e.ProductNumber)
@@ -431,12 +433,12 @@ public partial class HucidbContext : DbContext
                 .IsUnicode(false);
             entity.Property(e => e.Quantity).HasDefaultValueSql("((1))");
 
-            entity.HasOne(d => d.Order).WithMany()
+            entity.HasOne(d => d.Order).WithMany(p => p.OrderDetails)
                 .HasForeignKey(d => d.OrderId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_OrderDetail_Order");
 
-            entity.HasOne(d => d.Product).WithMany()
+            entity.HasOne(d => d.Product).WithMany(p => p.OrderDetails)
                 .HasForeignKey(d => d.ProductId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_OrderDetail_Product");

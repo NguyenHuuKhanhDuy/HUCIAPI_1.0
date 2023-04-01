@@ -30,7 +30,7 @@ namespace ApplicationCore.ViewModels.Order
         [Range(0, int.MaxValue, ErrorMessage = EmployeeConstants.INVALID_WARD)]
         public int WardId { get; set; }
 
-        [Range(0, int.MaxValue, ErrorMessage = OrderConstants.INVALID_TOTAL_ORDER)]
+        [RegularExpression(RegexConstants.REGEX_GUID, ErrorMessage = OrderConstants.INVALID_VOUCHER_ID)]
         public Guid? VoucherId { get; set; }
 
         [Range(0, int.MaxValue, ErrorMessage = OrderConstants.INVALID_ORDER_DISCOUNT)]

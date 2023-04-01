@@ -81,6 +81,8 @@ public partial class Order
 
     public virtual Location District { get; set; } = null!;
 
+    public virtual ICollection<OrderDetail> OrderDetails { get; } = new List<OrderDetail>();
+
     public virtual ShippingMethod OrderShippingMethod { get; set; } = null!;
 
     public virtual OrderSource OrderSource { get; set; } = null!;
