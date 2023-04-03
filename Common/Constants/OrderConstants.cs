@@ -13,6 +13,7 @@
         public const string INVALID_SOURCE_ORDER_ID = "Invalid id of source order";
 
         public const string CUSTOMER_NOT_EXISTS = "Customer not exists";
+        public const string ORDER_NOT_EXISTS = "Order not exists";
         public const string VOUCHER_NOT_EXISTS = "Voucher not exists";
         public const string ORDER_STATUS_NOT_EXISTS = "Order status not exists";
         public const string PAYMENT_STATUS_NOT_EXISTS = "Payment status not exists";

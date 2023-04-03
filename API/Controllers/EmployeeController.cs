@@ -12,9 +12,11 @@ namespace API.Controllers
     public class EmployeeController : BaseController
     {
         private readonly IEmployeeServices _employeeService;
-        public EmployeeController(IEmployeeServices employeeService)
+        private readonly ILogger _logger;
+        public EmployeeController(IEmployeeServices employeeService, ILogger<EmployeeController> logger)
         {
             _employeeService = employeeService;
+            _logger = logger;
         }
 
         /// <summary>
@@ -24,14 +26,19 @@ namespace API.Controllers
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
         [HttpPost("[action]")]
-        public async Task<IActionResult> CreateEmployee([FromForm] EmployeeVM employee)
+        public async Task<IActionResult> CreateEmployee([FromBody] EmployeeVM employee)
         {
+
+            _logger.LogInformation($"Start create employee... {employee}");
+
             if (employee == null)
             {
                 throw new ArgumentNullException(nameof(employee));
             }
 
             var employeeDto = await _employeeService.CreateEmployeeAsync(employee);
+
+            _logger.LogInformation("End create employee...");
             return HandleResponse(employeeDto, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
         }
 
@@ -42,7 +49,12 @@ namespace API.Controllers
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllEmployee()
         {
+            _logger.LogInformation("Start get all employee...");
+
             var employees = await _employeeService.GetAllEmployeeAsync();
+
+            _logger.LogInformation("End get all employee...");
+
             return HandleResponse(employees, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
         }
 
@@ -54,7 +66,12 @@ namespace API.Controllers
         [HttpGet("[action]")]
         public async Task<IActionResult> GetEmployeeById(Guid employeeId)
         {
+            _logger.LogInformation($"Start get employee by id: {employeeId}");
+
             var employee = await _employeeService.GetEmployeeByIdAsync(employeeId);
+
+            _logger.LogInformation($"End get employee by id: {employeeId}");
+
             return HandleResponse(employee, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
         }
 
@@ -66,7 +83,12 @@ namespace API.Controllers
         [HttpPut("[action]")]
         public async Task<IActionResult> UpdateEmpoyee([FromBody] EmployeeUpdateVM employeeVM)
         {
+            _logger.LogInformation($"Start update employee... {employeeVM}");
+
             var employee = await _employeeService.UpdateEmployeeAsync(employeeVM);
+
+            _logger.LogInformation($"End update employee... {employeeVM}");
+
             return HandleResponse(employee, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
         }
 
@@ -78,7 +100,12 @@ namespace API.Controllers
         [HttpDelete("[action]")]
         public async Task<IActionResult> DeleteEmployeeById(Guid employeeId)
         {
+            _logger.LogInformation($"Start delete employee by id: {employeeId}");
+
             await _employeeService.DeleteEmployeeByIdAsync(employeeId);
+
+            _logger.LogInformation($"End delete employee by id: {employeeId}");
+
             return HandleResponse(null, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
         }
 
@@ -89,7 +116,12 @@ namespace API.Controllers
         [HttpGet("[action]")]
         public async Task<IActionResult> GetDataForCreateEmployee()
         {
+            _logger.LogInformation("Start get data for create employee...");
+
             var data = await _employeeService.DataForCreateEmployeeAsync();
+
+            _logger.LogInformation("End get data for create employee...");
+
             return HandleResponse(data, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
         }
     }

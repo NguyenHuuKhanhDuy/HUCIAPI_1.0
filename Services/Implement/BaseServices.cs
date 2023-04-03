@@ -285,6 +285,16 @@ namespace Services.Implement
             order.CreateEmployeeId = orderVM.CreateEmployeeId;
         }
 
+        public void MapFOrderUpdateVMTOrder(Order order, OrderUpdateVM orderVM)
+        {
+            order.VoucherId = orderVM.VoucherId;
+            order.OrderStatusId = orderVM.OrderStatusId;
+            order.OrderStatusPaymentId = orderVM.OrderStatusPaymentId;
+            order.OrderStatusShippingId = orderVM.OrderStatusShippingId;
+            order.OrderShippingMethodId = orderVM.OrderShippingMethodId;
+            order.OrderSourceId = orderVM.OrderSourceId;
+        }
+
         public OrderDto MapFOrderTOrderDto(Order order)
         {
             OrderDto orderDto = new OrderDto

@@ -53,7 +53,7 @@ namespace ApplicationCore.ViewModels.Employee
 
         [Required]
         public string Password { get; set; } = null!;
-        public IFormFile? Image { get; set; }
+        public string Image { get; set; } = null!;
 
         //public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         //{

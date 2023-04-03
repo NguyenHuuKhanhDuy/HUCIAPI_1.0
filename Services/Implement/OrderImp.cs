@@ -26,26 +26,29 @@ namespace Services.Implement
         /// <exception cref="NotImplementedException"></exception>
         public async Task<OrderDto> CreateOrderAsync(OrderVM orderVM)
         {
-            NameRelationOfOrder nameRelationOfOrder = await CheckInforForOrder(orderVM);
-
-            Order order = new Order();
+            Order order = new Order
+            {
+                CustomerId = Guid.Empty,
+                ProvinceId = BaseConstants.INT_DEFAULT,
+                DistrictId = BaseConstants.INT_DEFAULT,
+                WardId = BaseConstants.INT_DEFAULT,
+                VoucherId = Guid.Empty,
+                OrderStatusId = BaseConstants.INT_DEFAULT,
+                OrderStatusPaymentId = BaseConstants.INT_DEFAULT,
+                OrderStatusShippingId = BaseConstants.INT_DEFAULT,
+                OrderShippingMethodId = BaseConstants.INT_DEFAULT,
+                OrderSourceId = BaseConstants.INT_DEFAULT
+            };
             MapFOrderVMTOrder(order, orderVM);
+
+            await CheckInforForOrder(order);
+
             order.Id = Guid.NewGuid();
             order.OrderNumber = await GetOrderNumber();
             order.OrderDate = GetDateTimeNow();
-            order.ProvinceName = nameRelationOfOrder.Province;
-            order.DistrictName = nameRelationOfOrder.District;
-            order.WardName = nameRelationOfOrder.Ward;
-            order.VoucherName = nameRelationOfOrder.Voucher;
-            order.OrderStatusName = nameRelationOfOrder.OrderStatus;
-            order.OrderStatusPaymentName = nameRelationOfOrder.PaymentStatus;
-            order.OrderStatusShippingName = nameRelationOfOrder.ShippingStatus;
-            order.OrderShippingMethodName = nameRelationOfOrder.ShippingMethod;
-            order.CreateEmployeeName = nameRelationOfOrder.Employee;
-            order.OrderSourceName = nameRelationOfOrder.Source;
-            
-            List<ProductDto> productDtos = await GetProductDtoByIdsAsync(orderVM.products.Select(x => x.ProductId).ToList());
-            List<OrderDetail> orderDetails = await GetOrderDetailsAndCalculatePrice(order, productDtos, orderVM.products);
+
+            var productDtos = await GetProductDtoByIdsAsync(orderVM.products);
+            var orderDetails = await GetOrderDetailsAndCalculatePrice(order, productDtos, orderVM.products);
 
             await _dbContext.Orders.AddAsync(order);
             await _dbContext.SaveChangesAsync();
@@ -58,11 +61,18 @@ namespace Services.Implement
             return dto;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="order"></param>
+        /// <param name="productDtos"></param>
+        /// <param name="discounts"></param>
+        /// <returns></returns>
         private async Task<List<OrderDetail>> GetOrderDetailsAndCalculatePrice(Order order, List<ProductDto> productDtos, List<ProductInsideOrderVM> discounts)
         {
-            int total = 0;
-            int voucherDiscount = 0;
-            int productDiscount = 0;
+            int total = BaseConstants.INT_DEFAULT;
+            int voucherDiscount = BaseConstants.INT_DEFAULT;
+            int productDiscount = BaseConstants.INT_DEFAULT;
             List<OrderDetail> orderDetails = new List<OrderDetail>();
 
 
@@ -84,7 +94,7 @@ namespace Services.Implement
                         ProductImage = product.Image,
                         ProductPrice = product.Price,
                         Discount = discount.Discount,
-                        SubTotal = product.Price - discount.Discount,
+                        SubTotal = (product.Price - discount.Discount) * discount.Quantity,
                         Quantity = discount.Quantity
                     });
                 }
@@ -104,9 +114,9 @@ namespace Services.Implement
                         order.TotalPayment = 0;
                     }
                 }
-                else if(voucher.DiscountPercent != 0)
+                else if (voucher.DiscountPercent != 0)
                 {
-                    voucherDiscount = (int)(((double) voucher.DiscountPercent / 100.0) * (total - productDiscount));
+                    voucherDiscount = (int)(((double)voucher.DiscountPercent / 100.0) * (total - productDiscount));
 
                     if (voucherDiscount > total)
                     {
@@ -125,16 +135,27 @@ namespace Services.Implement
 
             return orderDetails;
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public async Task<string> GetOrderNumber()
         {
             int number = await _dbContext.Orders.CountAsync() + 1;
             return OrderConstants.PREFIX_ORDER_NUMBER + number;
         }
 
-        private async Task<NameRelationOfOrder> CheckInforForOrder(OrderVM orderVM)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="orderVM"></param>
+        /// <param name="order"></param>
+        /// <returns></returns>
+        /// <exception cref="BusinessException"></exception>
+        private async Task CheckInforForOrder(Order order)
         {
-            NameRelationOfOrder nameRelationOfOrder = new NameRelationOfOrder();
-            var voucher = await _dbContext.Vouchers.FirstOrDefaultAsync(x => x.Id == orderVM.VoucherId);
+            var voucher = await _dbContext.Vouchers.FirstOrDefaultAsync(x => x.Id == order.VoucherId);
 
             if (voucher == null)
             {
@@ -145,69 +166,91 @@ namespace Services.Implement
             {
                 throw new BusinessException(OrderConstants.VOUCHER_EXCEED);
             }
-            nameRelationOfOrder.Voucher = voucher.Name;
+            order.VoucherName = voucher.Name;
 
-            var status = await _dbContext.StatusOrders.AsNoTracking().FirstOrDefaultAsync(x => x.Id == orderVM.OrderStatusId);
+            var status = await _dbContext.StatusOrders.AsNoTracking().FirstOrDefaultAsync(x => x.Id == order.OrderStatusId);
 
             if (status == null)
             {
                 throw new BusinessException(OrderConstants.ORDER_STATUS_NOT_EXISTS);
             }
 
-            nameRelationOfOrder.OrderStatus = status.Name;
+            order.OrderStatusName = status.Name;
 
-            var paymentStatus = await _dbContext.StatusPayments.AsNoTracking().FirstOrDefaultAsync(x => x.Id == orderVM.OrderStatusPaymentId);
+            var customer = await _dbContext.Customers.FirstOrDefaultAsync(x => x.Id == order.CustomerId);
+
+            if (customer == null)
+            {
+                throw new BusinessException(OrderConstants.CUSTOMER_NOT_EXISTS);
+            }
+
+            order.CustomerName = customer.Name;
+            order.CustomerPhone = customer.Phone;
+            order.CustomerEmail = customer.Email;
+            order.CustomerAddress = customer.Address;
+            customer.OrderCount += 1;
+
+            var paymentStatus = await _dbContext.StatusPayments.AsNoTracking().FirstOrDefaultAsync(x => x.Id == order.OrderStatusPaymentId);
 
             if (paymentStatus == null)
             {
                 throw new BusinessException(OrderConstants.PAYMENT_STATUS_NOT_EXISTS);
             }
 
-            var statusShipping = await _dbContext.StatusShippings.AsNoTracking().FirstOrDefaultAsync(x => x.Id == orderVM.OrderStatusShippingId);
+            order.OrderStatusPaymentName = paymentStatus.Name;
+
+            var statusShipping = await _dbContext.StatusShippings.AsNoTracking().FirstOrDefaultAsync(x => x.Id == order.OrderStatusShippingId);
 
             if (paymentStatus == null)
             {
                 throw new BusinessException(OrderConstants.SHIPPING_STATUS_NOT_EXISTS);
             }
 
-            nameRelationOfOrder.ShippingStatus = statusShipping.Name;
+            order.OrderStatusShippingName = statusShipping.Name;
 
-            var shippingMethod = await _dbContext.ShippingMethods.AsNoTracking().FirstOrDefaultAsync(x => x.Id == orderVM.OrderShippingMethodId);
+            var shippingMethod = await _dbContext.ShippingMethods.AsNoTracking().FirstOrDefaultAsync(x => x.Id == order.OrderShippingMethodId);
 
             if (shippingMethod == null)
             {
                 throw new BusinessException(OrderConstants.SHIPPING_METHOD_NOT_EXISTS);
             }
 
-            nameRelationOfOrder.ShippingMethod = shippingMethod.Name;
+            order.OrderShippingMethodName = shippingMethod.Name;
 
-            var employee = await _dbContext.Employees.AsNoTracking().FirstOrDefaultAsync(x => x.Id == orderVM.CreateEmployeeId);
+            var employee = await _dbContext.Employees.AsNoTracking().FirstOrDefaultAsync(x => x.Id == order.CreateEmployeeId);
 
             if (employee == null)
             {
                 throw new BusinessException(OrderConstants.USER_CREATE_NOT_EXISTS);
             }
 
-            nameRelationOfOrder.Employee = employee.Name;
+            order.CreateEmployeeName = employee.Name;
 
-            var source = await _dbContext.OrderSources.AsNoTracking().FirstOrDefaultAsync(x => x.Id == orderVM.OrderSourceId);
+            var source = await _dbContext.OrderSources.AsNoTracking().FirstOrDefaultAsync(x => x.Id == order.OrderSourceId);
 
             if (employee == null)
             {
                 throw new BusinessException(OrderConstants.SOURCE_ORDER_NOT_EXISTS);
             }
 
-            nameRelationOfOrder.Source = source.SourceName;
-            nameRelationOfOrder.Province = await GetNameLocationById(orderVM.ProvinceId);
-            nameRelationOfOrder.District = await GetNameLocationById(orderVM.DistrictId);
-            nameRelationOfOrder.Ward = await GetNameLocationById(orderVM.WardId);
-            return nameRelationOfOrder;
+            order.OrderSourceName = source.SourceName;
+            order.ProvinceName = await GetNameLocationById(order.ProvinceId);
+            order.DistrictName = await GetNameLocationById(order.DistrictId);
+            order.WardName = await GetNameLocationById(order.WardId);
         }
 
-
-        private async Task<List<ProductDto>> GetProductDtoByIdsAsync(List<Guid> productVMs)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="productVMs"></param>
+        /// <returns></returns>
+        /// <exception cref="BusinessException"></exception>
+        private async Task<List<ProductDto>> GetProductDtoByIdsAsync(List<ProductInsideOrderVM> productVMs)
         {
-            var products = await _dbContext.Products.Where(x => !x.IsDeleted && productVMs.Contains(x.Id)).ToListAsync();
+            var products = await _dbContext.Products.Where(x => !x.IsDeleted && productVMs
+                                                    .Select(x => x.ProductId)
+                                                    .Contains(x.Id))
+                                                    .ToListAsync();
 
             if (products.Count == 0)
             {
@@ -218,7 +261,7 @@ namespace Services.Implement
 
             foreach (var productVM in productVMs)
             {
-                var product = products.Where(x => x.Id == productVM).FirstOrDefault();
+                var product = products.Where(x => x.Id == productVM.ProductId).FirstOrDefault();
 
                 if (product == null)
                 {
@@ -226,20 +269,125 @@ namespace Services.Implement
                 }
 
                 productDtos.Add(MapFProductTProductDto(product));
+                product.OnHand = product.OnHand - productVM.Quantity;
             }
 
             return productDtos.OrderBy(x => x.ProductNumber).ToList();
         }
 
-
-        public Task DeleteOrderAsync(Guid orderId)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="orderId"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public async Task DeleteOrderAsync(Guid orderId)
         {
-            throw new NotImplementedException();
+            var order = await _dbContext.Orders.FirstOrDefaultAsync(x => x.Id == orderId && !x.IsDeleted);
+
+            if (order == null)
+            {
+                throw new BusinessException(OrderConstants.ORDER_NOT_EXISTS);
+            }
+
+            await HandleCancelOrDeleteOrderAsync(order);
+            order.IsDeleted = true;
+            order.OrderNumber += BaseConstants.DELETE;
+            await _dbContext.SaveChangesAsync();
         }
 
-        public Task<OrderDto> UpdateOrderAsync(OrderVM orderVM)
+        public async Task HandleCancelOrDeleteOrderAsync(Order order)
         {
-            throw new NotImplementedException();
+            var orderDetails = await _dbContext.OrderDetails.AsNoTracking().Where(x => x.OrderId == order.Id).ToListAsync();
+            var products = await _dbContext.Products
+                                           .Where(x => !x.IsDeleted && orderDetails.Select(x => x.ProductId).ToList().Contains(x.Id))
+                                           .ToListAsync();
+
+            if (products.Any())
+            {
+                foreach (var product in products)
+                {
+                    var orderDetail = orderDetails.FirstOrDefault(x => x.ProductId == product.Id);
+
+                    if (orderDetail != null)
+                    {
+                        product.OnHand += orderDetail.Quantity;
+                    }
+                }
+            }
+
+            var customer = await _dbContext.Customers.FirstOrDefaultAsync(x => x.Id == order.CustomerId && !x.IsDeleted);
+
+            if (customer != null)
+            {
+                customer.OrderCount -= 1;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="orderVM"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public async Task<OrderDto> UpdateOrderAsync(OrderUpdateVM orderVM)
+        {
+            var order = await _dbContext.Orders.FirstOrDefaultAsync(x => x.Id == orderVM.Id && !x.IsDeleted);
+
+            if (order == null)
+            {
+                throw new BusinessException(OrderConstants.ORDER_NOT_EXISTS);
+            }
+
+            MapFOrderUpdateVMTOrder(order, orderVM);
+            await CheckInforForOrder(order);
+
+            await _dbContext.SaveChangesAsync();
+
+            var dto = MapFOrderTOrderDto(order);
+            return dto;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public async Task<List<OrderDto>> GetAllOrderAsync()
+        {
+            List<OrderDto> orderDtos = new List<OrderDto>();
+            var orders = await _dbContext.Orders.Where(x => !x.IsDeleted).ToListAsync();
+
+            if (orders.Any())
+            {
+                foreach (var order in orders)
+                {
+                    orderDtos.Add(MapFOrderTOrderDto(order));
+                }
+            }
+            
+            return orderDtos;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <returns></returns>
+        public async Task<List<OrderDto>> GetOrderByDate(DateTime startDate, DateTime endDate)
+        {
+            List<OrderDto> orderDtos = new List<OrderDto>();
+            var orders = await _dbContext.Orders.Where(x => x.OrderDate.Date >= startDate.Date && x.OrderDate.Date <= endDate.Date).ToListAsync();
+
+            if (orders.Any())
+            {
+                foreach (var order in orders)
+                {
+                    orderDtos.Add(MapFOrderTOrderDto(order));
+                }
+            }
+
+            return orderDtos;
         }
     }
 }
