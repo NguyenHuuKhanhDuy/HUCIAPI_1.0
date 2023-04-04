@@ -38,6 +38,12 @@ namespace Services.Implement
         public async Task<string> GetNameLocationById(int id)
         {
             var location = await _dbContext.Locations.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+
+            if(location == null)
+            {
+                throw new BusinessException(BaseConstants.LOCATION_NOT_EXIST);
+            }
+
             return location.Name;
         }
 

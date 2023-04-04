@@ -17,5 +17,7 @@ namespace Common.Constants
 
         public const int INT_DEFAULT = 0;
 
+        public const string LOCATION_NOT_EXIST = "Location not exists";
+
     }
 }
