@@ -109,6 +109,12 @@ namespace Services.Implement
             List<Employee> employees = await _dbContext.Employees.Where(x => !x.IsDeleted).ToListAsync();
             CheckEmployeeInformation(employeeVM, employees);
 
+            var salaryType = await _dbContext.SalaryTypes.FindAsync(employeeVM.SalaryTypeId);
+            if(salaryType == null)
+            {
+                throw new BusinessException(EmployeeConstants.SALARY_TYPE_NOTE_EXIST);
+            }
+
             Employee employee = _mapper.Map<Employee>(employeeVM);
             employee.Id = Guid.NewGuid();
             await GetNameFieldHaveId(employee);
@@ -138,6 +144,12 @@ namespace Services.Implement
         public async Task<string> GetRuleNameById(int id)
         {
             var rule = await _dbContext.Rules.FindAsync(id);
+
+            if (rule == null)
+            {
+                throw new BusinessException(EmployeeConstants.RULE_NOTE_EXIST);
+            }
+
             return rule.Name;
         }
 

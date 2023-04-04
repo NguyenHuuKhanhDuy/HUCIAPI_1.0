@@ -18,5 +18,9 @@
         public const string EXIST_EMAIL = "Email already exists";
         public const string EXIST_PHONE = "Phone already exists";
         public const string EXIST_USERNAME = "Username already exists";
+
+        public const string RULE_NOTE_EXIST = "Rule not exists";
+        public const string SALARY_TYPE_NOTE_EXIST = "Salary type not exists";
+
     }
 }
