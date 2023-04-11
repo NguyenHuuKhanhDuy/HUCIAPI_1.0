@@ -72,6 +72,6 @@ namespace ApplicationCore.ModelsDto.Order
 
         public string OrderSourceName { get; set; } = null!;
 
-        public List<OrderDetail> products { get; set; } = new List<OrderDetail>();
+        public List<OrderDetailDto> products { get; set; } = new List<OrderDetailDto>();
     }
 }

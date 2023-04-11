@@ -376,7 +376,7 @@ namespace Services.Implement
         /// <returns></returns>
         public async Task<List<OrderDto>> GetOrderByDate(DateTime startDate, DateTime endDate)
         {
-            List<OrderDto> orderDtos = new List<OrderDto>();
+            var orderDtos = new List<OrderDto>();
             var orders = await _dbContext.Orders.Where(x => x.OrderDate.Date >= startDate.Date && x.OrderDate.Date <= endDate.Date).ToListAsync();
 
             if (orders.Any())
@@ -388,6 +388,53 @@ namespace Services.Implement
             }
 
             return orderDtos;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="statusId"></param>
+        /// <returns></returns>
+        public async Task<List<OrderDto>> GetOrderByStatusId(int statusId)
+        {
+            var orderDtos = new List<OrderDto>();
+            var orders = await _dbContext.Orders.Where(x => x.OrderStatusId == statusId).ToListAsync();
+
+            if (orders.Any())
+            {
+                foreach (var order in orders)
+                {
+                    orderDtos.Add(MapFOrderTOrderDto(order));
+                }
+            }
+
+            return orderDtos;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="orderId"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        public async Task<OrderDto> GetDetailOrderById(Guid orderId)
+        {
+            var order = _dbContext.Orders.FirstOrDefault(x => x.Id== orderId);
+
+            if(order == null)
+            {
+                throw new Exception(OrderConstants.ORDER_NOT_EXISTS);
+            }
+
+            var orderDetails = await _dbContext.OrderDetails.Where(x => x.OrderId == order.Id).ToListAsync();
+            var orderDto = MapFOrderTOrderDto(order);
+            
+            if(orderDetails.Any())
+            {
+                orderDto.products = orderDetails.Select(x => MapFOrderDetailTOrderDetailDto(x)).ToList();
+            }
+
+            return orderDto;
         }
     }
 }

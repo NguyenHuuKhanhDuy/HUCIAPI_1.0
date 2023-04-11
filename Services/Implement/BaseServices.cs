@@ -343,5 +343,21 @@ namespace Services.Implement
 
             return orderDto;
         }
+
+        public OrderDetailDto MapFOrderDetailTOrderDetailDto(OrderDetail orderDetail)
+        {
+            return new OrderDetailDto{
+                Id = orderDetail.Id,
+                OrderId = orderDetail.OrderId,
+                ProductId = orderDetail.ProductId,
+                ProductNumber = orderDetail.ProductNumber,
+                ProductName = orderDetail.ProductName,
+                ProductImage = orderDetail.ProductImage,
+                ProductPrice = orderDetail.ProductPrice,
+                Discount = orderDetail.Discount,
+                SubTotal = orderDetail.SubTotal,
+                Quantity = orderDetail.Quantity
+            };
+        }
     }
 }

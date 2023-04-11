@@ -105,5 +105,39 @@ namespace API.Controllers
 
             return HandleResponseStatusOk(orders);
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="statusId"></param>
+        /// <returns></returns>
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetOrderByStatusId(int statusId)
+        {
+            _logger.LogInformation($"Start get order by status id: {statusId}");
+
+            var orders = await _orderServices.GetOrderByStatusId(statusId);
+
+            _logger.LogInformation($"End get order by status id.");
+
+            return HandleResponseStatusOk(orders);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="statusId"></param>
+        /// <returns></returns>
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetOrderDetailById(Guid orderId)
+        {
+            _logger.LogInformation($"Start get order detail id: {orderId}");
+
+            var orders = await _orderServices.GetDetailOrderById(orderId);
+
+            _logger.LogInformation($"End get order detail by id.");
+
+            return HandleResponseStatusOk(orders);
+        }
     }
 }
