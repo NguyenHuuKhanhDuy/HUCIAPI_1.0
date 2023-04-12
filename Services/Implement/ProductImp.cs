@@ -178,6 +178,7 @@ namespace Services.Implement
             List<Product> products = await _dbContext.Products.Where(x => !x.IsDeleted).ToListAsync();
 
             MapListFProductsTProductDtos(products, productDtos);
+            await GetDetailProductAsync(productDtos);
 
             return productDtos.OrderByDescending(x => x.CreateDate).ToList();
         }
@@ -242,6 +243,7 @@ namespace Services.Implement
             List<ProductDto> productDtos = new List<ProductDto>();
 
             MapListFProductsTProductDtos(products, productDtos);
+            await GetDetailProductAsync(productDtos);
 
             return productDtos;
         }
@@ -257,7 +259,7 @@ namespace Services.Implement
             List<ProductDto> productDtos = new List<ProductDto>();
 
             MapListFProductsTProductDtos(products, productDtos);
-
+            await GetDetailProductAsync(productDtos);
             return productDtos;
         }
 
@@ -420,6 +422,20 @@ namespace Services.Implement
             }
 
             return comboDetails1;
+        }
+
+        public async Task GetDetailProductAsync(List<ProductDto> productDtos)
+        {
+            var brands = await _dbContext.Brands.ToListAsync();
+            var categorys = await _dbContext.Categories.ToListAsync();
+            var employees = await _dbContext.Employees.ToListAsync();
+
+            foreach (var product in productDtos)
+            {
+                product.BrandName = brands.FirstOrDefault(x => x.Id == product.BrandId)?.Name;
+                product.CategoryName = categorys.FirstOrDefault(x => x.Id == product.CategoryId)?.Name;
+                product.UserCreateName = employees.FirstOrDefault(x => x.Id == product.UserCreateId)?.Name;
+            }
         }
     }
 }

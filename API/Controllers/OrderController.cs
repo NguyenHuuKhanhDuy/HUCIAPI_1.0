@@ -8,7 +8,7 @@ namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class OrderController : BaseController
     {
         private readonly IOrderServices _orderServices;
@@ -81,7 +81,7 @@ namespace API.Controllers
         {
             _logger.LogInformation($"Start get order from {startDate} to {endDate}");
 
-            var orders = await _orderServices.GetOrderByDate(startDate, endDate);
+            var orders = await _orderServices.GetOrderByDateAsync(startDate, endDate);
 
             _logger.LogInformation($"End get order from {startDate} to {endDate}");
 
@@ -116,7 +116,7 @@ namespace API.Controllers
         {
             _logger.LogInformation($"Start get order by status id: {statusId}");
 
-            var orders = await _orderServices.GetOrderByStatusId(statusId);
+            var orders = await _orderServices.GetOrderByStatusIdAsync(statusId);
 
             _logger.LogInformation($"End get order by status id.");
 
@@ -133,7 +133,7 @@ namespace API.Controllers
         {
             _logger.LogInformation($"Start get order detail id: {orderId}");
 
-            var orders = await _orderServices.GetDetailOrderById(orderId);
+            var orders = await _orderServices.GetDetailOrderByIdAsync(orderId);
 
             _logger.LogInformation($"End get order detail by id.");
 

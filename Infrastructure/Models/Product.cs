@@ -51,5 +51,7 @@ public partial class Product
 
     public virtual ProductType ProductType { get; set; } = null!;
 
+    public virtual ICollection<Promotion> Promotions { get; } = new List<Promotion>();
+
     public virtual Employee UserCreate { get; set; } = null!;
 }

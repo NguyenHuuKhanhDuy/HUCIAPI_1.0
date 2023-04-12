@@ -1,4 +1,6 @@
-﻿namespace ApplicationCore.ModelsDto
+﻿using Common.Constants;
+
+namespace ApplicationCore.ModelsDto
 {
     public class EmployeeDto
     {
@@ -40,6 +42,10 @@
         public string CreateUserName { get; set; } = null!; 
 
         public string Token { get; set; } = null!;
+
+        public string Username { get; set; } = null!;
+
+        public string Password { get; set; } = null!;
 
     }
 }

@@ -23,6 +23,14 @@ builder.Services.AddControllers().ConfigureApiBehaviorOptions(options =>
         BaseController.ValidateModelState;
 });
 
+#if DEBUG
+var connectionString = builder.Configuration.GetConnectionString("HUCIDB");
+builder.Services.AddDbContext<HucidbContext>(options => options.UseSqlServer(connectionString));
+#else
+var connectionString = builder.Configuration.GetConnectionString("HUCIDB_SERVER");
+builder.Services.AddDbContext<HucidbContext>(options => options.UseSqlServer(connectionString));
+#endif
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -31,9 +39,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddControllersWithViews();
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
 
-//add Database
-var connectionString = builder.Configuration.GetConnectionString("HUCIDB");
-builder.Services.AddDbContext<HucidbContext>(options => options.UseSqlServer(connectionString));
+
 
 // Add services to the container.
 builder.Logging.ClearProviders(); 
@@ -56,6 +62,7 @@ builder.Services.AddTransient<IProductServices, ProductImp>();
 builder.Services.AddTransient<ICustomerServices, CustomerImp>();
 builder.Services.AddTransient<ISupplierServices, SupplierImp>();
 builder.Services.AddTransient<IOrderServices, OrderImp>();
+builder.Services.AddTransient<IPromotionServices, PromotionImp>();
 
 //add authen services
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>

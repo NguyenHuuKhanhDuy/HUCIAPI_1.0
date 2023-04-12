@@ -9,8 +9,8 @@ namespace Services.Interface
         Task<OrderDto> UpdateOrderAsync(OrderUpdateVM orderVM);
         Task DeleteOrderAsync(Guid orderId);
         Task<List<OrderDto>> GetAllOrderAsync();
-        Task<List<OrderDto>> GetOrderByDate(DateTime startDate, DateTime endDate);
-        Task<List<OrderDto>> GetOrderByStatusId(int statusId);
-        Task<OrderDto> GetDetailOrderById(Guid orderId);
+        Task<List<OrderDto>> GetOrderByDateAsync(DateTime startDate, DateTime endDate);
+        Task<List<OrderDto>> GetOrderByStatusIdAsync(int statusId);
+        Task<OrderDto> GetDetailOrderByIdAsync(Guid orderId);
     }
 }

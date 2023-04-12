@@ -65,6 +65,8 @@ public partial class Employee
 
     public virtual ICollection<Product> Products { get; } = new List<Product>();
 
+    public virtual ICollection<Promotion> Promotions { get; } = new List<Promotion>();
+
     public virtual Location Province { get; set; } = null!;
 
     public virtual Rule Rule { get; set; } = null!;

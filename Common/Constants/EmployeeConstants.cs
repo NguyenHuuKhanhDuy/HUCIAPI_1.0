@@ -22,5 +22,6 @@
         public const string RULE_NOTE_EXIST = "Rule not exists";
         public const string SALARY_TYPE_NOTE_EXIST = "Salary type not exists";
 
+        public const string PASS_DEFAULT = "passDefault";
     }
 }

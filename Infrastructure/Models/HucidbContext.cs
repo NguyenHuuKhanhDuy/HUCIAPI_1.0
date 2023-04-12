@@ -43,6 +43,8 @@ public partial class HucidbContext : DbContext
 
     public virtual DbSet<ProductType> ProductTypes { get; set; }
 
+    public virtual DbSet<Promotion> Promotions { get; set; }
+
     public virtual DbSet<Rule> Rules { get; set; }
 
     public virtual DbSet<SalaryType> SalaryTypes { get; set; }
@@ -493,6 +495,24 @@ public partial class HucidbContext : DbContext
             entity.Property(e => e.Name)
                 .HasMaxLength(50)
                 .IsUnicode(false);
+        });
+
+        modelBuilder.Entity<Promotion>(entity =>
+        {
+            entity.ToTable("Promotion");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.CreateDate).HasColumnType("datetime");
+
+            entity.HasOne(d => d.Product).WithMany(p => p.Promotions)
+                .HasForeignKey(d => d.ProductId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Promotion_Product");
+
+            entity.HasOne(d => d.UserCreate).WithMany(p => p.Promotions)
+                .HasForeignKey(d => d.UserCreateId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Promotion_Employee");
         });
 
         modelBuilder.Entity<Rule>(entity =>

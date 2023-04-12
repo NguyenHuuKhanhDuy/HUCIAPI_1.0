@@ -2,10 +2,12 @@
 using ApplicationCore.ModelsDto.Customer;
 using ApplicationCore.ModelsDto.Order;
 using ApplicationCore.ModelsDto.Product;
+using ApplicationCore.ModelsDto.Promotion;
 using ApplicationCore.ModelsDto.Supplier;
 using ApplicationCore.ViewModels.Customer;
 using ApplicationCore.ViewModels.Order;
 using ApplicationCore.ViewModels.Product;
+using ApplicationCore.ViewModels.Promotion;
 using ApplicationCore.ViewModels.Supplier;
 using Common.Constants;
 using Infrastructure.Models;
@@ -359,5 +361,39 @@ namespace Services.Implement
                 Quantity = orderDetail.Quantity
             };
         }
+
+        //Map Promotion
+
+        public Promotion MapFPromotionVMToPromotion(PromotionVM promotionVM)
+        {
+            return new Promotion
+            {
+                ProductId = promotionVM.ProductId,
+                QuantityFrom = promotionVM.QuantityFrom,
+                Price = promotionVM.Price,
+                UserCreateId = promotionVM.UserCreateId
+            };
+        }
+
+        public void MapFPromotionUpdateVMTPromotion(Promotion promotion, PromotionUpdateVM promotionVM)
+        {
+            promotion.ProductId = promotionVM.ProductId;
+            promotion.Price = promotionVM.Price;
+            promotion.QuantityFrom = promotionVM.QuantityFrom;
+        }
+
+        public PromotionDto MapFPromotionTPromotionDto(Promotion promotion)
+        {
+            return new PromotionDto
+            {
+                Id = promotion.Id,
+                ProductId = promotion.ProductId,
+                Price = promotion.Price,
+                QuantityFrom = promotion.QuantityFrom,
+                UserCreateId = promotion.UserCreateId,
+                UserCreateName = promotion.UserCreateName,
+                CreateDate = promotion.CreateDate
+            };
+        } 
     }
 }

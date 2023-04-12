@@ -57,7 +57,12 @@ namespace Services.Implement
             await _dbContext.SaveChangesAsync();
 
             OrderDto dto = MapFOrderTOrderDto(order);
-            dto.products = orderDetails;
+
+            if (orderDetails.Any())
+            {
+                dto.products = orderDetails.Select(x => MapFOrderDetailTOrderDetailDto(x)).ToList();
+            }
+
             return dto;
         }
 
@@ -355,7 +360,7 @@ namespace Services.Implement
         public async Task<List<OrderDto>> GetAllOrderAsync()
         {
             List<OrderDto> orderDtos = new List<OrderDto>();
-            var orders = await _dbContext.Orders.Where(x => !x.IsDeleted).ToListAsync();
+            var orders = await _dbContext.Orders.Where(x => !x.IsDeleted).OrderBy(x => x.OrderDate).ToListAsync();
 
             if (orders.Any())
             {
@@ -374,10 +379,10 @@ namespace Services.Implement
         /// <param name="startDate"></param>
         /// <param name="endDate"></param>
         /// <returns></returns>
-        public async Task<List<OrderDto>> GetOrderByDate(DateTime startDate, DateTime endDate)
+        public async Task<List<OrderDto>> GetOrderByDateAsync(DateTime startDate, DateTime endDate)
         {
             var orderDtos = new List<OrderDto>();
-            var orders = await _dbContext.Orders.Where(x => x.OrderDate.Date >= startDate.Date && x.OrderDate.Date <= endDate.Date).ToListAsync();
+            var orders = await _dbContext.Orders.Where(x => x.OrderDate.Date >= startDate.Date && x.OrderDate.Date <= endDate.Date).OrderBy(x => x.OrderDate).ToListAsync();
 
             if (orders.Any())
             {
@@ -395,10 +400,10 @@ namespace Services.Implement
         /// </summary>
         /// <param name="statusId"></param>
         /// <returns></returns>
-        public async Task<List<OrderDto>> GetOrderByStatusId(int statusId)
+        public async Task<List<OrderDto>> GetOrderByStatusIdAsync(int statusId)
         {
             var orderDtos = new List<OrderDto>();
-            var orders = await _dbContext.Orders.Where(x => x.OrderStatusId == statusId).ToListAsync();
+            var orders = await _dbContext.Orders.Where(x => x.OrderStatusId == statusId).OrderBy(x => x.OrderDate).ToListAsync();
 
             if (orders.Any())
             {
@@ -417,7 +422,7 @@ namespace Services.Implement
         /// <param name="orderId"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public async Task<OrderDto> GetDetailOrderById(Guid orderId)
+        public async Task<OrderDto> GetDetailOrderByIdAsync(Guid orderId)
         {
             var order = _dbContext.Orders.FirstOrDefault(x => x.Id== orderId);
 
@@ -431,7 +436,7 @@ namespace Services.Implement
             
             if(orderDetails.Any())
             {
-                orderDto.products = orderDetails.Select(x => MapFOrderDetailTOrderDetailDto(x)).ToList();
+                orderDto.products = orderDetails?.Select(x => MapFOrderDetailTOrderDetailDto(x)).ToList();
             }
 
             return orderDto;

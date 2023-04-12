@@ -244,7 +244,11 @@ namespace Services.Implement
             employee.RuleId = employeeVM.RuleId.Value;
             employee.Address = employeeVM.Address;
             employee.Username = employeeVM.Username;
-            employee.Password = HashPassword(employeeVM.Password);
+
+            if(employee.Password != employeeVM.Password)
+            {
+                employee.Password = HashPassword(employeeVM.Password);
+            }
 
             await GetNameFieldHaveId(employee);
 
