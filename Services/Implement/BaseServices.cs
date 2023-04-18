@@ -1,10 +1,12 @@
 ﻿using ApplicationCore.Exceptions;
 using ApplicationCore.ModelsDto.Customer;
+using ApplicationCore.ModelsDto.Fund;
 using ApplicationCore.ModelsDto.Order;
 using ApplicationCore.ModelsDto.Product;
 using ApplicationCore.ModelsDto.Promotion;
 using ApplicationCore.ModelsDto.Supplier;
 using ApplicationCore.ViewModels.Customer;
+using ApplicationCore.ViewModels.Fund;
 using ApplicationCore.ViewModels.Order;
 using ApplicationCore.ViewModels.Product;
 using ApplicationCore.ViewModels.Promotion;
@@ -41,7 +43,7 @@ namespace Services.Implement
         {
             var location = await _dbContext.Locations.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
 
-            if(location == null)
+            if (location == null)
             {
                 throw new BusinessException(BaseConstants.LOCATION_NOT_EXIST);
             }
@@ -161,7 +163,7 @@ namespace Services.Implement
 
         public void MapListFProductsTProductDtos(List<Product> products, List<ProductDto> productDtos)
         {
-            foreach(Product product in products)
+            foreach (Product product in products)
             {
                 productDtos.Add(MapFProductTProductDto(product));
             }
@@ -308,7 +310,7 @@ namespace Services.Implement
             OrderDto orderDto = new OrderDto
             {
                 Id = order.Id,
-                OrderNumber = order.OrderNumber, 
+                OrderNumber = order.OrderNumber,
                 OrderDate = order.OrderDate,
                 CustomerId = order.CustomerId,
                 CustomerName = order.CustomerName,
@@ -348,7 +350,8 @@ namespace Services.Implement
 
         public OrderDetailDto MapFOrderDetailTOrderDetailDto(OrderDetail orderDetail)
         {
-            return new OrderDetailDto{
+            return new OrderDetailDto
+            {
                 Id = orderDetail.Id,
                 OrderId = orderDetail.OrderId,
                 ProductId = orderDetail.ProductId,
@@ -363,7 +366,6 @@ namespace Services.Implement
         }
 
         //Map Promotion
-
         public Promotion MapFPromotionVMToPromotion(PromotionVM promotionVM)
         {
             return new Promotion
@@ -394,6 +396,36 @@ namespace Services.Implement
                 UserCreateName = promotion.UserCreateName,
                 CreateDate = promotion.CreateDate
             };
-        } 
+        }
+
+        //Map Fund
+        public Fund MapFFundVMTFund(FundVM fundVM)
+        {
+            return new Fund
+            {
+                Id = Guid.NewGuid(),
+                Name = fundVM.Name,
+                TotalFund = fundVM.TotalFund,
+                CreateDate = GetDateTimeNow(),
+                IsActive = true,
+                IsDeleted = false,
+                UserCreateId = fundVM.UserCreateId,
+                Note = fundVM.Note
+            };
+        }
+
+        public FundDto MapFFundTFundDto(Fund fund)
+        {
+            return new FundDto
+            {
+                Id = fund.Id,
+                Name = fund.Name,
+                TotalFund = fund.TotalFund,
+                CreateDate = fund.CreateDate,
+                IsActive = fund.IsActive.HasValue ? fund.IsActive.Value : true,
+                UserCreateId = fund.UserCreateId,
+                Note = fund.Note
+            };
+        }
     }
 }
