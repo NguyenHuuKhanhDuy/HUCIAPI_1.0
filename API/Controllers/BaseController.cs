@@ -12,7 +12,7 @@ namespace API.Controllers
             return StatusCode(statusCode, new DataResponse(o, massage, statusCode));
         }
 
-        protected IActionResult HandleResponseStatusOk(Object o)
+        protected IActionResult HandleResponseStatusOk(Object o = null)
         {
             return StatusCode(StatusCodeConstants.STATUS_SUCCESS, new DataResponse(o, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS));
         }

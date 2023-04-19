@@ -427,5 +427,12 @@ namespace Services.Implement
                 Note = fund.Note
             };
         }
+
+        public void MapFFundUpdateVMTFund(Fund fund, FundUpdateVM fundUpdateVM)
+        {
+            fund.Name = fundUpdateVM.Name;
+            fund.TotalFund = fundUpdateVM.TotalFund;
+            fund.Note = fundUpdateVM.Note;
+        }
     }
 }
