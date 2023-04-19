@@ -434,5 +434,35 @@ namespace Services.Implement
             fund.TotalFund = fundUpdateVM.TotalFund;
             fund.Note = fundUpdateVM.Note;
         }
+
+        //Fund Detail
+        public FundDetail MapFFundDetailVMTFundDetail(FundDetailVM fundDetail)
+        {
+            return new FundDetail
+            {
+                Id = Guid.NewGuid(),
+                FundId = fundDetail.FundId,
+                AmountMoney = fundDetail.AmountMoney,
+                CreateDate = GetDateTimeNow(),
+                TypeFundId = fundDetail.TypeFundId,
+                TypeFundName = fundDetail.TypeFundName,
+                UserCreateId = fundDetail.UserCreateId,
+                Note = fundDetail.Note
+            };
+        }
+
+        public FundDetailDto MapFFundDetailTFundDetailDto(FundDetail fundDetail)
+        {
+            return new FundDetailDto
+            {
+                Id = fundDetail.Id,
+                FundId = fundDetail.FundId,
+                AmountMoney = fundDetail.AmountMoney,
+                TypeFundId = fundDetail.TypeFundId,
+                TypeFundName = fundDetail.TypeFundName,
+                UserCreateId = fundDetail.UserCreateId,
+                Note = fundDetail.Note
+            };
+        }
     }
 }

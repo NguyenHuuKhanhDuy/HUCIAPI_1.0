@@ -64,6 +64,7 @@ builder.Services.AddTransient<ISupplierServices, SupplierImp>();
 builder.Services.AddTransient<IOrderServices, OrderImp>();
 builder.Services.AddTransient<IPromotionServices, PromotionImp>();
 builder.Services.AddTransient<ILocationServices, LocationImp>();
+builder.Services.AddTransient<IFundServices, FundImp>();
 
 //add authen services
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
