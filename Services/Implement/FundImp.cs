@@ -1,5 +1,6 @@
 ﻿using ApplicationCore.Exceptions;
 using ApplicationCore.ModelsDto.Fund;
+using ApplicationCore.ViewModels.Employee;
 using ApplicationCore.ViewModels.Fund;
 using Common.Constants;
 using Infrastructure.Models;
@@ -38,6 +39,24 @@ namespace Services.Implement
 
             var fundDto = MapFFundTFundDto(fund);
             fundDto.UserCreateName = employee.Name;
+
+            var typeFund = await _dbContext.TypeFunds.FirstOrDefaultAsync(x => x.Id == FundConstants.COLLECT);
+
+            if (typeFund == null)
+                return fundDto;
+
+            var fundDetailVM = new FundDetailVM
+            {
+                FundId = fund.Id,
+                TypeFundId = typeFund.Id,
+                TypeFundName = typeFund.Name,
+                AmountMoney = fundVM.TotalFund,
+                Note = $"Create Fund with total money is: {fund.TotalFund}"
+            };
+
+            var fundDetailDto = await CreateFundDetailAsync(fundDetailVM);
+            fundDetailDto.UserCreateName = employee.Name;
+            fundDto.FundDetails.Add(fundDetailDto);
 
             return fundDto;
         }
@@ -124,13 +143,51 @@ namespace Services.Implement
         public async Task<FundDto> UpdateFundAsync(FundUpdateVM fundVM)
         {
             var fund = await FindFundAsync(fundVM?.Id);
+            var employee = await _dbContext.Employees.FirstOrDefaultAsync(x => x.Id == fundVM.UserUpdateId && !x.IsDeleted);
+
+            if(employee == null)
+            {
+                throw new BusinessException(EmployeeConstants.EMPLOYEE_NOT_EXIST);
+            }
 
             MapFFundUpdateVMTFund(fund, fundVM);
             await _dbContext.SaveChangesAsync();
 
-            var dto = MapFFundTFundDto(fund);
-            
-            return dto;
+            var fundDto = MapFFundTFundDto(fund);
+
+            int typeFundId = IsCollectFund(fund.TotalFund, fundVM.TotalFund) ? FundConstants.COLLECT : FundConstants.PAY_OUT;
+            var typeFund = await _dbContext.TypeFunds.FirstOrDefaultAsync(x => x.Id == typeFundId);
+
+            if (typeFund == null)
+                return fundDto;
+
+            var fundDetailVM = new FundDetailVM
+            {
+                FundId = fund.Id,
+                TypeFundId = typeFund.Id,
+                TypeFundName = typeFund.Name,
+                AmountMoney = Math.Abs(fund.TotalFund - fundVM.TotalFund),
+                Note = $"Update Fund with total money from {fund.TotalFund} to {fundVM.TotalFund}"
+            };
+
+            var fundDetailDto = await CreateFundDetailAsync(fundDetailVM);
+            fundDetailDto.UserCreateName = employee.Name;
+            fundDto.FundDetails.Add(fundDetailDto);
+
+            return fundDto;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="totalFund"></param>
+        /// <param name="totalFundUpdate"></param>
+        /// <returns></returns>
+        private bool IsCollectFund(int totalFund, int totalFundUpdate)
+        {
+            int difference = totalFund - totalFundUpdate;
+
+            return difference > 0 ? true : false;
         }
 
         /// <summary>
