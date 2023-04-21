@@ -34,9 +34,6 @@ namespace Services.Implement
 
             var fund = MapFFundVMTFund(fundVM);
 
-            await _dbContext.Funds.AddAsync(fund);
-            await _dbContext.SaveChangesAsync();
-
             var fundDto = MapFFundTFundDto(fund);
             fundDto.UserCreateName = employee.Name;
 
@@ -51,12 +48,16 @@ namespace Services.Implement
                 TypeFundId = typeFund.Id,
                 TypeFundName = typeFund.Name,
                 AmountMoney = fundVM.TotalFund,
-                Note = $"Create Fund with total money is: {fund.TotalFund}"
+                Note = $"Create Fund with total money is: {fund.TotalFund}",
+                UserCreateId = fundVM.UserCreateId
             };
 
             var fundDetailDto = await CreateFundDetailAsync(fundDetailVM);
             fundDetailDto.UserCreateName = employee.Name;
             fundDto.FundDetails.Add(fundDetailDto);
+
+            await _dbContext.Funds.AddAsync(fund);
+            await _dbContext.SaveChangesAsync();
 
             return fundDto;
         }
@@ -150,30 +151,41 @@ namespace Services.Implement
                 throw new BusinessException(EmployeeConstants.EMPLOYEE_NOT_EXIST);
             }
 
+            var fundDetailVM = new FundDetailVM();
+            bool isChangeTotalFund = fund.TotalFund != fundVM?.TotalFund;
+            if (isChangeTotalFund)
+            {
+                int typeFundId = IsCollectFund(fund.TotalFund, fundVM.TotalFund) ? FundConstants.COLLECT : FundConstants.PAY_OUT;
+                var typeFund = await _dbContext.TypeFunds.FirstOrDefaultAsync(x => x.Id == typeFundId);
+
+                if (typeFund == null)
+                {
+                    throw new BusinessException(FundConstants.TYPE_FUND_NOT_EXIST);
+                }
+
+                fundDetailVM = new FundDetailVM
+                {
+                    FundId = fund.Id,
+                    TypeFundId = typeFund.Id,
+                    TypeFundName = typeFund.Name,
+                    AmountMoney = Math.Abs(fund.TotalFund - fundVM.TotalFund),
+                    Note = $"Update Fund with total money from {fund.TotalFund} to {fundVM.TotalFund}",
+                    UserCreateId = fundVM.UserUpdateId
+                };
+            }
+
             MapFFundUpdateVMTFund(fund, fundVM);
-            await _dbContext.SaveChangesAsync();
 
             var fundDto = MapFFundTFundDto(fund);
 
-            int typeFundId = IsCollectFund(fund.TotalFund, fundVM.TotalFund) ? FundConstants.COLLECT : FundConstants.PAY_OUT;
-            var typeFund = await _dbContext.TypeFunds.FirstOrDefaultAsync(x => x.Id == typeFundId);
-
-            if (typeFund == null)
-                return fundDto;
-
-            var fundDetailVM = new FundDetailVM
+            if (isChangeTotalFund)
             {
-                FundId = fund.Id,
-                TypeFundId = typeFund.Id,
-                TypeFundName = typeFund.Name,
-                AmountMoney = Math.Abs(fund.TotalFund - fundVM.TotalFund),
-                Note = $"Update Fund with total money from {fund.TotalFund} to {fundVM.TotalFund}"
-            };
+                var fundDetailDto = await CreateFundDetailAsync(fundDetailVM);
+                fundDetailDto.UserCreateName = employee.Name;
+                fundDto.FundDetails.Add(fundDetailDto);
+            }
 
-            var fundDetailDto = await CreateFundDetailAsync(fundDetailVM);
-            fundDetailDto.UserCreateName = employee.Name;
-            fundDto.FundDetails.Add(fundDetailDto);
-
+            await _dbContext.SaveChangesAsync();
             return fundDto;
         }
 
@@ -187,7 +199,7 @@ namespace Services.Implement
         {
             int difference = totalFund - totalFundUpdate;
 
-            return difference > 0 ? true : false;
+            return difference < 0 ? true : false;
         }
 
         /// <summary>
@@ -237,7 +249,7 @@ namespace Services.Implement
         /// <returns></returns>
         private async Task<List<FundDetailDto>> GetFundDetailDtoAsync(Guid fundId)
         {
-            var fundDetails = await _dbContext.FundDetails.AsNoTracking().Where(x => x.FundId == fundId).ToListAsync();
+            var fundDetails = await _dbContext.FundDetails.AsNoTracking().Where(x => x.FundId == fundId).OrderByDescending(x => x.CreateDate).ToListAsync();
             var employees = await _dbContext.Employees.AsNoTracking().ToListAsync();
             var fundDetailsDto = new List<FundDetailDto>();
 

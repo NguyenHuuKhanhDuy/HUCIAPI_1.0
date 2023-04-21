@@ -461,6 +461,7 @@ namespace Services.Implement
                 TypeFundId = fundDetail.TypeFundId,
                 TypeFundName = fundDetail.TypeFundName,
                 UserCreateId = fundDetail.UserCreateId,
+                CreateDate = fundDetail.CreateDate,
                 Note = fundDetail.Note
             };
         }
