@@ -1,6 +1,7 @@
 ﻿using ApplicationCore.Exceptions;
 using ApplicationCore.ModelsDto.Order;
 using ApplicationCore.ModelsDto.Product;
+using ApplicationCore.ViewModels.Customer;
 using ApplicationCore.ViewModels.Order;
 using ApplicationCore.ViewModels.Product;
 using Common.Constants;
@@ -13,9 +14,11 @@ namespace Services.Implement
     public class OrderImp : BaseServices, IOrderServices
     {
         private readonly HucidbContext _dbContext;
-        public OrderImp(HucidbContext dbContext) : base(dbContext)
+        private readonly ICustomerServices _customerServices;
+        public OrderImp(HucidbContext dbContext, ICustomerServices customerServices) : base(dbContext)
         {
             _dbContext = dbContext;
+            _customerServices = customerServices;
         }
 
         /// <summary>
@@ -39,6 +42,7 @@ namespace Services.Implement
                 OrderShippingMethodId = BaseConstants.INT_DEFAULT,
                 OrderSourceId = BaseConstants.INT_DEFAULT
             };
+
             MapFOrderVMTOrder(order, orderVM);
 
             await CheckInforForOrder(order);
@@ -189,10 +193,10 @@ namespace Services.Implement
                 throw new BusinessException(OrderConstants.CUSTOMER_NOT_EXISTS);
             }
 
-            order.CustomerName = customer.Name;
-            order.CustomerPhone = customer.Phone;
-            order.CustomerEmail = customer.Email;
-            order.CustomerAddress = customer.Address;
+            //order.CustomerName = customer.Name;
+            //order.CustomerPhone = customer.Phone;
+            //order.CustomerEmail = customer.Email;
+            //order.CustomerAddress = customer.Address;
             customer.OrderCount += 1;
 
             var paymentStatus = await _dbContext.StatusPayments.AsNoTracking().FirstOrDefaultAsync(x => x.Id == order.OrderStatusPaymentId);
@@ -233,7 +237,7 @@ namespace Services.Implement
 
             var source = await _dbContext.OrderSources.AsNoTracking().FirstOrDefaultAsync(x => x.Id == order.OrderSourceId);
 
-            if (employee == null)
+            if (source == null)
             {
                 throw new BusinessException(OrderConstants.SOURCE_ORDER_NOT_EXISTS);
             }
@@ -440,6 +444,102 @@ namespace Services.Implement
             }
 
             return orderDto;
+        }
+
+        /// <summary>
+        /// Create Order From Ladipage
+        /// </summary>
+        /// <param name="orderVM"></param>
+        /// <returns></returns>
+        public async Task<OrderDto> CreateOrderFromLadipageAsync(OrderForLadipageVM orderVM)
+        {
+            var order = await GetInformationForOrderLadipageAsync(orderVM);
+            var orderDto = await CreateOrderAsync(order);
+
+            return orderDto;
+        }
+
+        private async Task<OrderVM> GetInformationForOrderLadipageAsync(OrderForLadipageVM orderVM)
+        {
+            var customer = await _dbContext.Customers.FirstOrDefaultAsync(x => x.Phone == orderVM.Phone && !x.IsDeleted);
+            var order = new OrderVM
+            {
+                CustomerName = orderVM.Name,
+                CustomerPhone = orderVM.Phone,
+                CustomerAddress = $"{orderVM.Address}, {orderVM.Ward}, {orderVM.District}, {orderVM.Province}",
+                ProvinceId = BaseConstants.INT_DEFAULT,
+                DistrictId = BaseConstants.INT_DEFAULT,
+                WardId = BaseConstants.INT_DEFAULT,
+                VoucherId = Guid.Empty,
+                OrderDiscount = BaseConstants.INT_DEFAULT,
+                OrderStatusId = BaseConstants.INT_DEFAULT,
+                OrderSourceId = OrderConstants.ORDER_SOURCE_TIKTOK,
+                OrderStatusPaymentId = BaseConstants.INT_DEFAULT,
+                OrderStatusShippingId = BaseConstants.INT_DEFAULT,
+                OrderShippingMethodId = BaseConstants.INT_DEFAULT,
+                OrderNote = "Order from Ladipage"
+            };
+
+            if (customer == null)
+            {
+                var customerVM = new CustomerVM
+                {
+                    Name = orderVM.Name,
+                    Phone = orderVM.Phone,
+                    Email = string.Empty,
+                    ProvinceId = BaseConstants.INT_DEFAULT,
+                    DistrictId = BaseConstants.INT_DEFAULT,
+                    WardId = BaseConstants.INT_DEFAULT,
+                    Address = $"{orderVM.Address}, {orderVM.Ward}, {orderVM.District}, {orderVM.Province}",
+                    CreateUserId = Guid.Parse(BaseConstants.ADMIN_ID),
+                    Notes = "Customer create from Ladipage"
+                };
+
+                var customerDto = await _customerServices.CreateCustomerAsync(customerVM);
+                order.CustomerId = customerDto.Id;
+            }
+            else
+            {
+                order.CustomerId = customer.Id;
+            }
+
+            var productNumber = GetProductCodeFromName(orderVM.Product);
+            var product = await _dbContext.Products.FirstOrDefaultAsync(x => x.ProductNumber == productNumber && !x.IsDeleted);
+
+            if (product == null)
+            {
+                throw new BusinessException(ProductConstants.PRODUCT_NOT_EXIST);
+            }
+
+            var productInsideOrder = new ProductInsideOrderVM
+            {
+                ProductId = product.Id,
+                Quantity = 1,
+                Discount = 0
+            };
+
+            order.products.Add(productInsideOrder);
+            return order;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="productName"></param>
+        /// <returns></returns>
+        private string GetProductCodeFromName(string productName)
+        {
+            int startIndex = productName.IndexOf("(") + 1;
+            int endIndex = productName.IndexOf(")");
+
+            if (startIndex != 0 && endIndex != -1 && endIndex > startIndex)
+            {
+                return productName.Substring(startIndex, endIndex - startIndex);
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }

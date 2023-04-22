@@ -29,5 +29,6 @@
 
         public const string PREFIX_ORDER_NUMBER = "DH0";
 
+        public const int ORDER_SOURCE_TIKTOK = 1;
     }
 }

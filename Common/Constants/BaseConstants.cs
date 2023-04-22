@@ -19,5 +19,7 @@ namespace Common.Constants
 
         public const string LOCATION_NOT_EXIST = "Location not exists";
 
+        public const string ADMIN_ID = "0A1ECDDB-067D-4302-A3B0-E986BBAFD19F";
+
     }
 }

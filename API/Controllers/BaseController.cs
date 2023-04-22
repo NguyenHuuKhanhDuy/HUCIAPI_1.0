@@ -2,6 +2,7 @@
 using Common.Constants;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System.Text.Json;
 
 namespace API.Controllers
 {
@@ -26,8 +27,13 @@ namespace API.Controllers
             
             DataResponse response = new DataResponse(null, errorSerialized, StatusCodeConstants.STATUS_EXP_VALIDATE);
             var result = new BadRequestObjectResult(response);
-
+            
             return result;
+        }
+
+        public static string GetStringFromJson(Object obj)
+        {
+            return JsonSerializer.Serialize(obj);
         }
     }
 }

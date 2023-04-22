@@ -13,10 +13,8 @@ namespace ApplicationCore.ViewModels.Order
         [Required]
         public string CustomerName { get; set; } = null!;
 
-        [RegularExpression(RegexConstants.REGEX_EMAIL, ErrorMessage = EmployeeConstants.INVALID_EMAIL)]
         public string CustomerEmail { get; set; } = null!;
 
-        [RegularExpression(RegexConstants.REGEX_PHONE, ErrorMessage = EmployeeConstants.INVALID_PHONE)]
         public string CustomerPhone { get; set; } = null!;
 
         public string CustomerAddress { get; set; } = null!;

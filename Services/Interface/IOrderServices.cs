@@ -12,5 +12,6 @@ namespace Services.Interface
         Task<List<OrderDto>> GetOrderByDateAsync(DateTime startDate, DateTime endDate);
         Task<List<OrderDto>> GetOrderByStatusIdAsync(int statusId);
         Task<OrderDto> GetDetailOrderByIdAsync(Guid orderId);
+        Task<OrderDto> CreateOrderFromLadipageAsync(OrderForLadipageVM orderVM);
     }
 }

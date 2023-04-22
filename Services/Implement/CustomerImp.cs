@@ -70,13 +70,13 @@ namespace Services.Implement
         /// <exception cref="BusinessException"></exception>
         public void CheckCustomerInformation(string email, string phone, List<Customer> customers)
         {
-            var exist = customers.Where(x => x.Email == email).FirstOrDefault();
-            if (exist != null)
-            {
-                throw new BusinessException(EmployeeConstants.EXIST_EMAIL);
-            }
+            //var exist = customers.Where(x => x.Email == email).FirstOrDefault();
+            //if (exist != null)
+            //{
+            //    throw new BusinessException(EmployeeConstants.EXIST_EMAIL);
+            //}
 
-            exist = customers.Where(x => x.Phone == phone).FirstOrDefault();
+            var exist = customers.Where(x => x.Phone == phone).FirstOrDefault();
             if (exist != null)
             {
                 throw new BusinessException(EmployeeConstants.EXIST_PHONE);

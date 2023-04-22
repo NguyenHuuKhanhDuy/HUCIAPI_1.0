@@ -8,10 +8,8 @@ namespace ApplicationCore.ViewModels.Customer
         [Required]
         public string Name { get; set; } = null!;
 
-        [RegularExpression(RegexConstants.REGEX_EMAIL, ErrorMessage = EmployeeConstants.INVALID_EMAIL)]
         public string Email { get; set; } = null!;
 
-        [RegularExpression(RegexConstants.REGEX_PHONE, ErrorMessage = EmployeeConstants.INVALID_PHONE)]
         public string Phone { get; set; } = null!;
 
         public DateTime Birthday { get; set; }
