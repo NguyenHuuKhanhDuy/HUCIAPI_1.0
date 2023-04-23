@@ -8,7 +8,7 @@ namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class OrderController : BaseController
     {
         private readonly IOrderServices _orderServices;
@@ -138,6 +138,17 @@ namespace API.Controllers
             _logger.LogInformation($"End get order detail by id.");
 
             return HandleResponseStatusOk(orders);
+        }
+
+        [HttpPut("[action]")]
+        public async Task<IActionResult> UpdateStatusShippingGHTKAsync(IFormFile excelFile)
+        {
+            _logger.LogInformation("Start update status for order from GHTK");
+
+            var file = await _orderServices.UpdateStatusShippingGHTKAsync(excelFile);
+
+            _logger.LogInformation("End update status for order from GHTK");
+            return HandleResponseStatusOk(file);
         }
     }
 }

@@ -6,7 +6,9 @@ using ApplicationCore.ViewModels.Order;
 using ApplicationCore.ViewModels.Product;
 using Common.Constants;
 using Infrastructure.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using OfficeOpenXml;
 using Services.Interface;
 
 namespace Services.Implement
@@ -373,7 +375,7 @@ namespace Services.Implement
                     orderDtos.Add(MapFOrderTOrderDto(order));
                 }
             }
-            
+
             return orderDtos;
         }
 
@@ -428,17 +430,17 @@ namespace Services.Implement
         /// <exception cref="Exception"></exception>
         public async Task<OrderDto> GetDetailOrderByIdAsync(Guid orderId)
         {
-            var order = _dbContext.Orders.FirstOrDefault(x => x.Id== orderId);
+            var order = _dbContext.Orders.FirstOrDefault(x => x.Id == orderId);
 
-            if(order == null)
+            if (order == null)
             {
                 throw new Exception(OrderConstants.ORDER_NOT_EXISTS);
             }
 
             var orderDetails = await _dbContext.OrderDetails.Where(x => x.OrderId == order.Id).ToListAsync();
             var orderDto = MapFOrderTOrderDto(order);
-            
-            if(orderDetails.Any())
+
+            if (orderDetails.Any())
             {
                 orderDto.products = orderDetails?.Select(x => MapFOrderDetailTOrderDetailDto(x)).ToList();
             }
@@ -539,6 +541,88 @@ namespace Services.Implement
             else
             {
                 return null;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="excelFile"></param>
+        /// <returns></returns>
+        public async Task<string> UpdateStatusShippingGHTKAsync(IFormFile excelFile)
+        {
+            CheckExtensionExcelFile(excelFile);
+            if (excelFile == null || excelFile.Length == 0)
+                throw new BusinessException("Excel file not found");
+
+            string result = string.Empty;
+            int orderNumberCol = 0;
+            int statusOrderCol = 0;
+            int shippingNote = 0;
+            int startIndex = 999999999;
+            var orders = await _dbContext.Orders.ToListAsync();
+
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
+            using (var stream = new MemoryStream())
+            {
+                await excelFile.CopyToAsync(stream);
+
+                using (var package = new ExcelPackage(stream))
+                {
+                    var worksheet = package.Workbook.Worksheets[0];
+                    var rowCount = worksheet.Dimension.Rows;
+                    var columnCount = worksheet.Dimension.Columns;
+
+                    // Iterate through rows and columns
+                    for (int row = 1; row <= rowCount; row++)
+                    {
+                        var cellValueCol1 = worksheet.Cells[row, 1].Value?.ToString().Trim();
+
+                        if (cellValueCol1 == FileConstants.Stt)
+                        {
+                            for (int col = 1; col <= columnCount; col++)
+                            {
+                                var cellValue = worksheet.Cells[row, col].Value?.ToString().Trim();
+                                if (cellValue == FileConstants.OrderNumber) orderNumberCol = col;
+                                if (cellValue == FileConstants.StatusOrder) statusOrderCol = col;
+                                if (cellValue == FileConstants.ShippingNote) shippingNote = col;
+                            }
+
+                            startIndex = row;
+                        }
+
+                        if(row > startIndex)
+                        {
+                            var cellOrderNumver = worksheet.Cells[row, orderNumberCol].Value?.ToString().Trim();
+                            var order = orders.FirstOrDefault(x => x.OrderNumber == cellOrderNumver);
+
+                            if(order != null)
+                            {
+                                order.OrderNote = "được rồi nè!!!";
+                            }
+                        }
+
+
+                    }
+
+                    if(orderNumberCol == 0)
+                    {
+                        throw new BusinessException("file wrong format");
+                    }
+                }
+            }
+
+            await _dbContext.SaveChangesAsync();
+            return result;
+        }
+
+        private void CheckExtensionExcelFile(IFormFile excelFile)
+        {
+            string extension = Path.GetExtension(excelFile.FileName);
+            if (extension != ".xlsx" && extension != ".xls")
+            {
+                throw new BusinessException(FileConstants.FileNotSupport);
             }
         }
     }

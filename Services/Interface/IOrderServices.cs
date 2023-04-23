@@ -1,5 +1,6 @@
 ﻿using ApplicationCore.ModelsDto.Order;
 using ApplicationCore.ViewModels.Order;
+using Microsoft.AspNetCore.Http;
 
 namespace Services.Interface
 {
@@ -13,5 +14,6 @@ namespace Services.Interface
         Task<List<OrderDto>> GetOrderByStatusIdAsync(int statusId);
         Task<OrderDto> GetDetailOrderByIdAsync(Guid orderId);
         Task<OrderDto> CreateOrderFromLadipageAsync(OrderForLadipageVM orderVM);
+        Task<string> UpdateStatusShippingGHTKAsync(IFormFile excelFile);
     }
 }
