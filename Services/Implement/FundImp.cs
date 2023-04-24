@@ -33,6 +33,8 @@ namespace Services.Implement
             }
 
             var fund = MapFFundVMTFund(fundVM);
+            await _dbContext.Funds.AddAsync(fund);
+            await _dbContext.SaveChangesAsync();
 
             var fundDto = MapFFundTFundDto(fund);
             fundDto.UserCreateName = employee.Name;
@@ -55,10 +57,7 @@ namespace Services.Implement
             var fundDetailDto = await CreateFundDetailAsync(fundDetailVM);
             fundDetailDto.UserCreateName = employee.Name;
             fundDto.FundDetails.Add(fundDetailDto);
-
-            await _dbContext.Funds.AddAsync(fund);
-            await _dbContext.SaveChangesAsync();
-
+            
             return fundDto;
         }
 

@@ -7,7 +7,9 @@ namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+#if !DEBUG    
+[Authorize]
+#endif
     public class FundController : BaseController
     {
         private readonly IFundServices _fundServices;
