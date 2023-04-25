@@ -15,6 +15,8 @@ public partial class Product
 
     public int WholesalePrice { get; set; }
 
+    public int OriginalPrice { get; set; }
+
     public string Image { get; set; } = null!;
 
     public int OnHand { get; set; }
