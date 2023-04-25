@@ -1,10 +1,12 @@
 ﻿using ApplicationCore.Exceptions;
+using ApplicationCore.ModelsDto.Commission;
 using ApplicationCore.ModelsDto.Customer;
 using ApplicationCore.ModelsDto.Fund;
 using ApplicationCore.ModelsDto.Order;
 using ApplicationCore.ModelsDto.Product;
 using ApplicationCore.ModelsDto.Promotion;
 using ApplicationCore.ModelsDto.Supplier;
+using ApplicationCore.ViewModels.Commission;
 using ApplicationCore.ViewModels.Customer;
 using ApplicationCore.ViewModels.Fund;
 using ApplicationCore.ViewModels.Order;
@@ -407,8 +409,8 @@ namespace Services.Implement
                 Name = fundVM.Name,
                 TotalFund = fundVM.TotalFund,
                 CreateDate = GetDateTimeNow(),
-                IsActive = true,
-                IsDeleted = false,
+                IsActive = BaseConstants.IsActiveDefault,
+                IsDeleted = BaseConstants.IsDeletedDefault,
                 UserCreateId = fundVM.UserCreateId,
                 Note = fundVM.Note
             };
@@ -464,6 +466,39 @@ namespace Services.Implement
                 CreateDate = fundDetail.CreateDate,
                 Note = fundDetail.Note
             };
+        }
+
+        //Commission
+        public Commission MapFCommissionVMTCommission(CommissionVM commissionVM)
+        {
+            return new Commission
+            {
+                Id = Guid.NewGuid(),
+                CreateDate = GetDateTimeNow(),
+                IsDelete = BaseConstants.IsDeletedDefault,
+                TotalPriceFrom = commissionVM.TotalPriceFrom,
+                CommissionPrice = commissionVM.CommissionPrice,
+                UserCreateId = commissionVM.UserCreateId,
+            };
+        }
+
+        public CommissionDto MapFCommissionTCommissionDto(Commission commission, string userCreateName)
+        {
+            return new CommissionDto
+            {
+                Id = commission.Id,
+                TotalPriceFrom = commission.TotalPriceFrom,
+                CommissionPrice = commission.CommissionPrice,
+                UserCreateId = commission.UserCreateId,
+                UserCreateName = userCreateName,
+                CreateDate = commission.CreateDate
+            };
+        }
+
+        public void MapFCommissionUpdateVMTCommission(CommissionUpdateVM commissionVM, Commission commission)
+        {
+            commission.TotalPriceFrom = commissionVM.TotalPriceFrom;
+            commission.CommissionPrice = commissionVM.CommissionPrice;
         }
     }
 }

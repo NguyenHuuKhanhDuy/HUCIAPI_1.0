@@ -51,6 +51,8 @@ public partial class Employee
 
     public string? Image { get; set; }
 
+    public virtual ICollection<Commission> Commissions { get; } = new List<Commission>();
+
     public virtual ICollection<Customer> Customers { get; } = new List<Customer>();
 
     public virtual Location District { get; set; } = null!;

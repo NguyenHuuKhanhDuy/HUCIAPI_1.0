@@ -7,8 +7,9 @@ namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+
 #if !DEBUG    
-[Authorize]
+    [Authorize]
 #endif
     public class FundController : BaseController
     {

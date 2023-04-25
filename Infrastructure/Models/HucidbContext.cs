@@ -17,6 +17,8 @@ public partial class HucidbContext : DbContext
 
     public virtual DbSet<ComboDetail> ComboDetails { get; set; }
 
+    public virtual DbSet<Commission> Commissions { get; set; }
+
     public virtual DbSet<Customer> Customers { get; set; }
 
     public virtual DbSet<Employee> Employees { get; set; }
@@ -107,6 +109,21 @@ public partial class HucidbContext : DbContext
                 .HasForeignKey(d => d.ProductId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ComboDetail_Product1");
+        });
+
+        modelBuilder.Entity<Commission>(entity =>
+        {
+            entity.ToTable("Commission");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.CreateDate)
+                .HasDefaultValueSql("(format(getdate(),'yyyy-MM-dd HH:mm'))")
+                .HasColumnType("datetime");
+
+            entity.HasOne(d => d.UserCreate).WithMany(p => p.Commissions)
+                .HasForeignKey(d => d.UserCreateId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Commission_Employee");
         });
 
         modelBuilder.Entity<Customer>(entity =>
