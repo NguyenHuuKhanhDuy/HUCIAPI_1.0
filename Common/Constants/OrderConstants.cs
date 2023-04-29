@@ -30,5 +30,10 @@
         public const string PREFIX_ORDER_NUMBER = "DH0";
 
         public const int ORDER_SOURCE_TIKTOK = 1;
+        public const int ORDER_SOURCE_TAKE_CARE = 2;
+        public const int ORDER_SOURCE_NORMAL = 3;
+        public const int PERCENT_COMMISSION_TAKE_CARE = 5;
+
+        public const int OrderStatusSuccess = 6;
     }
 }

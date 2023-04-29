@@ -6,7 +6,10 @@ namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+
+#if !DEBUG    
     [Authorize]
+#endif
     public class LocationController : BaseController
     {
         private readonly ILocationServices _locationServices;

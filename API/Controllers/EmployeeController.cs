@@ -8,7 +8,11 @@ namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+
+#if !DEBUG
     [Authorize]
+#endif
+
     public class EmployeeController : BaseController
     {
         private readonly IEmployeeServices _employeeService;
@@ -121,6 +125,25 @@ namespace API.Controllers
             var data = await _employeeService.DataForCreateEmployeeAsync();
 
             _logger.LogInformation("End get data for create employee...");
+
+            return HandleResponse(data, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="employeeId"></param>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <returns></returns>
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetSalaryEmployeeByIdAsync(Guid employeeId, DateTime startDate, DateTime endDate)
+        {
+            _logger.LogInformation($"Start get salary for employee by id: {employeeId}");
+
+            var data = await _employeeService.SalaryEmployeeByIdAsync(employeeId, startDate, endDate);
+
+            _logger.LogInformation($"End get salary for employee by id: {employeeId}");
 
             return HandleResponse(data, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
         }

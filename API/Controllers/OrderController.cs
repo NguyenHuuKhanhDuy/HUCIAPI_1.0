@@ -8,7 +8,10 @@ namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
+
+#if !DEBUG    
+    [Authorize]
+#endif
     public class OrderController : BaseController
     {
         private readonly IOrderServices _orderServices;

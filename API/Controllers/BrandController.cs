@@ -8,7 +8,9 @@ namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+#if !DEBUG    
     [Authorize]
+#endif
     public class BrandController : BaseController
     {
         private readonly IBrandServices _brandService;

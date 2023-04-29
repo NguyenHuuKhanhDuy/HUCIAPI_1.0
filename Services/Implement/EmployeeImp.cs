@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Services.Interface;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 
@@ -285,6 +286,37 @@ namespace Services.Implement
             data.Rules = await _dbContext.Rules.Where(x => x.Id != 0).ToListAsync();
 
             return data;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="idEmployee"></param>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <returns></returns>
+        /// <exception cref="BusinessException"></exception>
+        public async Task<SalaryEmployeeDto> SalaryEmployeeByIdAsync(Guid idEmployee, DateTime startDate, DateTime endDate)
+        {
+            var employee = await _dbContext.Employees.FindAsync(idEmployee);
+            if (employee == null || employee.IsDeleted)
+            {
+                throw new BusinessException(EmployeeConstants.EMPLOYEE_NOT_EXIST);
+            }
+
+            var orderCommission = await _dbContext.OrderCommissions.Where(x => x.CreateDate.Date >= startDate.Date && x.CreateDate.Date <= endDate.Date && x.EmployeeId == idEmployee).ToListAsync();
+
+            var salaryEmployeeDto = new SalaryEmployeeDto();
+            salaryEmployeeDto.SalaryEmployee = employee.Salary;
+
+            foreach (var item in orderCommission)
+            {
+                salaryEmployeeDto.OrderCommissions.Add(MapFOrderCommissionTOrderCommissionDto(item));
+            }
+
+            salaryEmployeeDto.TotalCommission = orderCommission.Sum(x => x.OrderCommission1);
+
+            return salaryEmployeeDto;
         }
     }
 }

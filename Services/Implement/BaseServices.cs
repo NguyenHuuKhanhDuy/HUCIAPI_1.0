@@ -3,6 +3,7 @@ using ApplicationCore.ModelsDto.Commission;
 using ApplicationCore.ModelsDto.Customer;
 using ApplicationCore.ModelsDto.Fund;
 using ApplicationCore.ModelsDto.Order;
+using ApplicationCore.ModelsDto.OrderCommission;
 using ApplicationCore.ModelsDto.Product;
 using ApplicationCore.ModelsDto.Promotion;
 using ApplicationCore.ModelsDto.Supplier;
@@ -58,10 +59,43 @@ namespace Services.Implement
             return dt.ToString(format);
         }
 
+        /// <summary>
+        /// Get Time +7
+        /// </summary>
+        /// <returns></returns>
         public DateTime GetDateTimeNow()
         {
             //time Vietnam
             return DateTime.UtcNow.AddHours(7);
+        }
+
+        /// <summary>
+        /// remove mark vietnamese and lower
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
+        public string RemoveUnicode(string text)
+        {
+            string[] arr1 = new string[] { "á", "à", "ả", "ã", "ạ", "â", "ấ", "ầ", "ẩ", "ẫ", "ậ", "ă", "ắ", "ằ", "ẳ", "ẵ", "ặ",
+                                            "đ",
+                                            "é","è","ẻ","ẽ","ẹ","ê","ế","ề","ể","ễ","ệ",
+                                            "í","ì","ỉ","ĩ","ị",
+                                            "ó","ò","ỏ","õ","ọ","ô","ố","ồ","ổ","ỗ","ộ","ơ","ớ","ờ","ở","ỡ","ợ",
+                                            "ú","ù","ủ","ũ","ụ","ư","ứ","ừ","ử","ữ","ự",
+                                            "ý","ỳ","ỷ","ỹ","ỵ",};
+            string[] arr2 = new string[] { "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a",
+                                            "d",
+                                            "e","e","e","e","e","e","e","e","e","e","e",
+                                            "i","i","i","i","i",
+                                            "o","o","o","o","o","o","o","o","o","o","o","o","o","o","o","o","o",
+                                            "u","u","u","u","u","u","u","u","u","u","u",
+                                            "y","y","y","y","y",};
+            for (int i = 0; i < arr1.Length; i++)
+            {
+                text = text.Replace(arr1[i], arr2[i]);
+                text = text.Replace(arr1[i].ToUpper(), arr2[i].ToUpper());
+            }
+            return text.ToLower();
         }
 
         //Map product
@@ -499,6 +533,20 @@ namespace Services.Implement
         {
             commission.TotalPriceFrom = commissionVM.TotalPriceFrom;
             commission.CommissionPrice = commissionVM.CommissionPrice;
+        }
+
+        //Map OrderCommission
+        public OrderCommissionDto MapFOrderCommissionTOrderCommissionDto(OrderCommission orderCommission)
+        {
+            return new OrderCommissionDto
+            {
+                Id= orderCommission.Id,
+                OrderId = orderCommission.OrderId,
+                EmployeeId = orderCommission.EmployeeId,
+                OrderTotal = orderCommission.OrderTotal,
+                OrderCommission1 = orderCommission.OrderCommission1,
+                CreateDate = orderCommission.CreateDate
+            };
         }
     }
 }

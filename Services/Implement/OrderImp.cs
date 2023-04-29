@@ -353,6 +353,13 @@ namespace Services.Implement
             MapFOrderUpdateVMTOrder(order, orderVM);
             await CheckInforForOrder(order);
 
+            if (order.OrderStatusId == OrderConstants.OrderStatusSuccess)
+            {
+                var commissions = await _dbContext.Commissions.Where(x => !x.IsDelete).ToListAsync();
+                var orderCommissions = await _dbContext.OrderCommissions.ToListAsync();
+                await CreateOrderCommission(order, commissions, orderCommissions);
+            }
+
             await _dbContext.SaveChangesAsync();
 
             var dto = MapFOrderTOrderDto(order);
@@ -558,10 +565,14 @@ namespace Services.Implement
             string result = string.Empty;
             int orderNumberCol = 0;
             int statusOrderCol = 0;
-            int shippingNote = 0;
+            int shippingNoteCol = 0;
             int startIndex = 999999999;
             var orders = await _dbContext.Orders.ToListAsync();
+            var statusOrders = await _dbContext.StatusOrders.ToListAsync();
+            var commissions = await _dbContext.Commissions.Where(x => !x.IsDelete).ToListAsync();
+            var orderCommissions = await _dbContext.OrderCommissions.ToListAsync();
 
+            int statusId = statusOrders.Count + 1;
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
             using (var stream = new MemoryStream())
@@ -586,27 +597,56 @@ namespace Services.Implement
                                 var cellValue = worksheet.Cells[row, col].Value?.ToString().Trim();
                                 if (cellValue == FileConstants.OrderNumber) orderNumberCol = col;
                                 if (cellValue == FileConstants.StatusOrder) statusOrderCol = col;
-                                if (cellValue == FileConstants.ShippingNote) shippingNote = col;
+                                if (cellValue == FileConstants.ShippingNote) shippingNoteCol = col;
                             }
 
                             startIndex = row;
                         }
 
-                        if(row > startIndex)
+                        if (row > startIndex)
                         {
-                            var cellOrderNumver = worksheet.Cells[row, orderNumberCol].Value?.ToString().Trim();
-                            var order = orders.FirstOrDefault(x => x.OrderNumber == cellOrderNumver);
+                            var orderNumberText = worksheet.Cells[row, orderNumberCol].Value?.ToString().Trim();
+                            var order = orders.FirstOrDefault(x => x.OrderNumber == orderNumberText);
 
-                            if(order != null)
+                            if (order != null)
                             {
-                                order.OrderNote = "được rồi nè!!!";
+                                var shippingNoteText = worksheet.Cells[row, shippingNoteCol].Value?.ToString().Trim();
+                                var statusOrderText = worksheet.Cells[row, statusOrderCol].Value?.ToString().Trim();
+
+                                if (string.IsNullOrEmpty(statusOrderText))
+                                    continue;
+
+                                var statusOrder = statusOrders.FirstOrDefault(x => !string.IsNullOrEmpty(x.Name)
+                                && RemoveUnicode(x.Name) == RemoveUnicode(statusOrderText));
+
+                                if (statusOrder == null)
+                                {
+                                    statusOrder = new StatusOrder
+                                    {
+                                        Id = statusId,
+                                        Name = statusOrderText
+                                    };
+
+                                    statusId++;
+                                    await _dbContext.StatusOrders.AddAsync(statusOrder);
+                                    await _dbContext.SaveChangesAsync();
+                                }
+
+                                order.OrderStatusId = statusOrder.Id;
+                                order.OrderStatusName = statusOrder.Name;
+                                order.OrderNote = shippingNoteText ?? string.Empty;
+
+                                if (RemoveUnicode(statusOrderText) == FileConstants.Paid)
+                                {
+                                    //add Commission for order
+                                    await CreateOrderCommission(order, commissions, orderCommissions);
+
+                                }
                             }
                         }
-
-
                     }
 
-                    if(orderNumberCol == 0)
+                    if (orderNumberCol == 0 || statusOrderCol == 0 || statusOrderCol == 0)
                     {
                         throw new BusinessException("file wrong format");
                     }
@@ -617,13 +657,76 @@ namespace Services.Implement
             return result;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="excelFile"></param>
+        /// <exception cref="BusinessException"></exception>
         private void CheckExtensionExcelFile(IFormFile excelFile)
         {
             string extension = Path.GetExtension(excelFile.FileName);
-            if (extension != ".xlsx" && extension != ".xls")
+
+            if (extension != FileConstants.ExtensionExcel1 && extension != FileConstants.ExtensionExcel2)
             {
                 throw new BusinessException(FileConstants.FileNotSupport);
             }
+        }
+
+        /// <summary>
+        /// Create order commission when status order is paid
+        /// </summary>
+        /// <param name="order"></param>
+        /// <param name="commission"></param>
+        /// <returns></returns>
+        private async Task CreateOrderCommission(Order order, List<Commission> commission, List<OrderCommission> orderCommissions)
+        {
+            if (commission?.Count == 0)
+                return;
+
+            var commissionPrice = commission?.Where(x => x.TotalPriceFrom < order.OrderTotal)?.Max(x => x.CommissionPrice);
+
+            if (commissionPrice == 0)
+                return;
+
+            var orderCommission = orderCommissions.FirstOrDefault(x => x.OrderId == order.Id && x.EmployeeId == order.CreateEmployeeId);
+
+            if (orderCommission == null)
+            {
+                if (order.OrderSourceId == OrderConstants.ORDER_SOURCE_NORMAL)
+                {
+                    var orderCommissionTemp = new OrderCommission
+                    {
+                        Id = Guid.NewGuid(),
+                        OrderId = order.Id,
+                        OrderTotal = order.OrderTotal,
+                        CreateDate = GetDateTimeNow(),
+                        EmployeeId = order.CreateEmployeeId,
+                        OrderCommission1 = commissionPrice.HasValue ? commissionPrice.Value : 0
+                    };
+                    await _dbContext.OrderCommissions.AddAsync(orderCommissionTemp);
+                    orderCommissions.Add(orderCommissionTemp);
+                }
+                else if (order.OrderSourceId == OrderConstants.ORDER_SOURCE_TAKE_CARE)
+                {
+                    var orderCommissionTemp = new OrderCommission
+                    {
+                        Id = Guid.NewGuid(),
+                        OrderId = order.Id,
+                        OrderTotal = order.OrderTotal,
+                        CreateDate = GetDateTimeNow(),
+                        EmployeeId = order.CreateEmployeeId,
+                        OrderCommission1 = (order.OrderTotal * OrderConstants.PERCENT_COMMISSION_TAKE_CARE) / 100
+                    };
+                    await _dbContext.OrderCommissions.AddAsync(orderCommissionTemp);
+                    orderCommissions.Add(orderCommissionTemp);
+                }
+            }
+            else
+            {
+                orderCommission.OrderCommission1 = commissionPrice.HasValue ? commissionPrice.Value : 0;
+            }
+
+            await _dbContext.SaveChangesAsync();
         }
     }
 }

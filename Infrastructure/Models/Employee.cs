@@ -63,6 +63,8 @@ public partial class Employee
 
     public virtual ICollection<Import> Imports { get; } = new List<Import>();
 
+    public virtual ICollection<OrderCommission> OrderCommissions { get; } = new List<OrderCommission>();
+
     public virtual ICollection<Order> Orders { get; } = new List<Order>();
 
     public virtual ICollection<Product> Products { get; } = new List<Product>();

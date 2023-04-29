@@ -37,6 +37,8 @@ public partial class HucidbContext : DbContext
 
     public virtual DbSet<Order> Orders { get; set; }
 
+    public virtual DbSet<OrderCommission> OrderCommissions { get; set; }
+
     public virtual DbSet<OrderDetail> OrderDetails { get; set; }
 
     public virtual DbSet<OrderSource> OrderSources { get; set; }
@@ -430,6 +432,25 @@ public partial class HucidbContext : DbContext
                 .HasForeignKey(d => d.WardId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Order_Location1");
+        });
+
+        modelBuilder.Entity<OrderCommission>(entity =>
+        {
+            entity.ToTable("OrderCommission");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.CreateDate).HasColumnType("datetime");
+            entity.Property(e => e.OrderCommission1).HasColumnName("OrderCommission");
+
+            entity.HasOne(d => d.Employee).WithMany(p => p.OrderCommissions)
+                .HasForeignKey(d => d.EmployeeId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_OrderCommission_Employee");
+
+            entity.HasOne(d => d.Order).WithMany(p => p.OrderCommissions)
+                .HasForeignKey(d => d.OrderId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_OrderCommission_Order");
         });
 
         modelBuilder.Entity<OrderDetail>(entity =>

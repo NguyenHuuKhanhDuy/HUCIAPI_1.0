@@ -7,7 +7,10 @@ namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+
+#if !DEBUG
     [Authorize]
+#endif
     public class PromotionController : BaseController
     {
         private IPromotionServices _promotionServices;

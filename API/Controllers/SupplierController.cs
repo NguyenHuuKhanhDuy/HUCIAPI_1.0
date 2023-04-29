@@ -6,8 +6,11 @@ using Services.Interface;
 namespace API.Controllers
 {
     [Route("api/[controller]")]
-    [Authorize]
     [ApiController]
+
+#if !DEBUG
+    [Authorize]
+#endif
     public class SupplierController : BaseController
     {
         private readonly ISupplierServices _supplierServices;

@@ -20,5 +20,7 @@ namespace Services.Interface
         Task DeleteEmployeeByIdAsync(Guid employeeId);
 
         Task<DataForCreateEmployeeDto> DataForCreateEmployeeAsync();
+
+        Task<SalaryEmployeeDto> SalaryEmployeeByIdAsync(Guid idEmployee, DateTime startDate, DateTime endDate);
     }
 }

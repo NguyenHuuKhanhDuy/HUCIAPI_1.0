@@ -7,5 +7,8 @@
         public const string OrderNumber = "Mã ĐH shop";
         public const string StatusOrder = "Trạng thái đơn hàng";
         public const string ShippingNote = "Lí do delay giao hàng";
+        public const string Paid = "da doi soat";
+        public const string ExtensionExcel1 = ".xlsx";
+        public const string ExtensionExcel2 = ".xls";
     }
 }

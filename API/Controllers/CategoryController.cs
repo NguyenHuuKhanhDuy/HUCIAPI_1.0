@@ -9,7 +9,10 @@ namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+
+#if !DEBUG    
     [Authorize]
+#endif
     public class CategoryController : BaseController
     {
         private readonly ICategoryServices _categoryServices;
