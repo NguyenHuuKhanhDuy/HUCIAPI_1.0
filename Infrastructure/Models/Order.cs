@@ -35,6 +35,8 @@ public partial class Order
 
     public int OrderTotal { get; set; }
 
+    public int BenefitOrder { get; set; }
+
     public Guid? VoucherId { get; set; }
 
     public string VoucherName { get; set; } = null!;
