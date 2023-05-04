@@ -99,7 +99,7 @@ namespace Services.Implement
                 issuer,
                 audience,
                 claims,
-                expires: DateTime.UtcNow.AddMinutes(10),
+                expires: DateTime.UtcNow.AddHours(12),
                 signingCredentials: signIn);
 
             return new JwtSecurityTokenHandler().WriteToken(token).ToString();

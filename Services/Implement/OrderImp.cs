@@ -58,6 +58,7 @@ namespace Services.Implement
             var productDtos = await GetProductDtoByIdsAsync(orderVM.products);
             var orderDetails = await GetOrderDetailsAndCalculatePrice(order, productDtos, orderVM.products);
 
+            order.BenefitOrder = await CalculateBenefitOrder(order.OrderTotal, orderVM.products);
             await _dbContext.Orders.AddAsync(order);
             await _dbContext.SaveChangesAsync();
 
@@ -288,6 +289,18 @@ namespace Services.Implement
             return productDtos.OrderBy(x => x.ProductNumber).ToList();
         }
 
+        private async Task<int> CalculateBenefitOrder(int orderTotal, List<ProductInsideOrderVM> productVMs)
+        {
+            var products = await _dbContext.Products.Where(x => !x.IsDeleted && productVMs
+                                                    .Select(x => x.ProductId)
+                                                    .Contains(x.Id))
+                                                    .ToListAsync();
+
+            var totalOriginPrice = products.Sum(x => x.OriginalPrice);
+            var benefit = orderTotal - totalOriginPrice;
+
+            return benefit;
+        }
         /// <summary>
         /// 
         /// </summary>
@@ -375,13 +388,22 @@ namespace Services.Implement
         public async Task<List<OrderDto>> GetAllOrderAsync()
         {
             List<OrderDto> orderDtos = new List<OrderDto>();
-            var orders = await _dbContext.Orders.Where(x => !x.IsDeleted).OrderBy(x => x.OrderDate).ToListAsync();
+            var orders = await _dbContext.Orders.Where(x => !x.IsDeleted).OrderByDescending(x => x.OrderDate).ToListAsync();
+            var ordersDetails = await _dbContext.OrderDetails.ToListAsync();
 
             if (orders.Any())
             {
                 foreach (var order in orders)
                 {
-                    orderDtos.Add(MapFOrderTOrderDto(order));
+                    var orderDto = MapFOrderTOrderDto(order);
+                    var orderDetailForOrder = ordersDetails?.Where(x => x.OrderId == order.Id).ToList();
+
+                    if (orderDetailForOrder != null && orderDetailForOrder.Any())
+                    {
+                        orderDto.products = orderDetailForOrder?.Select(x => MapFOrderDetailTOrderDetailDto(x)).ToList();
+                    }
+
+                    orderDtos.Add(orderDto);
                 }
             }
 
@@ -793,6 +815,64 @@ namespace Services.Implement
             }
 
             return ordersList;
+        }
+
+        public async Task<StatusOrderDto> GetAllOrderStatusAsync()
+        {
+            var statusShipping = await _dbContext.StatusShippings.ToListAsync();
+            var orderSource = await _dbContext.OrderSources.ToListAsync();
+            var statusPayment = await _dbContext.StatusPayments.ToListAsync();
+            var statusOrder = await _dbContext.StatusOrders.ToListAsync();
+            var shippingMethod = await _dbContext.ShippingMethods.ToListAsync();
+
+            var statusOrderDto = new StatusOrderDto();
+
+            foreach (var item in statusShipping)
+            {
+                statusOrderDto.StatusShipping.Add(new ModelStatusDto
+                {
+                    Id = item.Id,
+                    Name = item.Name
+                });
+            }
+
+            foreach (var item in orderSource)
+            {
+                statusOrderDto.OrderSource.Add(new ModelStatusDto
+                {
+                    Id = item.Id,
+                    Name = item.SourceName
+                });
+            }
+
+            foreach (var item in statusPayment)
+            {
+                statusOrderDto.StatusPayment.Add(new ModelStatusDto
+                {
+                    Id = item.Id,
+                    Name = item.Name
+                });
+            }
+
+            foreach (var item in statusOrder)
+            {
+                statusOrderDto.StatusOrder.Add(new ModelStatusDto
+                {
+                    Id = item.Id,
+                    Name = item.Name
+                });
+            }
+
+            foreach (var item in shippingMethod)
+            {
+                statusOrderDto.ShippingMethod.Add(new ModelStatusDto
+                {
+                    Id = item.Id,
+                    Name = item.Name
+                });
+            }
+
+            return statusOrderDto;
         }
     }
 }

@@ -155,6 +155,12 @@ namespace API.Controllers
             return HandleResponseStatusOk(file);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="page"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
         [HttpGet("[action]")]
         public async Task<IActionResult> GetOrderForPaginationAsync(int page = BaseConstants.PageDefault, int pageSize = BaseConstants.PageSizeDefault)
         {
@@ -165,6 +171,18 @@ namespace API.Controllers
             _logger.LogInformation($"End get order with page: {page}, pageSize: {pageSize} \r\n{GetStringFromJson(orders)}");
 
             return HandleResponseStatusOk(orders);
+        }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetAllStatusForOrderAsync()
+        {
+            _logger.LogInformation("Start get all status for order");
+
+            var status = await _orderServices.GetAllOrderStatusAsync();
+
+            _logger.LogInformation($"End get all status for order. \r\n {GetStringFromJson(status)}");
+
+            return HandleResponseStatusOk(status);
         }
     }
 }
