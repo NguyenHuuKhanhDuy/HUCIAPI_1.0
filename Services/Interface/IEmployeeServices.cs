@@ -22,5 +22,6 @@ namespace Services.Interface
         Task<DataForCreateEmployeeDto> DataForCreateEmployeeAsync();
 
         Task<SalaryEmployeeDto> SalaryEmployeeByIdAsync(Guid idEmployee, DateTime startDate, DateTime endDate);
+
     }
 }

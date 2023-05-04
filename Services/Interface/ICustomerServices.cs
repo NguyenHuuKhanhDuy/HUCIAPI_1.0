@@ -10,5 +10,6 @@ namespace Services.Interface
         Task DeleteCustomerAsync(Guid customerId);
         Task<List<CustomerDto>> GetAllCustomerAsync();
         Task<CustomerDto> GetCustomerByIdAsync(Guid customerId);
+        Task<CustomerPaginationDto> GetCustomerForPagination(int Page, int PageSize);
     }
 }

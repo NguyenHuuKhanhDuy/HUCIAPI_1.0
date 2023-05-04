@@ -9,7 +9,9 @@ using Infrastructure.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
+using OfficeOpenXml.Style;
 using Services.Interface;
+using System.Drawing.Printing;
 
 namespace Services.Implement
 {
@@ -727,6 +729,70 @@ namespace Services.Implement
             }
 
             await _dbContext.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="page"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public async Task<OrderPaginationDto> GetOrdersWithPagination(int page, int pageSize)
+        {
+            var orderPage = new OrderPaginationDto
+            {
+                Page = 1,
+                PageSize = pageSize,
+                TotalOrder = BaseConstants.INT_DEFAULT,
+                TotalPage = BaseConstants.INT_DEFAULT,
+            };
+
+            var orders = await _dbContext.Orders.AsNoTracking().OrderByDescending(x => x.OrderDate).ToListAsync();
+            var totalOrder = orders.Count();
+
+            if(totalOrder == 0)
+                return orderPage;
+
+            orderPage.Page = page;
+            orderPage.PageSize = pageSize;
+            orderPage.TotalOrder = totalOrder;
+            orderPage.TotalPage = (int)Math.Ceiling((double)totalOrder / pageSize);
+
+            var totalOrdersPerPage = orders.OrderByDescending(o => o.OrderDate).Skip((page - 1) * pageSize).Take(pageSize).ToList();
+            orderPage.Orders = await GetOrderWithOrderDetail(totalOrdersPerPage);
+
+            return orderPage;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="orders"></param>
+        /// <param name="orderDetails"></param>
+        /// <returns></returns>
+        private async Task<List<OrderDto>> GetOrderWithOrderDetail(List<Order> orders)
+        {
+            var ordersList = new List<OrderDto>();
+            if (orders == null || !orders.Any())
+                return ordersList;
+
+            var orderDetails = await _dbContext.OrderDetails.AsNoTracking().Where(x => orders.Select(x => x.Id).Contains(x.OrderId)).ToListAsync();
+
+            foreach (var order in orders)
+            {
+                var orderDto = MapFOrderTOrderDto(order);
+                var orderDetailForOrder = orderDetails?.Where(x => x.OrderId == order.Id).ToList();
+
+                if (orderDetailForOrder != null && orderDetailForOrder.Any())
+                {
+                    orderDto.products = orderDetailForOrder?.Select(x => MapFOrderDetailTOrderDetailDto(x)).ToList();
+                }
+
+                ordersList.Add(orderDto);
+            }
+
+            return ordersList;
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using ApplicationCore.ModelsDto.Order;
 using ApplicationCore.ViewModels.Order;
+using Common.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services.Interface;
@@ -152,6 +153,18 @@ namespace API.Controllers
 
             _logger.LogInformation("End update status for order from GHTK");
             return HandleResponseStatusOk(file);
+        }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetOrderForPaginationAsync(int page = BaseConstants.PageDefault, int pageSize = BaseConstants.PageSizeDefault)
+        {
+            _logger.LogInformation($"Start get order with page: {page}, pageSize: {pageSize}");
+            
+            var orders = await _orderServices.GetOrdersWithPagination(page, pageSize);
+
+            _logger.LogInformation($"End get order with page: {page}, pageSize: {pageSize} \r\n{GetStringFromJson(orders)}");
+
+            return HandleResponseStatusOk(orders);
         }
     }
 }

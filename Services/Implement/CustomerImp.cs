@@ -1,6 +1,7 @@
 ﻿using ApplicationCore.Exceptions;
 using ApplicationCore.ModelsDto.Customer;
 using ApplicationCore.ViewModels.Customer;
+using Azure;
 using Common.Constants;
 using Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
@@ -32,7 +33,6 @@ namespace Services.Implement
             customer.ProvinceName = await GetNameLocationById(customer.ProvinceId);
             customer.DistrictName = await GetNameLocationById(customer.DistrictId);
             customer.WardName = await GetNameLocationById(customer.WardId);
-            customer.Address = $"{customer.Address}, {customer.WardName}, {customer.DistrictName}, {customer.ProvinceName}";
             customer.OrderCount = 0;
             customer.CreateDate = GetDateTimeNow();
 
@@ -110,7 +110,6 @@ namespace Services.Implement
             customer.ProvinceName = await GetNameLocationById(customer.ProvinceId);
             customer.DistrictName = await GetNameLocationById(customer.DistrictId);
             customer.WardName = await GetNameLocationById(customer.WardId);
-            customer.Address = $"{customer.Address}, {customer.WardName}, {customer.DistrictName}, {customer.ProvinceName}";
 
             await _dbContext.SaveChangesAsync();
 
@@ -148,6 +147,44 @@ namespace Services.Implement
                 dtos.Add(MapFCustomerTCustomerDto(customer));
             }
             return dtos;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="page"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
+        public async Task<CustomerPaginationDto> GetCustomerForPagination(int page, int pageSize)
+        {
+            var customerPagination = new CustomerPaginationDto
+            {
+                Page = page, 
+                PageSize = pageSize,
+                TotalPage = BaseConstants.INT_DEFAULT,
+                TotalCustomer = BaseConstants.INT_DEFAULT
+            };
+
+            var customers = await _dbContext.Customers.AsNoTracking().Where(x => !x.IsDeleted).OrderByDescending(x => x.CreateDate).ToListAsync();
+            var totalCustomer = customers.Count();
+
+            if (totalCustomer == 0)
+                return customerPagination;
+
+            customerPagination.TotalCustomer = totalCustomer;
+            customerPagination.TotalPage = (int)Math.Ceiling((double)totalCustomer / pageSize);
+
+            var customerPerPage = customers.OrderByDescending(x => x.CreateDate)
+                                        .Skip((page - 1) * pageSize)
+                                        .Take(pageSize)
+                                        .ToList();
+
+            foreach(var customer in customers)
+            {
+                customerPagination.customer.Add(MapFCustomerTCustomerDto(customer));
+            }
+
+            return customerPagination;
         }
     }
 }

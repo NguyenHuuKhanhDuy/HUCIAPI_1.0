@@ -15,5 +15,6 @@ namespace Services.Interface
         Task<OrderDto> GetDetailOrderByIdAsync(Guid orderId);
         Task<OrderDto> CreateOrderFromLadipageAsync(OrderForLadipageVM orderVM);
         Task<string> UpdateStatusShippingGHTKAsync(IFormFile excelFile);
+        Task<OrderPaginationDto> GetOrdersWithPagination(int page, int pageSize);
     }
 }

@@ -101,6 +101,18 @@ namespace API.Controllers
             _logger.LogInformation($"End get all customer");
 
             return HandleResponse(customer, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
+        }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetCustomerForPaginationAsync(int page = BaseConstants.PageDefault, int pageSize = BaseConstants.PageSizeDefault)
+        {
+            _logger.LogInformation($"Start get customer with page: {page}, pageSize: {pageSize}");
+
+            var customers = await _customerServices.GetCustomerForPagination(page, pageSize);
+
+            _logger.LogInformation($"End get customer with page: {page}, pageSize: {pageSize} \r\n {GetStringFromJson(customers)}");
+
+            return HandleResponseStatusOk(customers);
 
         }
     }

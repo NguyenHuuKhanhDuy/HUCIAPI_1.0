@@ -23,5 +23,7 @@ namespace Common.Constants
         public const bool IsActiveDefault = true;
         public const bool IsDeletedDefault = false;
 
+        public const int PageDefault = 1;
+        public const int PageSizeDefault = 20;
     }
 }
