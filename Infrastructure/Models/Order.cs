@@ -97,6 +97,8 @@ public partial class Order
 
     public virtual StatusShipping OrderStatusShipping { get; set; } = null!;
 
+    public virtual ICollection<OrderTakeCare> OrderTakeCares { get; } = new List<OrderTakeCare>();
+
     public virtual Location Province { get; set; } = null!;
 
     public virtual Voucher? Voucher { get; set; }

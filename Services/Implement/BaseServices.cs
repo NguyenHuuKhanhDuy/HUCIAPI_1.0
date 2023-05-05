@@ -4,6 +4,7 @@ using ApplicationCore.ModelsDto.Customer;
 using ApplicationCore.ModelsDto.Fund;
 using ApplicationCore.ModelsDto.Order;
 using ApplicationCore.ModelsDto.OrderCommission;
+using ApplicationCore.ModelsDto.OtherCost;
 using ApplicationCore.ModelsDto.Product;
 using ApplicationCore.ModelsDto.Promotion;
 using ApplicationCore.ModelsDto.Supplier;
@@ -11,6 +12,7 @@ using ApplicationCore.ViewModels.Commission;
 using ApplicationCore.ViewModels.Customer;
 using ApplicationCore.ViewModels.Fund;
 using ApplicationCore.ViewModels.Order;
+using ApplicationCore.ViewModels.OtherCost;
 using ApplicationCore.ViewModels.Product;
 using ApplicationCore.ViewModels.Promotion;
 using ApplicationCore.ViewModels.Supplier;
@@ -546,6 +548,39 @@ namespace Services.Implement
                 OrderTotal = orderCommission.OrderTotal,
                 OrderCommission1 = orderCommission.OrderCommission1,
                 CreateDate = orderCommission.CreateDate
+            };
+        }
+
+        //Other Cost
+        public OtherCost MapFOtherCostVMTOtherCost(OtherCostVM vm)
+        {
+            return new OtherCost
+            {
+                Id = Guid.NewGuid(),
+                CreateDate = GetDateTimeNow(),
+                IsDeleted = BaseConstants.IsDeletedDefault,
+                Price = vm.Price,
+                UserCreateId = vm.UserCreateId,
+                Notes = !string.IsNullOrEmpty(vm.Notes) ? vm.Notes : string.Empty
+            };
+        }
+
+        public void MapFOtherCostUpdateVMTOtherCost(OtherCost otherCost, OtherCostUpdateVM vm)
+        {
+            otherCost.Price = vm.Price;
+            otherCost.Notes = !string.IsNullOrEmpty(vm.Notes) ? vm.Notes : string.Empty;
+        }
+
+        public OtherCostDto MapFOtherCostTOtherCostDto(OtherCost otherCost, string userCreateName)
+        {
+            return new OtherCostDto
+            {
+                Id = otherCost.Id,
+                Price = otherCost.Price,
+                UserCreateId = otherCost.UserCreateId,
+                UserCreateName = userCreateName,
+                CreateDate = otherCost.CreateDate,
+                Notes = otherCost.Notes
             };
         }
     }

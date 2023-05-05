@@ -184,6 +184,7 @@ namespace Services.Implement
                 fundDto.FundDetails.Add(fundDetailDto);
             }
 
+            MapFFundUpdateVMTFund(fund, fundVM);
             await _dbContext.SaveChangesAsync();
             return fundDto;
         }

@@ -65,7 +65,11 @@ public partial class Employee
 
     public virtual ICollection<OrderCommission> OrderCommissions { get; } = new List<OrderCommission>();
 
+    public virtual ICollection<OrderTakeCare> OrderTakeCares { get; } = new List<OrderTakeCare>();
+
     public virtual ICollection<Order> Orders { get; } = new List<Order>();
+
+    public virtual ICollection<OtherCost> OtherCosts { get; } = new List<OtherCost>();
 
     public virtual ICollection<Product> Products { get; } = new List<Product>();
 
@@ -78,6 +82,10 @@ public partial class Employee
     public virtual SalaryType SalaryType { get; set; } = null!;
 
     public virtual ICollection<Supplier> Suppliers { get; } = new List<Supplier>();
+
+    public virtual ICollection<TimeKeeping> TimeKeepingUserCreates { get; } = new List<TimeKeeping>();
+
+    public virtual ICollection<TimeKeeping> TimeKeepingUserTimeKeepings { get; } = new List<TimeKeeping>();
 
     public virtual ICollection<Voucher> Vouchers { get; } = new List<Voucher>();
 

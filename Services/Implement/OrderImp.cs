@@ -283,7 +283,24 @@ namespace Services.Implement
                 }
 
                 productDtos.Add(MapFProductTProductDto(product));
-                product.OnHand = product.OnHand - productVM.Quantity;
+
+                if (product.ProductTypeId == ProductConstants.PRODUCT_TYPE_COMBO)
+                {
+                    var comboDetails = await _dbContext.ComboDetails.Where(x => x.ComboId == product.Id && !x.IsDelete).ToListAsync(); ;
+
+                    foreach (var item in comboDetails)
+                    {
+                        var productInsideCombo = products.Where(x => x.Id == item.ProductId && !x.IsDeleted).FirstOrDefault();
+                        if (productInsideCombo != null)
+                        {
+                            productInsideCombo.OnHand = productInsideCombo.OnHand - item.Quantity;
+                        }
+                    }
+                }
+                else
+                {
+                    product.OnHand = product.OnHand - productVM.Quantity;
+                }
             }
 
             return productDtos.OrderBy(x => x.ProductNumber).ToList();
