@@ -1,4 +1,5 @@
 ﻿using ApplicationCore.Exceptions;
+using ApplicationCore.ModelsDto;
 using ApplicationCore.ModelsDto.Commission;
 using ApplicationCore.ModelsDto.Customer;
 using ApplicationCore.ModelsDto.Fund;
@@ -581,6 +582,20 @@ namespace Services.Implement
                 UserCreateName = userCreateName,
                 CreateDate = otherCost.CreateDate,
                 Notes = otherCost.Notes
+            };
+        }
+
+        // Time Keeping
+        public TimeKeepingDto MapFTimeKeepingTTimeKeepingDto(TimeKeeping timeKeeping, string userCreateName, string userTimeKeeping)
+        {
+            return new TimeKeepingDto
+            {
+                Id = timeKeeping.Id,
+                UserCreateId = timeKeeping.UserCreateId,
+                UserTimeKeepingId = timeKeeping.UserTimeKeepingId,
+                CreateDate = timeKeeping.CreateDate,
+                UserCreateName = userCreateName,
+                UserTimeKeepingName = userTimeKeeping
             };
         }
     }
