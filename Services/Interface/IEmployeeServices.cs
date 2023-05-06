@@ -23,5 +23,6 @@ namespace Services.Interface
 
         Task<SalaryEmployeeDto> SalaryEmployeeByIdAsync(Guid idEmployee, DateTime startDate, DateTime endDate);
 
+        string GetPassworkEncrypt(string password);
     }
 }

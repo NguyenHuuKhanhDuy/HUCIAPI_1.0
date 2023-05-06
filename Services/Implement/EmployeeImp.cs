@@ -318,5 +318,15 @@ namespace Services.Implement
 
             return salaryEmployeeDto;
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="password"></param>
+        /// <returns></returns>
+        public string GetPassworkEncrypt(string password)
+        {
+            return HashPassword(password);
+        }
     }
 }

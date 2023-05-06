@@ -60,5 +60,12 @@ namespace API.Controllers
 
             return HandleResponseStatusOk(order);
         }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetEncryptPassword(string password)
+        {
+            var hashPass = _employeeServices.GetPassworkEncrypt(password);
+            return HandleResponseStatusOk(hashPass);
+        }
     }
 }
