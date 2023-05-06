@@ -12,6 +12,5 @@ namespace Services.Interface
         Task<List<TimeKeepingDto>> GetAllTimeKeepingByEmployeeIdAndDateAsync(Guid employeeId, DateTime startDate, DateTime endDate);
         Task<List<TimeKeepingDto>> GetAllTimeKeepingAsync();
         Task<List<TimeKeepingDto>> GetAllTimeKeepingByDateAsync(DateTime startDate, DateTime endDate);
-
     }
 }

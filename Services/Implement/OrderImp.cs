@@ -40,10 +40,10 @@ namespace Services.Implement
                 DistrictId = BaseConstants.INT_DEFAULT,
                 WardId = BaseConstants.INT_DEFAULT,
                 VoucherId = Guid.Empty,
-                OrderStatusId = BaseConstants.INT_DEFAULT,
-                OrderStatusPaymentId = BaseConstants.INT_DEFAULT,
-                OrderStatusShippingId = BaseConstants.INT_DEFAULT,
-                OrderShippingMethodId = BaseConstants.INT_DEFAULT,
+                OrderStatusId = 1,
+                OrderStatusPaymentId = 1,
+                OrderStatusShippingId = 1,
+                OrderShippingMethodId = 1,
                 OrderSourceId = BaseConstants.INT_DEFAULT
             };
 
@@ -318,6 +318,7 @@ namespace Services.Implement
 
             return benefit;
         }
+
         /// <summary>
         /// 
         /// </summary>
@@ -890,6 +891,24 @@ namespace Services.Implement
             }
 
             return statusOrderDto;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fromDateAgo"></param>
+        /// <param name="toDateAgo"></param>
+        /// <returns></returns>
+        public async Task<List<OrderDto>> GetOrdersToCallTakeCareWithDateAgoAsyns(int fromDateAgo, int toDateAgo)
+        {
+            DateTime startDate = GetDateTimeNow().AddDays(-toDateAgo);
+            DateTime endDate = GetDateTimeNow().AddDays(-fromDateAgo);
+            var orderCallTakeCareIds = await _dbContext.OrderTakeCares.Where(x => x.CreateDate.Date >= startDate.Date && x.CreateDate.Date <= endDate.Date && !x.IsDeleted).Select(x => x.OrderId).ToListAsync();
+            var orders = await _dbContext.Orders.AsNoTracking().Where(x => x.OrderDate.Date >= startDate.Date && x.OrderDate.Date <= endDate.Date && !orderCallTakeCareIds.Contains(x.Id)).OrderByDescending(x => x.OrderDate).ToListAsync();
+
+            var orderDtos = await GetOrderWithOrderDetail(orders);
+
+            return orderDtos;
         }
     }
 }

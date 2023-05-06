@@ -17,5 +17,7 @@ namespace Services.Interface
         Task<string> UpdateStatusShippingGHTKAsync(IFormFile excelFile);
         Task<OrderPaginationDto> GetOrdersWithPagination(int page, int pageSize);
         Task<StatusOrderDto> GetAllOrderStatusAsync();
+        Task<List<OrderDto>> GetOrdersToCallTakeCareWithDateAgoAsyns(int fromDateAgo, int toDateAgo);
+
     }
 }

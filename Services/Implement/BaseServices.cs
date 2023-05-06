@@ -1,5 +1,6 @@
 ﻿using ApplicationCore.Exceptions;
 using ApplicationCore.ModelsDto;
+using ApplicationCore.ModelsDto.CallTakeCare;
 using ApplicationCore.ModelsDto.Commission;
 using ApplicationCore.ModelsDto.Customer;
 using ApplicationCore.ModelsDto.Fund;
@@ -598,5 +599,20 @@ namespace Services.Implement
                 UserTimeKeepingName = userTimeKeeping
             };
         }
+
+        //Call Take Care
+        public CallTakeCareDto MapFOrderTakeCareTCallTakeCareDto(OrderTakeCare orderCall, string userCreateName)
+        {
+            return new CallTakeCareDto
+            {
+                Id = orderCall.Id,
+                OrderId = orderCall.OrderId,
+                CreateDate = orderCall.CreateDate,
+                Notes = !string.IsNullOrEmpty(orderCall.Notes) ? orderCall.Notes : string.Empty,
+                UserCreateId = orderCall.UserCreateId,
+                UserCreateName = userCreateName
+            };
+        }
+
     }
 }

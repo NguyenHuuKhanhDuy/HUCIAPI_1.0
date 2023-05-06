@@ -173,6 +173,10 @@ namespace API.Controllers
             return HandleResponseStatusOk(orders);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("[action]")]
         public async Task<IActionResult> GetAllStatusForOrderAsync()
         {
@@ -184,5 +188,23 @@ namespace API.Controllers
 
             return HandleResponseStatusOk(status);
         }
-    }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fromDateAdo"></param>
+        /// <param name="toDateAgo"></param>
+        /// <returns></returns>
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetOrdersToCallTakeCareWithDateAgoAsyns(int fromDateAdo, int toDateAgo)
+        {
+            _logger.LogInformation($"Start get order to call take care from {fromDateAdo} to {toDateAgo}");
+
+            var orders = await _orderServices.GetOrdersToCallTakeCareWithDateAgoAsyns(fromDateAdo, toDateAgo);
+
+            _logger.LogInformation($"End get order to call take care from {fromDateAdo} to {toDateAgo}. {GetStringFromJson(orders)}");
+
+            return HandleResponseStatusOk(orders);
+        }
+    }  
 }
