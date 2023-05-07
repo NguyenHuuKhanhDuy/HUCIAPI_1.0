@@ -23,5 +23,8 @@
         public const string SALARY_TYPE_NOTE_EXIST = "Salary type not exists";
 
         public const string PASS_DEFAULT = "passDefault";
+
+        public const string AdminName = "admin";
+        public const string CanNotRemoveAdmin = "Can't remove admin";
     }
 }

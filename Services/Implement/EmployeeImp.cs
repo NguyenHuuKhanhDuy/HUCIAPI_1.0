@@ -30,9 +30,9 @@ namespace Services.Implement
         }
         public async Task<EmployeeDto> Login(UserVM userVM)
         {
-            var employee =  _dbContext.Employees.Where(p => p.Username == userVM.Username).FirstOrDefault();
+            var employee = _dbContext.Employees.Where(p => p.Username == userVM.Username).FirstOrDefault();
 
-            if(employee == null || employee.IsDeleted)
+            if (employee == null || employee.IsDeleted)
             {
                 throw new BusinessException(LoginConstants.USER_NOT_EXIST);
             }
@@ -44,8 +44,8 @@ namespace Services.Implement
 
             EmployeeDto employeeDto = _mapper.Map<EmployeeDto>(employee);
 
-            var employeeCreate =  await _dbContext.Employees.FindAsync(employeeDto.CreateUserId);
-            if(employeeCreate != null)
+            var employeeCreate = await _dbContext.Employees.FindAsync(employeeDto.CreateUserId);
+            if (employeeCreate != null)
             {
                 employeeDto.CreateUserName = employeeCreate.Name;
             }
@@ -111,7 +111,7 @@ namespace Services.Implement
             CheckEmployeeInformation(employeeVM, employees);
 
             var salaryType = await _dbContext.SalaryTypes.FindAsync(employeeVM.SalaryTypeId);
-            if(salaryType == null)
+            if (salaryType == null)
             {
                 throw new BusinessException(EmployeeConstants.SALARY_TYPE_NOTE_EXIST);
             }
@@ -136,7 +136,7 @@ namespace Services.Implement
             employee.Address = $"{employee.Address}, {employee.WardName}, {employee.DistrictName}, {employee.ProvinceName}";
             employee.Password = HashPassword(employee.Password);
         }
-        
+
         /// <summary>
         /// 
         /// </summary>
@@ -162,13 +162,13 @@ namespace Services.Implement
         public void CheckEmployeeInformation(EmployeeVM employeeVM, List<Employee> employees)
         {
             var exist = employees.Where(x => x.Email == employeeVM.Email).FirstOrDefault();
-            if(exist != null)
+            if (exist != null)
             {
                 throw new BusinessException(EmployeeConstants.EXIST_EMAIL);
             }
 
             exist = employees.Where(x => x.Phone == employeeVM.Phone).FirstOrDefault();
-            if(exist != null)
+            if (exist != null)
             {
                 throw new BusinessException(EmployeeConstants.EXIST_PHONE);
             }
@@ -186,11 +186,11 @@ namespace Services.Implement
         /// <returns></returns>
         public async Task<List<EmployeeDto>> GetAllEmployeeAsync()
         {
-            var employees =  await _dbContext.Employees.ToListAsync();
+            var employees = await _dbContext.Employees.ToListAsync();
             List<EmployeeDto> employeeDtos = new List<EmployeeDto>();
             foreach (var employee in employees)
             {
-                if(employee.IsDeleted == false)
+                if (employee.IsDeleted == false)
                 {
                     var employeeDto = _mapper.Map<EmployeeDto>(employee);
                     employeeDto.CreateUserName = employees.Where(x => x.Id == employeeDto.CreateUserId).FirstOrDefault().Name;
@@ -210,7 +210,7 @@ namespace Services.Implement
         public async Task<EmployeeDto> GetEmployeeByIdAsync(Guid employeeId)
         {
             var employee = await _dbContext.Employees.FindAsync(employeeId);
-            if(employee == null || employee.IsDeleted)
+            if (employee == null || employee.IsDeleted)
             {
                 throw new BusinessException(EmployeeConstants.EMPLOYEE_NOT_EXIST);
             }
@@ -223,7 +223,7 @@ namespace Services.Implement
         public async Task<EmployeeDto> UpdateEmployeeAsync(EmployeeUpdateVM employeeVM)
         {
             var employee = await _dbContext.Employees.FindAsync(employeeVM.Id);
-            if(employee == null || employee.IsDeleted)
+            if (employee == null || employee.IsDeleted)
             {
                 throw new BusinessException(EmployeeConstants.EMPLOYEE_NOT_EXIST);
             }
@@ -246,7 +246,7 @@ namespace Services.Implement
             employee.Address = employeeVM.Address;
             employee.Username = employeeVM.Username;
 
-            if(employee.Password != employeeVM.Password)
+            if (employee.Password != employeeVM.Password)
             {
                 employee.Password = HashPassword(employeeVM.Password);
             }
@@ -254,7 +254,7 @@ namespace Services.Implement
             await GetNameFieldHaveId(employee);
 
             await _dbContext.SaveChangesAsync();
-            
+
             EmployeeDto employeeDto = _mapper.Map<EmployeeDto>(employee);
             return employeeDto;
         }
@@ -267,9 +267,15 @@ namespace Services.Implement
         public async Task DeleteEmployeeByIdAsync(Guid employeeId)
         {
             var employee = await _dbContext.Employees.FindAsync(employeeId);
-            if(employee == null || employee.IsDeleted)
+
+            if (employee == null || employee.IsDeleted)
             {
                 throw new BusinessException(EmployeeConstants.EMPLOYEE_NOT_EXIST);
+            }
+
+            if (employee.Name == EmployeeConstants.AdminName)
+            {
+                throw new BusinessException(EmployeeConstants.CanNotRemoveAdmin);
             }
 
             employee.IsDeleted = true;
@@ -327,6 +333,36 @@ namespace Services.Implement
         public string GetPassworkEncrypt(string password)
         {
             return HashPassword(password);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <returns></returns>
+        public async Task<BenefitDto> CalculateBenefitWithDateAsync(DateTime startDate, DateTime endDate)
+        {
+            var commissions = await _dbContext.OrderCommissions.AsNoTracking().Where(x => x.CreateDate.Date >= startDate.Date && x.CreateDate.Date <= endDate.Date).ToListAsync();
+
+            var orderIds = commissions.Select(x => x.OrderId);
+            var orders = await _dbContext.Orders.AsNoTracking()
+                .Where(x => orderIds.Contains(x.Id))
+                .ToListAsync();
+            var employee = await _dbContext.Employees.Where(x => !x.IsDeleted).ToListAsync();
+            var otherCosts = await _dbContext.OtherCosts.AsNoTracking()
+                .Where(x => x.CreateDate.Date >= startDate.Date
+                && x.CreateDate.Date <= endDate.Date
+                && !x.IsDeleted)
+                .ToListAsync();
+
+            var benefitDto = new BenefitDto();
+            benefitDto.TotalSalary = employee.Sum(x => x.Salary);
+            benefitDto.TotalCommission = commissions.Sum(x => x.OrderCommission1);
+            benefitDto.TotalOtherCost = otherCosts.Sum(x => x.Price);
+            benefitDto.TotalOrderBenefit = orders.Sum(x => x.BenefitOrder);
+
+            return benefitDto;
         }
     }
 }

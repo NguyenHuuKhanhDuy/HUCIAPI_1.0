@@ -147,5 +147,23 @@ namespace API.Controllers
 
             return HandleResponse(data, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <returns></returns>
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetCalculateBenefitAsync(DateTime startDate, DateTime endDate)
+        {
+            _logger.LogInformation($"Start calculate benefit from {startDate} to {endDate}");
+
+            var benefit = await _employeeService.CalculateBenefitWithDateAsync(startDate, endDate);
+
+            _logger.LogInformation($"Start calculate benefit from {startDate} to {endDate}. {GetStringFromJson(benefit)}");
+
+            return HandleResponseStatusOk(benefit);
+        }
     }
 }

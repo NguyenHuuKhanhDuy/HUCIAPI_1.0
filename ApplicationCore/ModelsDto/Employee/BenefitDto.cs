@@ -5,5 +5,6 @@
         public int TotalOrderBenefit { get; set; }
         public int TotalSalary { get; set; }
         public int TotalCommission { get; set; }
+        public int TotalOtherCost { get; set; }
     }
 }
