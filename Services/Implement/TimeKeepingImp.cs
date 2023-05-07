@@ -132,19 +132,26 @@ namespace Services.Implement
         /// <returns></returns>
         public async Task<List<TimeKeepingDto>> GetAllTimeKeepingByEmployeeIdAsync(Guid employeeId)
         {
+            var employees = await _dbContext.Employees.AsNoTracking().ToListAsync();
+            var employee = await _dbContext.Employees.AsNoTracking().FirstOrDefaultAsync(x => x.Id == employeeId && !x.IsDeleted);
+
+            if(employee == null)
+            {
+                throw new BusinessException(EmployeeConstants.EMPLOYEE_NOT_EXIST);
+            }
+
+            var userCreateName = employee.Name;
             var timeKeepings = await _dbContext.TimeKeepings.AsNoTracking()
                 .Where(x => !x.IsDeleted && x.UserTimeKeepingId == employeeId)
                 .ToListAsync();
 
-            var employees = await _dbContext.Employees.AsNoTracking().ToListAsync();
             var timeKeepingDtos = new List<TimeKeepingDto>();
 
             foreach (var item in timeKeepings)
             {
-                var userCreate = employees.FirstOrDefault(x => x.Id == item.UserCreateId);
                 var userTimeKeeping = employees.FirstOrDefault(x => x.Id == item.UserTimeKeepingId);
 
-                timeKeepingDtos.Add(MapFTimeKeepingTTimeKeepingDto(item, userCreate.Name, userTimeKeeping.Name));
+                timeKeepingDtos.Add(MapFTimeKeepingTTimeKeepingDto(item, userCreateName, userTimeKeeping.Name));
             }
 
             return timeKeepingDtos;
@@ -160,6 +167,15 @@ namespace Services.Implement
         /// <exception cref="NotImplementedException"></exception>
         public async Task<List<TimeKeepingDto>> GetAllTimeKeepingByEmployeeIdAndDateAsync(Guid employeeId, DateTime startDate, DateTime endDate)
         {
+            var employees = await _dbContext.Employees.AsNoTracking().ToListAsync();
+            var employee = await _dbContext.Employees.AsNoTracking().FirstOrDefaultAsync(x => x.Id == employeeId && !x.IsDeleted);
+
+            if (employee == null)
+            {
+                throw new BusinessException(EmployeeConstants.EMPLOYEE_NOT_EXIST);
+            }
+
+            var userCreateName = employee.Name;
             var timeKeepings = await _dbContext.TimeKeepings.AsNoTracking()
                 .Where(x => !x.IsDeleted 
                     && x.UserTimeKeepingId == employeeId
@@ -167,15 +183,13 @@ namespace Services.Implement
                     && x.CreateDate.Date <= endDate.Date)
                 .ToListAsync();
 
-            var employees = await _dbContext.Employees.AsNoTracking().ToListAsync();
             var timeKeepingDtos = new List<TimeKeepingDto>();
 
             foreach (var item in timeKeepings)
             {
-                var userCreate = employees.FirstOrDefault(x => x.Id == item.UserCreateId);
                 var userTimeKeeping = employees.FirstOrDefault(x => x.Id == item.UserTimeKeepingId);
 
-                timeKeepingDtos.Add(MapFTimeKeepingTTimeKeepingDto(item, userCreate.Name, userTimeKeeping.Name));
+                timeKeepingDtos.Add(MapFTimeKeepingTTimeKeepingDto(item, userCreateName, userTimeKeeping.Name));
             }
 
             return timeKeepingDtos;
