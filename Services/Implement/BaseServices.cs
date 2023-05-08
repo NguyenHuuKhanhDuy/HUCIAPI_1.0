@@ -244,6 +244,7 @@ namespace Services.Implement
             CustomerDto dto = new CustomerDto();
             dto.Id = customer.Id;
             dto.Name = customer.Name;
+            dto.CustomerNumber = customer.CustomerNumber;
             dto.Email = customer.Email;
             dto.Phone = customer.Phone;
             dto.Birthday = customer.Birthday;
