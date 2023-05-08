@@ -722,7 +722,10 @@ namespace Services.Implement
             if (commission?.Count == 0)
                 return;
 
-            var commissionPrice = commission?.Where(x => x.TotalPriceFrom < order.OrderTotal)?.Max(x => x.CommissionPrice);
+            var commissionPrice = commission?.Where(x => x.TotalPriceFrom < order.OrderTotal)
+                                 .Select(x => x.CommissionPrice)
+                                 .DefaultIfEmpty(0)
+                                 .Max();
 
             if (commissionPrice == 0)
                 return;
