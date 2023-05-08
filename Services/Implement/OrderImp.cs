@@ -441,10 +441,7 @@ namespace Services.Implement
 
             if (orders.Any())
             {
-                foreach (var order in orders)
-                {
-                    orderDtos.Add(MapFOrderTOrderDto(order));
-                }
+                orderDtos = await GetOrderWithOrderDetail(orders);
             }
 
             return orderDtos;
