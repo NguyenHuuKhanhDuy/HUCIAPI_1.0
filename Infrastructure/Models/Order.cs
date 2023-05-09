@@ -77,6 +77,8 @@ public partial class Order
 
     public string OrderSourceName { get; set; } = null!;
 
+    public bool IsRemovedCallTakeCare { get; set; }
+
     public virtual Employee CreateEmployee { get; set; } = null!;
 
     public virtual Customer Customer { get; set; } = null!;

@@ -4,6 +4,7 @@ using ApplicationCore.ModelsDto.Product;
 using ApplicationCore.ViewModels.Customer;
 using ApplicationCore.ViewModels.Order;
 using ApplicationCore.ViewModels.Product;
+using AutoMapper.Execution;
 using Common.Constants;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Http;
@@ -49,11 +50,12 @@ namespace Services.Implement
 
             MapFOrderVMTOrder(order, orderVM);
 
-            await CheckInforForOrder(order);
+            await CheckInforForOrder(order, orderVM);
 
             order.Id = Guid.NewGuid();
             order.OrderNumber = await GetOrderNumber();
             order.OrderDate = GetDateTimeNow();
+            order.IsDeleted = order.IsRemovedCallTakeCare = BaseConstants.IsDeletedDefault;
 
             var productDtos = await GetProductDtoByIdsAsync(orderVM.products);
             var orderDetails = await GetOrderDetailsAndCalculatePrice(order, productDtos, orderVM.products);
@@ -167,7 +169,7 @@ namespace Services.Implement
         /// <param name="order"></param>
         /// <returns></returns>
         /// <exception cref="BusinessException"></exception>
-        private async Task CheckInforForOrder(Order order)
+        private async Task CheckInforForOrder(Order order, OrderVM orderVM)
         {
             var voucher = await _dbContext.Vouchers.FirstOrDefaultAsync(x => x.Id == order.VoucherId);
 
@@ -191,18 +193,119 @@ namespace Services.Implement
 
             order.OrderStatusName = status.Name;
 
-            var customer = await _dbContext.Customers.FirstOrDefaultAsync(x => x.Id == order.CustomerId);
+            var customer = await _dbContext.Customers.FirstOrDefaultAsync(x => x.Phone == order.CustomerPhone);
 
             if (customer == null)
             {
-                throw new BusinessException(OrderConstants.CUSTOMER_NOT_EXISTS);
+                var customerVM = new CustomerVM
+                {
+                    Name = orderVM.CustomerName,
+                    Phone = orderVM.CustomerPhone,
+                    Email = orderVM.CustomerEmail,
+                    ProvinceId = BaseConstants.INT_DEFAULT,
+                    DistrictId = BaseConstants.INT_DEFAULT,
+                    WardId = BaseConstants.INT_DEFAULT,
+                    Address = orderVM.CustomerAddress,
+                    CreateUserId = orderVM.CreateEmployeeId,
+                    Notes = ""
+                };
+
+                var customerDto = await _customerServices.CreateCustomerAsync(customerVM);
+                var customerTemp = await _dbContext.Customers.FirstOrDefaultAsync(x => x.Phone == order.CustomerPhone);
+
+                customerTemp.OrderCount += 1;
+            }
+            else
+            {
+                customer.OrderCount += 1;
             }
 
-            //order.CustomerName = customer.Name;
-            //order.CustomerPhone = customer.Phone;
-            //order.CustomerEmail = customer.Email;
-            //order.CustomerAddress = customer.Address;
-            customer.OrderCount += 1;
+            var paymentStatus = await _dbContext.StatusPayments.AsNoTracking().FirstOrDefaultAsync(x => x.Id == order.OrderStatusPaymentId);
+
+            if (paymentStatus == null)
+            {
+                throw new BusinessException(OrderConstants.PAYMENT_STATUS_NOT_EXISTS);
+            }
+
+            order.OrderStatusPaymentName = paymentStatus.Name;
+
+            var statusShipping = await _dbContext.StatusShippings.AsNoTracking().FirstOrDefaultAsync(x => x.Id == order.OrderStatusShippingId);
+
+            if (paymentStatus == null)
+            {
+                throw new BusinessException(OrderConstants.SHIPPING_STATUS_NOT_EXISTS);
+            }
+
+            order.OrderStatusShippingName = statusShipping.Name;
+
+            var shippingMethod = await _dbContext.ShippingMethods.AsNoTracking().FirstOrDefaultAsync(x => x.Id == order.OrderShippingMethodId);
+
+            if (shippingMethod == null)
+            {
+                throw new BusinessException(OrderConstants.SHIPPING_METHOD_NOT_EXISTS);
+            }
+
+            order.OrderShippingMethodName = shippingMethod.Name;
+
+            var employee = await _dbContext.Employees.AsNoTracking().FirstOrDefaultAsync(x => x.Id == order.CreateEmployeeId);
+
+            if (employee == null)
+            {
+                throw new BusinessException(OrderConstants.USER_CREATE_NOT_EXISTS);
+            }
+
+            order.CreateEmployeeName = employee.Name;
+
+            var source = await _dbContext.OrderSources.AsNoTracking().FirstOrDefaultAsync(x => x.Id == order.OrderSourceId);
+
+            if (source == null)
+            {
+                throw new BusinessException(OrderConstants.SOURCE_ORDER_NOT_EXISTS);
+            }
+
+            order.OrderSourceName = source.SourceName;
+            order.ProvinceName = await GetNameLocationById(order.ProvinceId);
+            order.DistrictName = await GetNameLocationById(order.DistrictId);
+            order.WardName = await GetNameLocationById(order.WardId);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="orderVM"></param>
+        /// <param name="order"></param>
+        /// <returns></returns>
+        /// <exception cref="BusinessException"></exception>
+        private async Task CheckInforForOrderForUpdate(Order order)
+        {
+            var voucher = await _dbContext.Vouchers.FirstOrDefaultAsync(x => x.Id == order.VoucherId);
+
+            if (voucher == null)
+            {
+                throw new BusinessException(OrderConstants.VOUCHER_NOT_EXISTS);
+            }
+
+            if (voucher.Quantity == 0)
+            {
+                throw new BusinessException(OrderConstants.VOUCHER_EXCEED);
+            }
+            order.VoucherName = voucher.Name;
+
+            var status = await _dbContext.StatusOrders.AsNoTracking().FirstOrDefaultAsync(x => x.Id == order.OrderStatusId);
+
+            if (status == null)
+            {
+                throw new BusinessException(OrderConstants.ORDER_STATUS_NOT_EXISTS);
+            }
+
+            order.OrderStatusName = status.Name;
+
+            var customer = await _dbContext.Customers.FirstOrDefaultAsync(x => x.Phone == order.CustomerPhone);
+
+            if (customer == null)
+            {
+                throw new BusinessException(CustomerConstants.CUSTOMER_NOT_EXIST);
+            }
 
             var paymentStatus = await _dbContext.StatusPayments.AsNoTracking().FirstOrDefaultAsync(x => x.Id == order.OrderStatusPaymentId);
 
@@ -384,7 +487,7 @@ namespace Services.Implement
             }
 
             MapFOrderUpdateVMTOrder(order, orderVM);
-            await CheckInforForOrder(order);
+            await CheckInforForOrderForUpdate(order);
 
             if (order.OrderStatusId == OrderConstants.OrderStatusSuccess)
             {
@@ -552,21 +655,31 @@ namespace Services.Implement
                 order.CustomerId = customer.Id;
             }
 
-            var productNumbers = GetProductCodesFromName(orderVM.Product);
+            var productNumbersWithQuantitys = GetProductCodesFromName(orderVM.Product);
             var products = await _dbContext.Products.Where(x => !x.IsDeleted).ToListAsync();
 
-            foreach (var productNumber in productNumbers)
+            foreach (var productNumberWithQuantity in productNumbersWithQuantitys)
             {
+                string[] parts = productNumberWithQuantity.Split('_');
+
+                // Extract the two parts
+                string quantityString = parts[0];
+                int quantity;
+                bool success = int.TryParse(quantityString, out quantity);
+                string productNumber = parts[1];
+
                 var product = products.FirstOrDefault(x => x.ProductNumber == productNumber);
                 if (product == null)
                 {
                     throw new BusinessException(ProductConstants.PRODUCT_NOT_EXIST);
                 }
 
+
+
                 var productInsideOrder = new ProductInsideOrderVM
                 {
                     ProductId = product.Id,
-                    Quantity = 1,
+                    Quantity = success ? quantity : 1,
                     Discount = 0
                 };
 
@@ -893,20 +1006,74 @@ namespace Services.Implement
         /// <param name="pageSize"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public async Task<OrderPaginationDto> GetOrdersWithPagination(int page, int pageSize)
+        public async Task<OrderPaginationDto> GetOrdersWithPaginationAsync(DateTime startDate,
+            DateTime endDate,
+            Guid employeeCreateId,
+            int page,
+            int pageSize,
+            bool isGetWithoutDate,
+            int statusOrderId,
+            int sourceOrderId,
+            int orderStatusPaymentId,
+            int orderStatusShippingId,
+            int orderShippingMethodId)
         {
             var orderPage = new OrderPaginationDto
             {
-                Page = 1,
+                Page = page,
                 PageSize = pageSize,
                 TotalOrder = BaseConstants.INT_DEFAULT,
                 TotalPage = BaseConstants.INT_DEFAULT,
             };
 
             var orders = await _dbContext.Orders.AsNoTracking().OrderByDescending(x => x.OrderDate).ToListAsync();
-            var totalOrder = orders.Count();
 
-            if(totalOrder == 0)
+            //fillter with orderStatus
+            if(statusOrderId != BaseConstants.INT_DEFAULT)
+            {
+                orders = orders.Where(x => x.OrderStatusId == statusOrderId).ToList();
+            }
+
+            //fillter with status payment
+            if (orderStatusPaymentId != BaseConstants.INT_DEFAULT)
+            {
+                orders = orders.Where(x => x.OrderStatusId == orderStatusPaymentId).ToList();
+            }
+
+            //fillter with source order
+            if (sourceOrderId != BaseConstants.INT_DEFAULT)
+            {
+                orders = orders.Where(x => x.OrderStatusId == sourceOrderId).ToList();
+            }
+
+            //fillter with status shipping
+            if (orderStatusShippingId != BaseConstants.INT_DEFAULT)
+            {
+                orders = orders.Where(x => x.OrderStatusId == orderStatusShippingId).ToList();
+            }
+
+            //fillter with shipping method
+            if (orderShippingMethodId != BaseConstants.INT_DEFAULT)
+            {
+                orders = orders.Where(x => x.OrderStatusId == orderShippingMethodId).ToList();
+            }
+
+            //fillter with employee create
+            if(employeeCreateId != Guid.Empty)
+            {
+                orders = orders.Where(x => x.CreateEmployeeId == employeeCreateId).ToList();
+            }
+
+            //fillter for date
+            if (!isGetWithoutDate)
+            {
+                orders = orders.Where(x => x.OrderDate.Date >= startDate.Date && x.OrderDate.Date <= endDate.Date).ToList();
+            }
+
+            var totalOrdersPerPage = orders.OrderByDescending(o => o.OrderDate).Skip((page - 1) * pageSize).Take(pageSize).ToList();
+            var totalOrder = totalOrdersPerPage.Count();
+
+            if (totalOrder == 0)
                 return orderPage;
 
             orderPage.Page = page;
@@ -914,7 +1081,6 @@ namespace Services.Implement
             orderPage.TotalOrder = totalOrder;
             orderPage.TotalPage = (int)Math.Ceiling((double)totalOrder / pageSize);
 
-            var totalOrdersPerPage = orders.OrderByDescending(o => o.OrderDate).Skip((page - 1) * pageSize).Take(pageSize).ToList();
             orderPage.Orders = await GetOrderWithOrderDetail(totalOrdersPerPage);
 
             return orderPage;
@@ -1018,12 +1184,30 @@ namespace Services.Implement
         {
             DateTime startDate = GetDateTimeNow().AddDays(-toDateAgo);
             DateTime endDate = GetDateTimeNow().AddDays(-fromDateAgo);
-            var orderCallTakeCareIds = await _dbContext.OrderTakeCares.Where(x => x.CreateDate.Date >= startDate.Date && x.CreateDate.Date <= endDate.Date && !x.IsDeleted).Select(x => x.OrderId).ToListAsync();
-            var orders = await _dbContext.Orders.AsNoTracking().Where(x => x.OrderDate.Date >= startDate.Date && x.OrderDate.Date <= endDate.Date && !orderCallTakeCareIds.Contains(x.Id)).OrderByDescending(x => x.OrderDate).ToListAsync();
+            var orders = await _dbContext.Orders.AsNoTracking().Where(x => x.OrderDate.Date >= startDate.Date && x.OrderDate.Date <= endDate.Date && !x.IsRemovedCallTakeCare).OrderByDescending(x => x.OrderDate).ToListAsync();
 
             var orderDtos = await GetOrderWithOrderDetail(orders);
 
             return orderDtos;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="orderId"></param>
+        /// <returns></returns>
+        /// <exception cref="BusinessException"></exception>
+        public async Task RemoveCallTakeOrderAsync(Guid orderId)
+        {
+            var order = await _dbContext.Orders.FirstOrDefaultAsync(x => x.Id == orderId && !x.IsDeleted);
+
+            if (order == null)
+            {
+                throw new BusinessException(OrderConstants.ORDER_NOT_EXISTS);
+            }
+
+            order.IsRemovedCallTakeCare = true;
+            await _dbContext.SaveChangesAsync();
         }
     }
 }

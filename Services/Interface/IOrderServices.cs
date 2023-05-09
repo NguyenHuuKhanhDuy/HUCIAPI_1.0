@@ -1,5 +1,6 @@
 ﻿using ApplicationCore.ModelsDto.Order;
 using ApplicationCore.ViewModels.Order;
+using Common.Constants;
 using Microsoft.AspNetCore.Http;
 
 namespace Services.Interface
@@ -9,6 +10,7 @@ namespace Services.Interface
         Task<OrderDto> CreateOrderAsync(OrderVM orderVM);
         Task<OrderDto> UpdateOrderAsync(OrderUpdateVM orderVM);
         Task DeleteOrderAsync(Guid orderId);
+        Task RemoveCallTakeOrderAsync(Guid orderId);
         Task<List<OrderDto>> GetAllOrderAsync();
         Task<List<OrderDto>> GetOrderByDateAsync(DateTime startDate, DateTime endDate);
         Task<List<OrderDto>> GetOrderByStatusIdAsync(int statusId);
@@ -16,7 +18,17 @@ namespace Services.Interface
         Task<OrderDto> CreateOrderFromLadipageAsync(OrderForLadipageVM orderVM);
         Task<string> UpdateStatusShippingGHTKAsync(IFormFile excelFile);
         Task<string> UpdateStatusShippingEMSAsync(IFormFile excelFile);
-        Task<OrderPaginationDto> GetOrdersWithPagination(int page, int pageSize);
+        Task<OrderPaginationDto> GetOrdersWithPaginationAsync(DateTime startDate,
+            DateTime endDate,
+            Guid employeeCreateId,
+            int page,
+            int pageSize,
+            bool isGetWithoutDate,
+            int statusOrderId,
+            int sourceOrderId,
+            int orderStatusPaymentId,
+            int orderStatusShippingId,
+            int orderShippingMethodId);
         Task<StatusOrderDto> GetAllOrderStatusAsync();
         Task<List<OrderDto>> GetOrdersToCallTakeCareWithDateAgoAsyns(int fromDateAgo, int toDateAgo);
 

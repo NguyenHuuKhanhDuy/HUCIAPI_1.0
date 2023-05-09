@@ -77,71 +77,18 @@ namespace API.Controllers
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="startDate"></param>
-        /// <param name="endDate"></param>
+        /// <param name="orderId"></param>
         /// <returns></returns>
-        [HttpGet("[action]")]
-        public async Task<IActionResult> GetOrderByDateAsync(DateTime startDate, DateTime endDate)
+        [HttpPut("[action]")]
+        public async Task<IActionResult> RemoveCallTakeCareOrderAsync(Guid orderId)
         {
-            _logger.LogInformation($"Start get order from {startDate} to {endDate}");
+            _logger.LogInformation("Start remove call take care order...");
 
-            var orders = await _orderServices.GetOrderByDateAsync(startDate, endDate);
+            await _orderServices.RemoveCallTakeOrderAsync(orderId);
 
-            _logger.LogInformation($"End get order from {startDate} to {endDate}");
+            _logger.LogInformation("End remove call take care order...");
 
-            return HandleResponseStatusOk(orders);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="startDate"></param>
-        /// <param name="endDate"></param>
-        /// <returns></returns>
-        [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllOrderAsync()
-        {
-            _logger.LogInformation($"Start get all order...");
-
-            var orders = await _orderServices.GetAllOrderAsync();
-
-            _logger.LogInformation($"End get all order...");
-
-            return HandleResponseStatusOk(orders);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="statusId"></param>
-        /// <returns></returns>
-        [HttpGet("[action]")]
-        public async Task<IActionResult> GetOrderByStatusId(int statusId)
-        {
-            _logger.LogInformation($"Start get order by status id: {statusId}");
-
-            var orders = await _orderServices.GetOrderByStatusIdAsync(statusId);
-
-            _logger.LogInformation($"End get order by status id.");
-
-            return HandleResponseStatusOk(orders);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="statusId"></param>
-        /// <returns></returns>
-        [HttpGet("[action]")]
-        public async Task<IActionResult> GetOrderDetailById(Guid orderId)
-        {
-            _logger.LogInformation($"Start get order detail id: {orderId}");
-
-            var orders = await _orderServices.GetDetailOrderByIdAsync(orderId);
-
-            _logger.LogInformation($"End get order detail by id.");
-
-            return HandleResponseStatusOk(orders);
+            return HandleResponseStatusOk(null);
         }
 
         /// <summary>
@@ -183,11 +130,23 @@ namespace API.Controllers
         /// <param name="pageSize"></param>
         /// <returns></returns>
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetOrderForPaginationAsync(int page = BaseConstants.PageDefault, int pageSize = BaseConstants.PageSizeDefault)
+        public async Task<IActionResult> GetOrderForPaginationAsync(
+            DateTime startDate, 
+            DateTime endDate,
+            Guid employeeCreateId,
+            int page = BaseConstants.PageDefault,
+            int pageSize = BaseConstants.PageSizeDefault,
+            bool isGetWithoutDate = true,
+            int statusOrderId = 0, 
+            int sourceOrderId = 0,
+            int orderStatusPaymentId = 0,
+            int orderStatusShippingId = 0,
+            int orderShippingMethodId = 0
+            )
         {
             _logger.LogInformation($"Start get order with page: {page}, pageSize: {pageSize}");
             
-            var orders = await _orderServices.GetOrdersWithPagination(page, pageSize);
+            var orders = await _orderServices.GetOrdersWithPaginationAsync(startDate, endDate, employeeCreateId, page, pageSize, isGetWithoutDate, statusOrderId, sourceOrderId, orderStatusPaymentId, orderStatusShippingId, orderShippingMethodId);
 
             _logger.LogInformation($"End get order with page: {page}, pageSize: {pageSize} \r\n{GetStringFromJson(orders)}");
 
@@ -224,6 +183,76 @@ namespace API.Controllers
             var orders = await _orderServices.GetOrdersToCallTakeCareWithDateAgoAsyns(fromDateAdo, toDateAgo);
 
             _logger.LogInformation($"End get order to call take care from {fromDateAdo} to {toDateAgo}. {GetStringFromJson(orders)}");
+
+            return HandleResponseStatusOk(orders);
+        }
+
+        ///// <summary>
+        ///// 
+        ///// </summary>
+        ///// <param name="startDate"></param>
+        ///// <param name="endDate"></param>
+        ///// <returns></returns>
+        //[HttpGet("[action]")]
+        //public async Task<IActionResult> GetOrderByDateAsync(DateTime startDate, DateTime endDate)
+        //{
+        //    _logger.LogInformation($"Start get order from {startDate} to {endDate}");
+
+        //    var orders = await _orderServices.GetOrderByDateAsync(startDate, endDate);
+
+        //    _logger.LogInformation($"End get order from {startDate} to {endDate}");
+
+        //    return HandleResponseStatusOk(orders);
+        //}
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <returns></returns>
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetAllOrderAsync()
+        {
+            _logger.LogInformation($"Start get all order...");
+
+            var orders = await _orderServices.GetAllOrderAsync();
+
+            _logger.LogInformation($"End get all order...");
+
+            return HandleResponseStatusOk(orders);
+        }
+
+        ///// <summary>
+        ///// 
+        ///// </summary>
+        ///// <param name="statusId"></param>
+        ///// <returns></returns>
+        //[HttpGet("[action]")]
+        //public async Task<IActionResult> GetOrderByStatusId(int statusId)
+        //{
+        //    _logger.LogInformation($"Start get order by status id: {statusId}");
+
+        //    var orders = await _orderServices.GetOrderByStatusIdAsync(statusId);
+
+        //    _logger.LogInformation($"End get order by status id.");
+
+        //    return HandleResponseStatusOk(orders);
+        //}
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="statusId"></param>
+        /// <returns></returns>
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetOrderDetailById(Guid orderId)
+        {
+            _logger.LogInformation($"Start get order detail id: {orderId}");
+
+            var orders = await _orderServices.GetDetailOrderByIdAsync(orderId);
+
+            _logger.LogInformation($"End get order detail by id.");
 
             return HandleResponseStatusOk(orders);
         }
