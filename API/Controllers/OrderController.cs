@@ -187,24 +187,6 @@ namespace API.Controllers
             return HandleResponseStatusOk(orders);
         }
 
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <param name="startDate"></param>
-        ///// <param name="endDate"></param>
-        ///// <returns></returns>
-        //[HttpGet("[action]")]
-        //public async Task<IActionResult> GetOrderByDateAsync(DateTime startDate, DateTime endDate)
-        //{
-        //    _logger.LogInformation($"Start get order from {startDate} to {endDate}");
-
-        //    var orders = await _orderServices.GetOrderByDateAsync(startDate, endDate);
-
-        //    _logger.LogInformation($"End get order from {startDate} to {endDate}");
-
-        //    return HandleResponseStatusOk(orders);
-        //}
-
         /// <summary>
         /// 
         /// </summary>
@@ -222,23 +204,6 @@ namespace API.Controllers
 
             return HandleResponseStatusOk(orders);
         }
-
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <param name="statusId"></param>
-        ///// <returns></returns>
-        //[HttpGet("[action]")]
-        //public async Task<IActionResult> GetOrderByStatusId(int statusId)
-        //{
-        //    _logger.LogInformation($"Start get order by status id: {statusId}");
-
-        //    var orders = await _orderServices.GetOrderByStatusIdAsync(statusId);
-
-        //    _logger.LogInformation($"End get order by status id.");
-
-        //    return HandleResponseStatusOk(orders);
-        //}
 
         /// <summary>
         /// 
