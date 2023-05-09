@@ -273,7 +273,7 @@ namespace Services.Implement
                 throw new BusinessException(EmployeeConstants.EMPLOYEE_NOT_EXIST);
             }
 
-            if (employee.Name == EmployeeConstants.AdminName)
+            if (employee.Name == EmployeeConstants.AdminName || employee.Name == BaseConstants.NameDefault)
             {
                 throw new BusinessException(EmployeeConstants.CanNotRemoveAdmin);
             }

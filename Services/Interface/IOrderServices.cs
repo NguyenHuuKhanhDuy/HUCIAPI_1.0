@@ -15,6 +15,7 @@ namespace Services.Interface
         Task<OrderDto> GetDetailOrderByIdAsync(Guid orderId);
         Task<OrderDto> CreateOrderFromLadipageAsync(OrderForLadipageVM orderVM);
         Task<string> UpdateStatusShippingGHTKAsync(IFormFile excelFile);
+        Task<string> UpdateStatusShippingEMSAsync(IFormFile excelFile);
         Task<OrderPaginationDto> GetOrdersWithPagination(int page, int pageSize);
         Task<StatusOrderDto> GetAllOrderStatusAsync();
         Task<List<OrderDto>> GetOrdersToCallTakeCareWithDateAgoAsyns(int fromDateAgo, int toDateAgo);

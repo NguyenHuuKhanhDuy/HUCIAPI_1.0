@@ -25,5 +25,7 @@ namespace Common.Constants
 
         public const int PageDefault = 1;
         public const int PageSizeDefault = 20;
+
+        public const string NameDefault = "--";
     }
 }

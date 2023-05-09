@@ -144,6 +144,11 @@ namespace API.Controllers
             return HandleResponseStatusOk(orders);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="excelFile"></param>
+        /// <returns></returns>
         [HttpPut("[action]")]
         public async Task<IActionResult> UpdateStatusShippingGHTKAsync(IFormFile excelFile)
         {
@@ -152,6 +157,22 @@ namespace API.Controllers
             var file = await _orderServices.UpdateStatusShippingGHTKAsync(excelFile);
 
             _logger.LogInformation("End update status for order from GHTK");
+            return HandleResponseStatusOk(file);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="excelFile"></param>
+        /// <returns></returns>
+        [HttpPut("[action]")]
+        public async Task<IActionResult> UpdateStatusShippingEMSAsync(IFormFile excelFile)
+        {
+            _logger.LogInformation("Start update status for order from EMS");
+
+            var file = await _orderServices.UpdateStatusShippingEMSAsync(excelFile);
+
+            _logger.LogInformation("End update status for order from EMS");
             return HandleResponseStatusOk(file);
         }
 

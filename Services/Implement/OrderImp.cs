@@ -519,11 +519,12 @@ namespace Services.Implement
                 DistrictId = BaseConstants.INT_DEFAULT,
                 WardId = BaseConstants.INT_DEFAULT,
                 VoucherId = Guid.Empty,
+                CreateEmployeeId = Guid.Empty,
                 OrderDiscount = BaseConstants.INT_DEFAULT,
-                OrderStatusId = BaseConstants.INT_DEFAULT,
+                OrderStatusId = 1,
                 OrderSourceId = OrderConstants.ORDER_SOURCE_TIKTOK,
-                OrderStatusPaymentId = BaseConstants.INT_DEFAULT,
-                OrderStatusShippingId = BaseConstants.INT_DEFAULT,
+                OrderStatusPaymentId = 1,
+                OrderStatusShippingId = 1,
                 OrderShippingMethodId = BaseConstants.INT_DEFAULT,
                 OrderNote = "Order from Ladipage"
             };
@@ -551,22 +552,27 @@ namespace Services.Implement
                 order.CustomerId = customer.Id;
             }
 
-            var productNumber = GetProductCodeFromName(orderVM.Product);
-            var product = await _dbContext.Products.FirstOrDefaultAsync(x => x.ProductNumber == productNumber && !x.IsDeleted);
+            var productNumbers = GetProductCodesFromName(orderVM.Product);
+            var products = await _dbContext.Products.Where(x => !x.IsDeleted).ToListAsync();
 
-            if (product == null)
+            foreach (var productNumber in productNumbers)
             {
-                throw new BusinessException(ProductConstants.PRODUCT_NOT_EXIST);
+                var product = products.FirstOrDefault(x => x.ProductNumber == productNumber);
+                if (product == null)
+                {
+                    throw new BusinessException(ProductConstants.PRODUCT_NOT_EXIST);
+                }
+
+                var productInsideOrder = new ProductInsideOrderVM
+                {
+                    ProductId = product.Id,
+                    Quantity = 1,
+                    Discount = 0
+                };
+
+                order.products.Add(productInsideOrder);
             }
 
-            var productInsideOrder = new ProductInsideOrderVM
-            {
-                ProductId = product.Id,
-                Quantity = 1,
-                Discount = 0
-            };
-
-            order.products.Add(productInsideOrder);
             return order;
         }
 
@@ -575,19 +581,22 @@ namespace Services.Implement
         /// </summary>
         /// <param name="productName"></param>
         /// <returns></returns>
-        private string GetProductCodeFromName(string productName)
+        private List<string> GetProductCodesFromName(string productName)
         {
-            int startIndex = productName.IndexOf("(") + 1;
-            int endIndex = productName.IndexOf(")");
 
-            if (startIndex != 0 && endIndex != -1 && endIndex > startIndex)
+            // Extract the comma-separated list of strings inside the *...* markers
+            string[] spStrings = productName.Split('*')[1].Split(',');
+
+            // Trim any leading or trailing spaces from each string in the array
+            for (int i = 0; i < spStrings.Length; i++)
             {
-                return productName.Substring(startIndex, endIndex - startIndex);
+                spStrings[i] = spStrings[i].Trim();
             }
-            else
-            {
-                return null;
-            }
+
+            // Convert the array of strings into a list
+            List<string> spList = new List<string>(spStrings);
+
+            return spList;
         }
 
         /// <summary>
@@ -634,9 +643,9 @@ namespace Services.Implement
                             for (int col = 1; col <= columnCount; col++)
                             {
                                 var cellValue = worksheet.Cells[row, col].Value?.ToString().Trim();
-                                if (cellValue == FileConstants.OrderNumber) orderNumberCol = col;
-                                if (cellValue == FileConstants.StatusOrder) statusOrderCol = col;
-                                if (cellValue == FileConstants.ShippingNote) shippingNoteCol = col;
+                                if (cellValue == FileConstants.OrderNumberGHTK) orderNumberCol = col;
+                                if (cellValue == FileConstants.StatusOrderGHTK) statusOrderCol = col;
+                                if (cellValue == FileConstants.ShippingNoteGHTK) shippingNoteCol = col;
                             }
 
                             startIndex = row;
@@ -676,6 +685,112 @@ namespace Services.Implement
                                 order.OrderNote = shippingNoteText ?? string.Empty;
 
                                 if (RemoveUnicode(statusOrderText) == FileConstants.Paid)
+                                {
+                                    //add Commission for order
+                                    await CreateOrderCommission(order, commissions, orderCommissions);
+
+                                }
+                            }
+                        }
+                    }
+
+                    if (orderNumberCol == 0 || statusOrderCol == 0 || statusOrderCol == 0)
+                    {
+                        throw new BusinessException("file wrong format");
+                    }
+                }
+            }
+
+            await _dbContext.SaveChangesAsync();
+            return result;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="excelFile"></param>
+        /// <returns></returns>
+        public async Task<string> UpdateStatusShippingEMSAsync(IFormFile excelFile)
+        {
+            CheckExtensionExcelFile(excelFile);
+            if (excelFile == null || excelFile.Length == 0)
+                throw new BusinessException("Excel file not found");
+
+            string result = string.Empty;
+            int orderNumberCol = 0;
+            int statusOrderCol = 0;
+            int shippingNoteCol = 0;
+            int startIndex = 999999999;
+            var orders = await _dbContext.Orders.ToListAsync();
+            var statusOrders = await _dbContext.StatusOrders.ToListAsync();
+            var commissions = await _dbContext.Commissions.Where(x => !x.IsDelete).ToListAsync();
+            var orderCommissions = await _dbContext.OrderCommissions.ToListAsync();
+
+            int statusId = statusOrders.Count + 1;
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
+            using (var stream = new MemoryStream())
+            {
+                await excelFile.CopyToAsync(stream);
+
+                using (var package = new ExcelPackage(stream))
+                {
+                    var worksheet = package.Workbook.Worksheets[0];
+                    var rowCount = worksheet.Dimension.Rows;
+                    var columnCount = worksheet.Dimension.Columns;
+
+                    // Iterate through rows and columns
+                    for (int row = 1; row <= rowCount; row++)
+                    {
+                        var cellValueCol1 = worksheet.Cells[row, 1].Value?.ToString().Trim();
+
+                        if (cellValueCol1 == FileConstants.TinhNhan)
+                        {
+                            for (int col = 1; col <= columnCount; col++)
+                            {
+                                var cellValue = worksheet.Cells[row, col].Value?.ToString().Trim();
+                                if (cellValue == FileConstants.OrderNumberEMS) orderNumberCol = col;
+                                if (cellValue == FileConstants.StatusOrderEMS) statusOrderCol = col;
+                                if (cellValue == FileConstants.ShippingNoteEMS) shippingNoteCol = col;
+                            }
+
+                            startIndex = row;
+                        }
+
+                        if (row > startIndex)
+                        {
+                            var orderNumberText = worksheet.Cells[row, orderNumberCol].Value?.ToString().Trim();
+                            var order = orders.FirstOrDefault(x => x.OrderNumber == orderNumberText);
+
+                            if (order != null)
+                            {
+                                var shippingNoteText = worksheet.Cells[row, shippingNoteCol].Value?.ToString().Trim();
+                                var statusOrderText = worksheet.Cells[row, statusOrderCol].Value?.ToString().Trim();
+
+                                if (string.IsNullOrEmpty(statusOrderText))
+                                    continue;
+
+                                var statusOrder = statusOrders.FirstOrDefault(x => !string.IsNullOrEmpty(x.Name)
+                                && RemoveUnicode(x.Name) == RemoveUnicode(statusOrderText));
+
+                                if (statusOrder == null)
+                                {
+                                    statusOrder = new StatusOrder
+                                    {
+                                        Id = statusId,
+                                        Name = statusOrderText
+                                    };
+
+                                    statusId++;
+                                    await _dbContext.StatusOrders.AddAsync(statusOrder);
+                                    await _dbContext.SaveChangesAsync();
+                                }
+
+                                order.OrderStatusId = statusOrder.Id;
+                                order.OrderStatusName = statusOrder.Name;
+                                order.OrderNote = shippingNoteText ?? string.Empty;
+
+                                if (RemoveUnicode(statusOrderText) == FileConstants.EMSSuccess)
                                 {
                                     //add Commission for order
                                     await CreateOrderCommission(order, commissions, orderCommissions);
