@@ -3,6 +3,7 @@ using ApplicationCore.ModelsDto;
 using ApplicationCore.ModelsDto.Employee;
 using ApplicationCore.ViewModels.Employee;
 using AutoMapper;
+using AutoMapper.Configuration.Conventions;
 using Common.Constants;
 using Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
@@ -21,12 +22,14 @@ namespace Services.Implement
         private readonly HucidbContext _dbContext;
         private readonly IMapper _mapper;
         private readonly IConfiguration _config;
+        private readonly IOrderServices _orderServices;
 
-        public EmployeeImp(HucidbContext dbContext, IMapper mapper, IConfiguration config) : base(dbContext)
+        public EmployeeImp(HucidbContext dbContext, IMapper mapper, IConfiguration config, IOrderServices orderServices) : base(dbContext)
         {
             _dbContext = dbContext;
             _mapper = mapper;
             _config = config;
+            _orderServices = orderServices;
         }
         public async Task<EmployeeDto> Login(UserVM userVM)
         {
@@ -363,6 +366,36 @@ namespace Services.Implement
             benefitDto.TotalOrderBenefit = orders.Sum(x => x.BenefitOrder);
 
             return benefitDto;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="monthsAgo"></param>
+        /// <returns></returns>
+        public async Task<List<ReportMonthDto>> ReportMonthsAgo(int monthsAgo)
+        {
+            var reportDto = new List<ReportMonthDto>();
+            var monthsAgoDateTime = DateTime.Today.AddMonths(-monthsAgo);
+            for(int i = 0; i <monthsAgo;i++)
+            {
+                var firstDayOfMonth = new DateTime(monthsAgoDateTime.Year, monthsAgoDateTime.Month, 1);
+                var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
+                var totalOrder = await _orderServices.GetOrderByDateAsync(firstDayOfMonth, lastDayOfMonth);
+                var benefit = await CalculateBenefitWithDateAsync(firstDayOfMonth, lastDayOfMonth);
+                //do something
+                var report = new ReportMonthDto
+                {
+                    TotalOrder = totalOrder.Count,
+                    Benefit = benefit,
+                    MonthAgo = monthsAgo - i
+                };
+
+                reportDto.Add(report);
+                monthsAgoDateTime = monthsAgoDateTime.AddMonths(1);
+            }
+
+            return reportDto;
         }
     }
 }

@@ -26,5 +26,6 @@ namespace Services.Interface
         string GetPassworkEncrypt(string password);
 
         Task<BenefitDto> CalculateBenefitWithDateAsync(DateTime startDate, DateTime endDate);
+        Task<List<ReportMonthDto>> ReportMonthsAgo(int monthsAgo);
     }
 }

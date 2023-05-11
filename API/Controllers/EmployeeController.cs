@@ -165,5 +165,23 @@ namespace API.Controllers
 
             return HandleResponseStatusOk(benefit);
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <returns></returns>
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetReportMonthsAgo(int monthsAgo)
+        {
+            _logger.LogInformation($"Start get report for {monthsAgo} months ago...");
+
+            var report = await _employeeService.ReportMonthsAgo(monthsAgo);
+
+            _logger.LogInformation($"Start get report for {{monthsAgo}} months ago... {GetStringFromJson(report)}");
+
+            return HandleResponseStatusOk(report);
+        }
     }
 }
