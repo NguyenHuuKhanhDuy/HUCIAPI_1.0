@@ -193,7 +193,7 @@ namespace Services.Implement
 
             order.OrderStatusName = status.Name;
 
-            var customer = await _dbContext.Customers.FirstOrDefaultAsync(x => x.Phone == order.CustomerPhone);
+            var customer = await _dbContext.Customers.FirstOrDefaultAsync(x => x.Phone == order.CustomerPhone || x.Id == order.CustomerId);
 
             if (customer == null)
             {
@@ -214,10 +214,12 @@ namespace Services.Implement
                 var customerTemp = await _dbContext.Customers.FirstOrDefaultAsync(x => x.Phone == order.CustomerPhone);
 
                 customerTemp.OrderCount += 1;
+                order.CustomerId = customerTemp.Id;
             }
             else
             {
                 customer.OrderCount += 1;
+                order.CustomerId = customer.Id;
             }
 
             var paymentStatus = await _dbContext.StatusPayments.AsNoTracking().FirstOrDefaultAsync(x => x.Id == order.OrderStatusPaymentId);
@@ -445,7 +447,7 @@ namespace Services.Implement
 
         public async Task HandleCancelOrDeleteOrderAsync(Order order)
         {
-            var orderDetails = await _dbContext.OrderDetails.AsNoTracking().Where(x => x.OrderId == order.Id).ToListAsync();
+            var orderDetails = await _dbContext.OrderDetails.AsNoTracking().Where(x => x.OrderId == order.Id && !x.IsDeleted).ToListAsync();
             var products = await _dbContext.Products
                                            .Where(x => !x.IsDeleted && orderDetails.Select(x => x.ProductId).ToList().Contains(x.Id))
                                            .ToListAsync();
@@ -489,6 +491,7 @@ namespace Services.Implement
             MapFOrderUpdateVMTOrder(order, orderVM);
             await CheckInforForOrderForUpdate(order);
 
+            await UpdateOrderDetailsForOrder(orderVM, order);
             if (order.OrderStatusId == OrderConstants.OrderStatusSuccess)
             {
                 var commissions = await _dbContext.Commissions.Where(x => !x.IsDelete).ToListAsync();
@@ -502,6 +505,45 @@ namespace Services.Implement
             return dto;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="orderVM"></param>
+        /// <param name="order"></param>
+        /// <returns></returns>
+        private async Task UpdateOrderDetailsForOrder(OrderUpdateVM orderVM, Order order)
+        {
+            var orderDetailsDB = await _dbContext.OrderDetails.Where(x => x.OrderId == orderVM.Id).ToListAsync();
+
+            var productIds = orderVM.products.Select(x => x.ProductId).ToList();
+            var orderDetailsUpdate = orderDetailsDB.Where(x => productIds.Contains(x.ProductId)).ToList();
+
+            var orderDetailsDelete = orderDetailsDB.Where(x => !productIds.Contains(x.ProductId)).ToList();
+
+            var productInsideOrders = await GetProductDtoByIdsAsync(orderVM.products);
+            var orderDetails = await GetOrderDetailsAndCalculatePrice(order, productInsideOrders, orderVM.products);
+
+            var orderDetailAddDB = orderDetails.Where(x => !orderDetailsUpdate.Select(y => y.ProductId).Contains(x.ProductId)).ToList();
+
+            foreach (var update in orderDetailsUpdate)
+            {
+                var productInside = orderVM.products.Where(x => x.ProductId == update.ProductId).FirstOrDefault();
+
+                if (productInside == null)
+                    continue;
+
+                update.Quantity = productInside.Quantity;
+                update.Discount = productInside.Discount;
+            }
+
+            foreach (var delete in orderDetailsDelete)
+            {
+                delete.IsDeleted = true;
+            }
+
+            await _dbContext.OrderDetails.AddRangeAsync(orderDetailAddDB);
+            await _dbContext.SaveChangesAsync();
+        }
         /// <summary>
         /// 
         /// </summary>
@@ -586,7 +628,7 @@ namespace Services.Implement
                 throw new Exception(OrderConstants.ORDER_NOT_EXISTS);
             }
 
-            var orderDetails = await _dbContext.OrderDetails.Where(x => x.OrderId == order.Id).ToListAsync();
+            var orderDetails = await _dbContext.OrderDetails.Where(x => x.OrderId == order.Id && !x.IsDeleted).ToListAsync();
             var orderDto = MapFOrderTOrderDto(order);
 
             if (orderDetails.Any())
@@ -655,36 +697,47 @@ namespace Services.Implement
                 order.CustomerId = customer.Id;
             }
 
-            var productNumbersWithQuantitys = GetProductCodesFromName(orderVM.Product);
-            var products = await _dbContext.Products.Where(x => !x.IsDeleted).ToListAsync();
+            //var productNumbersWithQuantitys = GetProductCodesFromName(orderVM.Product);
+            //var products = await _dbContext.Products.Where(x => !x.IsDeleted).ToListAsync();
 
-            foreach (var productNumberWithQuantity in productNumbersWithQuantitys)
+            //foreach (var productNumberWithQuantity in productNumbersWithQuantitys)
+            //{
+            //    string[] parts = productNumberWithQuantity.Split('_');
+
+            //    // Extract the two parts
+            //    string quantityString = parts[0];
+            //    int quantity;
+            //    bool success = int.TryParse(quantityString, out quantity);
+            //    string productNumber = parts[1];
+
+            //    var product = products.FirstOrDefault(x => x.ProductNumber == productNumber);
+            //    if (product == null)
+            //    {
+            //        throw new BusinessException(ProductConstants.PRODUCT_NOT_EXIST);
+            //    }
+
+
+
+            //    var productInsideOrder = new ProductInsideOrderVM
+            //    {
+            //        ProductId = product.Id,
+            //        Quantity = success ? quantity : 1,
+            //        Discount = 0
+            //    };
+
+            //    order.products.Add(productInsideOrder);
+            //}
+
+            var product = await _dbContext.Products.AsNoTracking().FirstOrDefaultAsync(x => !x.IsDeleted && x.Name == orderVM.Product);
+
+            var productInsideOrder = new ProductInsideOrderVM
             {
-                string[] parts = productNumberWithQuantity.Split('_');
+                ProductId = product.Id,
+                Quantity = 1,
+                Discount = 0
+            };
 
-                // Extract the two parts
-                string quantityString = parts[0];
-                int quantity;
-                bool success = int.TryParse(quantityString, out quantity);
-                string productNumber = parts[1];
-
-                var product = products.FirstOrDefault(x => x.ProductNumber == productNumber);
-                if (product == null)
-                {
-                    throw new BusinessException(ProductConstants.PRODUCT_NOT_EXIST);
-                }
-
-
-
-                var productInsideOrder = new ProductInsideOrderVM
-                {
-                    ProductId = product.Id,
-                    Quantity = success ? quantity : 1,
-                    Discount = 0
-                };
-
-                order.products.Add(productInsideOrder);
-            }
+            order.products.Add(productInsideOrder);
 
             return order;
         }
@@ -1098,7 +1151,7 @@ namespace Services.Implement
             if (orders == null || !orders.Any())
                 return ordersList;
 
-            var orderDetails = await _dbContext.OrderDetails.AsNoTracking().Where(x => orders.Select(x => x.Id).Contains(x.OrderId)).ToListAsync();
+            var orderDetails = await _dbContext.OrderDetails.AsNoTracking().Where(x => !x.IsDeleted && orders.Select(x => x.Id).Contains(x.OrderId)).ToListAsync();
 
             foreach (var order in orders)
             {

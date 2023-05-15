@@ -189,7 +189,7 @@ namespace Services.Implement
         /// <returns></returns>
         public async Task<List<EmployeeDto>> GetAllEmployeeAsync()
         {
-            var employees = await _dbContext.Employees.ToListAsync();
+            var employees = await _dbContext.Employees.Where(x => !x.IsDeleted).ToListAsync();
             List<EmployeeDto> employeeDtos = new List<EmployeeDto>();
             foreach (var employee in employees)
             {

@@ -1,4 +1,6 @@
-﻿namespace Infrastructure.Models;
+﻿using System.Collections.Generic;
+
+namespace Infrastructure.Models;
 
 public partial class OtherCost
 {

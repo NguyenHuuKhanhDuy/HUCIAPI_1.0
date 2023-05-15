@@ -138,7 +138,7 @@ namespace Services.Implement
         /// <returns></returns>
         public async Task<List<CustomerDto>> GetAllCustomerAsync()
         {
-            var customers = await _dbContext.Customers.Where(x => !x.IsDeleted).ToListAsync();
+            var customers = await _dbContext.Customers.Where(x => !x.IsDeleted).OrderByDescending(x => x.CreateDate).ToListAsync();
 
 
             List<CustomerDto> dtos = new List<CustomerDto>();
