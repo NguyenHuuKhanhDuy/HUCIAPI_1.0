@@ -1124,7 +1124,7 @@ namespace Services.Implement
             }
 
             var totalOrdersPerPage = orders.OrderByDescending(o => o.OrderDate).Skip((page - 1) * pageSize).Take(pageSize).ToList();
-            var totalOrder = totalOrdersPerPage.Count();
+            var totalOrder = orders.Count();
 
             if (totalOrder == 0)
                 return orderPage;
