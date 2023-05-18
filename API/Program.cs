@@ -69,6 +69,8 @@ builder.Services.AddTransient<ICommissionServices, CommissionImp>();
 builder.Services.AddTransient<IOtherCostServices, OtherCostImp>();
 builder.Services.AddTransient<ITimeKeepingServices, TimeKeepingImp>();
 builder.Services.AddTransient<ICallTakeCareServices, CallTakeCareImp>();
+builder.Services.AddTransient<IIPServices, IPImp>();
+builder.Services.AddTransient<IShiftServices, ShiftImp>();
 
 //add authen services
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>

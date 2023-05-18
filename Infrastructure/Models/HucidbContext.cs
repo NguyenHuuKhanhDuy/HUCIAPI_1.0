@@ -6,10 +6,6 @@ namespace Infrastructure.Models;
 
 public partial class HucidbContext : DbContext
 {
-    public HucidbContext()
-    {
-    }
-
     public HucidbContext(DbContextOptions<HucidbContext> options)
         : base(options)
     {

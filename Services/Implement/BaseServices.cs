@@ -4,6 +4,7 @@ using ApplicationCore.ModelsDto.CallTakeCare;
 using ApplicationCore.ModelsDto.Commission;
 using ApplicationCore.ModelsDto.Customer;
 using ApplicationCore.ModelsDto.Fund;
+using ApplicationCore.ModelsDto.IP;
 using ApplicationCore.ModelsDto.Order;
 using ApplicationCore.ModelsDto.OrderCommission;
 using ApplicationCore.ModelsDto.OtherCost;
@@ -612,6 +613,17 @@ namespace Services.Implement
                 Notes = !string.IsNullOrEmpty(orderCall.Notes) ? orderCall.Notes : string.Empty,
                 UserCreateId = orderCall.UserCreateId,
                 UserCreateName = userCreateName
+            };
+        }
+
+        //IP
+        public IPDto MapFIPTIPDto(Ip ip)
+        {
+            return new IPDto
+            {
+                Id = ip.Id,
+                Ipv4 = ip.Ipv4,
+                CreateDate = ip.CreateDate
             };
         }
 
