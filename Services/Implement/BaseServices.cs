@@ -7,9 +7,11 @@ using ApplicationCore.ModelsDto.Fund;
 using ApplicationCore.ModelsDto.IP;
 using ApplicationCore.ModelsDto.Order;
 using ApplicationCore.ModelsDto.OrderCommission;
+using ApplicationCore.ModelsDto.OrderSource;
 using ApplicationCore.ModelsDto.OtherCost;
 using ApplicationCore.ModelsDto.Product;
 using ApplicationCore.ModelsDto.Promotion;
+using ApplicationCore.ModelsDto.Shift;
 using ApplicationCore.ModelsDto.Supplier;
 using ApplicationCore.ViewModels.Commission;
 using ApplicationCore.ViewModels.Customer;
@@ -546,7 +548,7 @@ namespace Services.Implement
         {
             return new OrderCommissionDto
             {
-                Id= orderCommission.Id,
+                Id = orderCommission.Id,
                 OrderId = orderCommission.OrderId,
                 EmployeeId = orderCommission.EmployeeId,
                 OrderTotal = orderCommission.OrderTotal,
@@ -627,5 +629,27 @@ namespace Services.Implement
             };
         }
 
+        //Shift
+        public ShiftDto MapFShiftTShiftDto(Shift shift)
+        {
+            return new ShiftDto
+            {
+                Id = shift.Id,
+                StartTime = shift.StartTime,
+                EndTime = shift.EndTime,
+                CreateDate = shift.CreateDate
+            };
+        }
+
+        //order source
+        public OrderSourceDto MapFOrderSourceTOrderSourceDto(OrderSource source)
+        {
+            return new OrderSourceDto
+            {
+                Id = source.Id,
+                SourceName = source.SourceName,
+                PercentCommission = source.PercentCommission,
+            };
+        }
     }
 }

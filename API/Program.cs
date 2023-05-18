@@ -24,7 +24,7 @@ builder.Services.AddControllers().ConfigureApiBehaviorOptions(options =>
 });
 
 #if DEBUG
-var connectionString = builder.Configuration.GetConnectionString("HUCIDB_SERVER");
+var connectionString = builder.Configuration.GetConnectionString("HUCIDB");
 builder.Services.AddDbContext<HucidbContext>(options => options.UseSqlServer(connectionString));
 #else
 var connectionString = builder.Configuration.GetConnectionString("HUCIDB_SERVER");
@@ -71,6 +71,7 @@ builder.Services.AddTransient<ITimeKeepingServices, TimeKeepingImp>();
 builder.Services.AddTransient<ICallTakeCareServices, CallTakeCareImp>();
 builder.Services.AddTransient<IIPServices, IPImp>();
 builder.Services.AddTransient<IShiftServices, ShiftImp>();
+builder.Services.AddTransient<IOrderSourceServices, OrderSourceImp>();
 
 //add authen services
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>

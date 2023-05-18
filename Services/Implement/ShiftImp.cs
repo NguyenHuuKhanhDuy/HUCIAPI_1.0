@@ -1,6 +1,9 @@
-﻿using ApplicationCore.ModelsDto.Shift;
+﻿using ApplicationCore.Exceptions;
+using ApplicationCore.ModelsDto.Shift;
 using ApplicationCore.ViewModels.Shift;
+using Common.Constants;
 using Infrastructure.Models;
+using Microsoft.EntityFrameworkCore;
 using Services.Interface;
 
 namespace Services.Implement
@@ -13,24 +16,92 @@ namespace Services.Implement
             _dbContext = dbContext;
         }
 
-        public Task<ShiftDto> CreateShiftAsync(ShiftVM vm)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="vm"></param>
+        /// <returns></returns>
+        public async Task<ShiftDto> CreateShiftAsync(ShiftVM vm)
         {
-            throw new NotImplementedException();
+            var shift = new Shift
+            {
+                Id = Guid.NewGuid(),
+                EndTime = vm.EndTime,
+                StartTime = vm.StartTime,
+                CreateDate = GetDateTimeNow(),
+                IsDeleted = BaseConstants.IsDeletedDefault
+            };
+
+            await _dbContext.AddAsync(shift);
+            await _dbContext.SaveChangesAsync();
+
+            var dto = MapFShiftTShiftDto(shift);
+
+            return dto;
         }
 
-        public Task DeleteShiftAsync(Guid shiftId)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="shiftId"></param>
+        /// <returns></returns>
+        public async Task DeleteShiftAsync(Guid shiftId)
         {
-            throw new NotImplementedException();
+            var shift = await FindShiftAsync(shiftId);
+
+            shift.IsDeleted = true;
+            await _dbContext.SaveChangesAsync();
         }
 
-        public Task<List<ShiftDto>> GetAllShiftAsync()
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public async Task<List<ShiftDto>> GetAllShiftAsync()
         {
-            throw new NotImplementedException();
+            var shifts = await _dbContext.Shifts.Where(x => !x.IsDeleted).ToListAsync();
+            var dtos = new List<ShiftDto>();
+
+            foreach (var shift in shifts)
+            {
+                dtos.Add(MapFShiftTShiftDto(shift));
+            }
+
+            return dtos;
         }
 
-        public Task<ShiftDto> UpdateShiftAsync(ShiftUpdateVM vm)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="vm"></param>
+        /// <returns></returns>
+        public async Task<ShiftDto> UpdateShiftAsync(ShiftUpdateVM vm)
         {
-            throw new NotImplementedException();
+            var shift = await FindShiftAsync(vm.Id);
+            shift.StartTime = vm.StartTime;
+            shift.EndTime = vm.EndTime;
+
+            var dto = MapFShiftTShiftDto(shift);
+
+            return dto;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="shiftId"></param>
+        /// <returns></returns>
+        /// <exception cref="BusinessException"></exception>
+        private async Task<Shift> FindShiftAsync(Guid shiftId)
+        {
+            var shift = await _dbContext.Shifts.FirstOrDefaultAsync(x => x.Id == shiftId && !x.IsDeleted);
+
+            if (shift == null)
+            {
+                throw new BusinessException(ShiftConstant.ShiftNotExist);
+            }
+
+            return shift;
         }
     }
 }
