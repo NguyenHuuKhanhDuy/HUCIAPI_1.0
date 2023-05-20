@@ -2,8 +2,8 @@
 {
     public class ShiftVM
     {
-        public TimeSpan StartTime { get; set; }
+        public string StartTime { get; set; } = null!;
 
-        public TimeSpan EndTime { get; set; }
+        public string EndTime { get; set; } = null!;
     }
 }

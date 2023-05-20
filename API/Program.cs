@@ -24,7 +24,7 @@ builder.Services.AddControllers().ConfigureApiBehaviorOptions(options =>
 });
 
 #if DEBUG
-var connectionString = builder.Configuration.GetConnectionString("HUCIDB");
+var connectionString = builder.Configuration.GetConnectionString("HUCIDB_SERVER");
 builder.Services.AddDbContext<HucidbContext>(options => options.UseSqlServer(connectionString));
 #else
 var connectionString = builder.Configuration.GetConnectionString("HUCIDB_SERVER");

@@ -26,8 +26,8 @@ namespace Services.Implement
             var shift = new Shift
             {
                 Id = Guid.NewGuid(),
-                EndTime = vm.EndTime,
-                StartTime = vm.StartTime,
+                EndTime = ParseStringToTimeSpan(vm.EndTime),
+                StartTime = ParseStringToTimeSpan(vm.StartTime),
                 CreateDate = GetDateTimeNow(),
                 IsDeleted = BaseConstants.IsDeletedDefault
             };
@@ -78,8 +78,8 @@ namespace Services.Implement
         public async Task<ShiftDto> UpdateShiftAsync(ShiftUpdateVM vm)
         {
             var shift = await FindShiftAsync(vm.Id);
-            shift.StartTime = vm.StartTime;
-            shift.EndTime = vm.EndTime;
+            shift.StartTime = ParseStringToTimeSpan(vm.StartTime);
+            shift.EndTime = ParseStringToTimeSpan(vm.EndTime);
 
             var dto = MapFShiftTShiftDto(shift);
 
@@ -102,6 +102,24 @@ namespace Services.Implement
             }
 
             return shift;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="timeString"></param>
+        /// <returns></returns>
+        /// <exception cref="BusinessException"></exception>
+        private TimeSpan ParseStringToTimeSpan(string timeString)
+        {
+            TimeSpan timeSpan;
+            bool success = TimeSpan.TryParse(timeString, out timeSpan);
+            if (!success)
+            {
+                throw new BusinessException(ShiftConstant.CanNotParseToTime);
+            }
+
+            return timeSpan;
         }
     }
 }
