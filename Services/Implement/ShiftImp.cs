@@ -81,6 +81,7 @@ namespace Services.Implement
             shift.StartTime = ParseStringToTimeSpan(vm.StartTime);
             shift.EndTime = ParseStringToTimeSpan(vm.EndTime);
 
+            await _dbContext.SaveChangesAsync();
             var dto = MapFShiftTShiftDto(shift);
 
             return dto;
