@@ -449,7 +449,7 @@ namespace Services.Implement
             {
                 Id = Guid.NewGuid(),
                 Name = fundVM.Name,
-                TotalFund = fundVM.TotalFund,
+                TotalFund = 0,
                 CreateDate = GetDateTimeNow(),
                 IsActive = BaseConstants.IsActiveDefault,
                 IsDeleted = BaseConstants.IsDeletedDefault,

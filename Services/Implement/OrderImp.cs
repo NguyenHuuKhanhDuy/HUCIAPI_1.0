@@ -1062,6 +1062,7 @@ namespace Services.Implement
         public async Task<OrderPaginationDto> GetOrdersWithPaginationAsync(DateTime startDate,
             DateTime endDate,
             Guid employeeCreateId,
+            Guid customerId,
             int page,
             int pageSize,
             bool isGetWithoutDate,
@@ -1069,7 +1070,8 @@ namespace Services.Implement
             int sourceOrderId,
             int orderStatusPaymentId,
             int orderStatusShippingId,
-            int orderShippingMethodId)
+            int orderShippingMethodId,
+            string phone)
         {
             var orderPage = new OrderPaginationDto
             {
@@ -1121,6 +1123,18 @@ namespace Services.Implement
             if (!isGetWithoutDate)
             {
                 orders = orders.Where(x => x.OrderDate.Date >= startDate.Date && x.OrderDate.Date <= endDate.Date).ToList();
+            }
+
+            //filter for phone 
+            if (!string.IsNullOrEmpty(phone))
+            {
+                orders = orders.Where(x => x.CustomerPhone == phone).ToList();
+            }
+
+            //filter for phone 
+            if (customerId != Guid.Empty)
+            {
+                orders = orders.Where(x => x.CustomerId == customerId).ToList();
             }
 
             var totalOrdersPerPage = orders.OrderByDescending(o => o.OrderDate).Skip((page - 1) * pageSize).Take(pageSize).ToList();

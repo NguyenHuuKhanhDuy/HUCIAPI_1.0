@@ -134,6 +134,8 @@ namespace API.Controllers
             DateTime startDate, 
             DateTime endDate,
             Guid employeeCreateId,
+            Guid customerId,
+            string? phone,
             int page = BaseConstants.PageDefault,
             int pageSize = BaseConstants.PageSizeDefault,
             bool isGetWithoutDate = true,
@@ -146,7 +148,7 @@ namespace API.Controllers
         {
             _logger.LogInformation($"Start get order with page: {page}, pageSize: {pageSize}");
             
-            var orders = await _orderServices.GetOrdersWithPaginationAsync(startDate, endDate, employeeCreateId, page, pageSize, isGetWithoutDate, statusOrderId, sourceOrderId, orderStatusPaymentId, orderStatusShippingId, orderShippingMethodId);
+            var orders = await _orderServices.GetOrdersWithPaginationAsync(startDate, endDate, employeeCreateId, customerId, page, pageSize, isGetWithoutDate, statusOrderId, sourceOrderId, orderStatusPaymentId, orderStatusShippingId, orderShippingMethodId, phone);
 
             _logger.LogInformation($"End get order with page: {page}, pageSize: {pageSize} \r\n{GetStringFromJson(orders)}");
 
