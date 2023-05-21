@@ -189,14 +189,15 @@ namespace Services.Implement
         /// <returns></returns>
         public async Task<List<EmployeeDto>> GetAllEmployeeAsync()
         {
-            var employees = await _dbContext.Employees.Where(x => !x.IsDeleted).ToListAsync();
+            var allEmployee = await _dbContext.Employees.ToListAsync();
+            var employees = allEmployee.Where(x => !x.IsDeleted).ToList();
             List<EmployeeDto> employeeDtos = new List<EmployeeDto>();
             foreach (var employee in employees)
             {
                 if (employee.IsDeleted == false)
                 {
                     var employeeDto = _mapper.Map<EmployeeDto>(employee);
-                    employeeDto.CreateUserName = employees.Where(x => x.Id == employeeDto.CreateUserId).FirstOrDefault().Name;
+                    employeeDto.CreateUserName = allEmployee.Where(x => x.Id == employeeDto.CreateUserId).FirstOrDefault().Name;
                     employeeDtos.Add(employeeDto);
                 }
             }

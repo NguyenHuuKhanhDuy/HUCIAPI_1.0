@@ -685,7 +685,7 @@ namespace Services.Implement
                     DistrictId = BaseConstants.INT_DEFAULT,
                     WardId = BaseConstants.INT_DEFAULT,
                     Address = $"{orderVM.Address}, {orderVM.Ward}, {orderVM.District}, {orderVM.Province}",
-                    CreateUserId = Guid.Parse(BaseConstants.ADMIN_ID),
+                    CreateUserId = Guid.Empty,
                     Notes = "Customer create from Ladipage"
                 };
 
@@ -1092,25 +1092,25 @@ namespace Services.Implement
             //fillter with status payment
             if (orderStatusPaymentId != BaseConstants.INT_DEFAULT)
             {
-                orders = orders.Where(x => x.OrderStatusId == orderStatusPaymentId).ToList();
+                orders = orders.Where(x => x.OrderStatusPaymentId == orderStatusPaymentId).ToList();
             }
 
             //fillter with source order
             if (sourceOrderId != BaseConstants.INT_DEFAULT)
             {
-                orders = orders.Where(x => x.OrderStatusId == sourceOrderId).ToList();
+                orders = orders.Where(x => x.OrderSourceId == sourceOrderId).ToList();
             }
 
             //fillter with status shipping
             if (orderStatusShippingId != BaseConstants.INT_DEFAULT)
             {
-                orders = orders.Where(x => x.OrderStatusId == orderStatusShippingId).ToList();
+                orders = orders.Where(x => x.OrderStatusShippingId == orderStatusShippingId).ToList();
             }
 
             //fillter with shipping method
             if (orderShippingMethodId != BaseConstants.INT_DEFAULT)
             {
-                orders = orders.Where(x => x.OrderStatusId == orderShippingMethodId).ToList();
+                orders = orders.Where(x => x.OrderShippingMethodId == orderShippingMethodId).ToList();
             }
 
             //fillter with employee create
