@@ -29,11 +29,11 @@ namespace API.Controllers
         /// <param name="orderVM"></param>
         /// <returns></returns>
         [HttpPost("[action]")]
-        public async Task<IActionResult> CreateOrderAsync(OrderVM orderVM)
+        public async Task<IActionResult> CreateOrderAsync(OrderVM orderVM, bool isSetOrderDate = false)
         {
             _logger.LogInformation("Start create order...");
 
-            OrderDto order = await _orderServices.CreateOrderAsync(orderVM);
+            OrderDto order = await _orderServices.CreateOrderAsync(orderVM, isSetOrderDate);
 
             _logger.LogInformation("End create order...");
 

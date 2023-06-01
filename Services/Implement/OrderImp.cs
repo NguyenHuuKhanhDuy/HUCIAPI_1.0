@@ -32,7 +32,7 @@ namespace Services.Implement
         /// <param name="orderVM"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public async Task<OrderDto> CreateOrderAsync(OrderVM orderVM)
+        public async Task<OrderDto> CreateOrderAsync(OrderVM orderVM, bool isSetOrderDate)
         {
             Order order = new Order
             {
@@ -54,7 +54,7 @@ namespace Services.Implement
 
             order.Id = Guid.NewGuid();
             order.OrderNumber = await GetOrderNumber();
-            order.OrderDate = GetDateTimeNow();
+            order.OrderDate = isSetOrderDate ? orderVM.OrderDate : GetDateTimeNow();
             order.IsDeleted = order.IsRemovedCallTakeCare = BaseConstants.IsDeletedDefault;
 
             var productDtos = await GetProductDtoByIdsAsync(orderVM.products);
@@ -647,7 +647,7 @@ namespace Services.Implement
         public async Task<OrderDto> CreateOrderFromLadipageAsync(OrderForLadipageVM orderVM)
         {
             var order = await GetInformationForOrderLadipageAsync(orderVM);
-            var orderDto = await CreateOrderAsync(order);
+            var orderDto = await CreateOrderAsync(order, false);
 
             return orderDto;
         }
@@ -1003,11 +1003,13 @@ namespace Services.Implement
             if (commission?.Count == 0)
                 return;
 
+            var isHaveOrderBefore = await _dbContext.Orders.AsNoTracking().Where(x => x.CustomerId == order.CustomerId && x.OrderDate.Date <= order.OrderDate.Date).AnyAsync();
             var commissionPrice = commission?.Where(x => x.TotalPriceFrom < order.OrderTotal)
                                  .Select(x => x.CommissionPrice)
                                  .DefaultIfEmpty(0)
                                  .Max();
 
+            var percent = isHaveOrderBefore ? OrderConstants.PERCENT_COMMISSION_TAKE_CARE : 3;
             if (commissionPrice == 0)
                 return;
 
@@ -1038,7 +1040,7 @@ namespace Services.Implement
                         OrderTotal = order.OrderTotal,
                         CreateDate = GetDateTimeNow(),
                         EmployeeId = order.CreateEmployeeId,
-                        OrderCommission1 = (order.OrderTotal * OrderConstants.PERCENT_COMMISSION_TAKE_CARE) / 100
+                        OrderCommission1 = (order.OrderTotal * percent) / 100
                     };
                     await _dbContext.OrderCommissions.AddAsync(orderCommissionTemp);
                     orderCommissions.Add(orderCommissionTemp);
