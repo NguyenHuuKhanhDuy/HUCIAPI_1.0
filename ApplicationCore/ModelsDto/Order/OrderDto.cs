@@ -72,6 +72,10 @@ namespace ApplicationCore.ModelsDto.Order
 
         public string OrderSourceName { get; set; } = null!;
 
+        public int OrderPaymentMethodId { get; set; }
+
+        public string OrderPaymentMethodName { get; set; } = null!;
+
         public List<OrderDetailDto> products { get; set; } = new List<OrderDetailDto>();
     }
 }

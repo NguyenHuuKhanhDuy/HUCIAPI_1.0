@@ -337,6 +337,7 @@ namespace Services.Implement
             order.OrderSourceId = orderVM.OrderSourceId;
             order.OrderNote = orderVM.OrderNote;
             order.CreateEmployeeId = orderVM.CreateEmployeeId;
+            order.OrderPaymentMethodId = orderVM.OrderPaymentMethodId;
         }
 
         public void MapFOrderUpdateVMTOrder(Order order, OrderUpdateVM orderVM)
@@ -387,6 +388,8 @@ namespace Services.Implement
                 CreateEmployeeName = order.CreateEmployeeName,
                 OrderSourceId = order.OrderSourceId,
                 OrderSourceName = order.OrderSourceName,
+                OrderPaymentMethodId = order.OrderPaymentMethodId,
+                OrderPaymentMethodName = order.OrderPaymentMethodName
             };
 
             return orderDto;

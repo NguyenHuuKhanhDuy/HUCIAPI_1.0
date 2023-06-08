@@ -5,11 +5,9 @@ namespace Infrastructure.Models;
 
 public partial class OrderPaymentMethod
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
 
-    public string? Name { get; set; }
+    public string Name { get; set; } = null!;
 
-    public Guid? OrderId { get; set; }
-
-    public virtual Order? Order { get; set; }
+    public virtual ICollection<Order> Orders { get; } = new List<Order>();
 }

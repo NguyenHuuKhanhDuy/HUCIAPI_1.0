@@ -395,6 +395,7 @@ public partial class HucidbContext : DbContext
             entity.Property(e => e.OrderNumber)
                 .HasMaxLength(10)
                 .IsUnicode(false);
+            entity.Property(e => e.OrderPaymentMethodName).HasDefaultValueSql("('')");
             entity.Property(e => e.OrderShippingMethodName).HasDefaultValueSql("('')");
             entity.Property(e => e.OrderSourceName).HasDefaultValueSql("('')");
             entity.Property(e => e.OrderStatusName).HasDefaultValueSql("('')");
@@ -418,6 +419,11 @@ public partial class HucidbContext : DbContext
                 .HasForeignKey(d => d.DistrictId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Order_Location");
+
+            entity.HasOne(d => d.OrderPaymentMethod).WithMany(p => p.Orders)
+                .HasForeignKey(d => d.OrderPaymentMethodId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Order_OrderPaymentMethod");
 
             entity.HasOne(d => d.OrderShippingMethod).WithMany(p => p.Orders)
                 .HasForeignKey(d => d.OrderShippingMethodId)
@@ -503,15 +509,12 @@ public partial class HucidbContext : DbContext
 
         modelBuilder.Entity<OrderPaymentMethod>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__OrderPay__3214EC076B01BAD4");
+            entity.HasKey(e => e.Id).HasName("PK__OrderPay__3214EC0759A6A559");
 
             entity.ToTable("OrderPaymentMethod");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
-
-            entity.HasOne(d => d.Order).WithMany(p => p.OrderPaymentMethods)
-                .HasForeignKey(d => d.OrderId)
-                .HasConstraintName("FK__OrderPaym__Order__54CB950F");
+            entity.Property(e => e.Name).HasDefaultValueSql("('')");
         });
 
         modelBuilder.Entity<OrderSource>(entity =>

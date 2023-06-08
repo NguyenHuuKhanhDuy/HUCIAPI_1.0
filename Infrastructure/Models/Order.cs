@@ -79,6 +79,10 @@ public partial class Order
 
     public bool IsRemovedCallTakeCare { get; set; }
 
+    public int OrderPaymentMethodId { get; set; }
+
+    public string OrderPaymentMethodName { get; set; } = null!;
+
     public virtual Employee CreateEmployee { get; set; } = null!;
 
     public virtual Customer Customer { get; set; } = null!;
@@ -89,7 +93,7 @@ public partial class Order
 
     public virtual ICollection<OrderDetail> OrderDetails { get; } = new List<OrderDetail>();
 
-    public virtual ICollection<OrderPaymentMethod> OrderPaymentMethods { get; } = new List<OrderPaymentMethod>();
+    public virtual OrderPaymentMethod OrderPaymentMethod { get; set; } = null!;
 
     public virtual ShippingMethod OrderShippingMethod { get; set; } = null!;
 

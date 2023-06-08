@@ -45,6 +45,7 @@ namespace Services.Implement
                 OrderStatusPaymentId = 1,
                 OrderStatusShippingId = 1,
                 OrderShippingMethodId = 1,
+                OrderPaymentMethodId = 0,
                 OrderSourceId = BaseConstants.INT_DEFAULT
             };
 
@@ -263,6 +264,13 @@ namespace Services.Implement
             if (source == null)
             {
                 throw new BusinessException(OrderConstants.SOURCE_ORDER_NOT_EXISTS);
+            }
+
+            var orderPaymentMethod = await _dbContext.OrderPaymentMethods.AsNoTracking().FirstOrDefaultAsync(x => x.Id == order.OrderPaymentMethodId); 
+            
+            if (orderPaymentMethod == null) 
+            {
+                throw new BusinessException(OrderConstants.PAYMENT_METHOD_NOT_EXISTS);
             }
 
             order.OrderSourceName = source.SourceName;
@@ -668,6 +676,7 @@ namespace Services.Implement
                 OrderDiscount = BaseConstants.INT_DEFAULT,
                 OrderStatusId = 1,
                 OrderSourceId = OrderConstants.ORDER_SOURCE_TIKTOK,
+                OrderPaymentMethodId = 0,
                 OrderStatusPaymentId = 1,
                 OrderStatusShippingId = 1,
                 OrderShippingMethodId = BaseConstants.INT_DEFAULT,

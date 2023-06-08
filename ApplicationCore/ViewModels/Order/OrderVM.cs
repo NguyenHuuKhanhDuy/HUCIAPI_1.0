@@ -49,6 +49,9 @@ namespace ApplicationCore.ViewModels.Order
         [Range(0, int.MaxValue, ErrorMessage = OrderConstants.INVALID_SOURCE_ORDER_ID)]
         public int OrderSourceId { get; set; }
 
+        [Range(0, int.MaxValue, ErrorMessage = OrderConstants.INVALID_PAYMENT_METHOD_ID)]
+        public int OrderPaymentMethodId { get; set; }
+
         public DateTime OrderDate { get; set; }
 
         public string OrderNote { get; set; } = null!;
