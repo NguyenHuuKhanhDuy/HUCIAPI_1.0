@@ -35,5 +35,6 @@
         public const int PERCENT_COMMISSION_TAKE_CARE = 5;
 
         public const int OrderStatusSuccess = 6;
+        public const int OrderStatucCompleted = 3;
     }
 }

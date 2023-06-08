@@ -89,6 +89,8 @@ public partial class Order
 
     public virtual ICollection<OrderDetail> OrderDetails { get; } = new List<OrderDetail>();
 
+    public virtual ICollection<OrderPaymentMethod> OrderPaymentMethods { get; } = new List<OrderPaymentMethod>();
+
     public virtual ShippingMethod OrderShippingMethod { get; set; } = null!;
 
     public virtual OrderSource OrderSource { get; set; } = null!;

@@ -1176,7 +1176,7 @@ namespace Services.Implement
 
                 if (orderDetailForOrder != null && orderDetailForOrder.Any())
                 {
-                    orderDto.products = orderDetailForOrder?.Select(x => MapFOrderDetailTOrderDetailDto(x)).ToList();
+                    orderDto.products = orderDetailForOrder.Select(x => MapFOrderDetailTOrderDetailDto(x)).ToList();
                 }
 
                 ordersList.Add(orderDto);
@@ -1253,7 +1253,11 @@ namespace Services.Implement
         {
             DateTime startDate = GetDateTimeNow().AddDays(-toDateAgo);
             DateTime endDate = GetDateTimeNow().AddDays(-fromDateAgo);
-            var orders = await _dbContext.Orders.AsNoTracking().Where(x => x.OrderDate.Date >= startDate.Date && x.OrderDate.Date <= endDate.Date && !x.IsRemovedCallTakeCare).OrderByDescending(x => x.OrderDate).ToListAsync();
+            var orders = await _dbContext.Orders.AsNoTracking().Where(x => x.OrderDate.Date >= startDate.Date 
+                                            && x.OrderDate.Date <= endDate.Date 
+                                            && !x.IsRemovedCallTakeCare
+                                            && (x.OrderStatusId == OrderConstants.OrderStatucCompleted || x.OrderStatusId == OrderConstants.OrderStatusSuccess))
+                                                .OrderByDescending(x => x.OrderDate).ToListAsync();
 
             var orderDtos = await GetOrderWithOrderDetail(orders);
 

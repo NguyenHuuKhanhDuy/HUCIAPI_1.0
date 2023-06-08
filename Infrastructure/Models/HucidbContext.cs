@@ -43,6 +43,8 @@ public partial class HucidbContext : DbContext
 
     public virtual DbSet<OrderDetail> OrderDetails { get; set; }
 
+    public virtual DbSet<OrderPaymentMethod> OrderPaymentMethods { get; set; }
+
     public virtual DbSet<OrderSource> OrderSources { get; set; }
 
     public virtual DbSet<OrderTakeCare> OrderTakeCares { get; set; }
@@ -85,9 +87,11 @@ public partial class HucidbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasDefaultSchema("huciapi");
+
         modelBuilder.Entity<Brand>(entity =>
         {
-            entity.ToTable("Brand");
+            entity.ToTable("Brand", "dbo");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.CreateDate)
@@ -98,7 +102,7 @@ public partial class HucidbContext : DbContext
 
         modelBuilder.Entity<Category>(entity =>
         {
-            entity.ToTable("Category");
+            entity.ToTable("Category", "dbo");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.CreateDate)
@@ -108,7 +112,7 @@ public partial class HucidbContext : DbContext
 
         modelBuilder.Entity<ComboDetail>(entity =>
         {
-            entity.ToTable("ComboDetail");
+            entity.ToTable("ComboDetail", "dbo");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
 
@@ -125,7 +129,7 @@ public partial class HucidbContext : DbContext
 
         modelBuilder.Entity<Commission>(entity =>
         {
-            entity.ToTable("Commission");
+            entity.ToTable("Commission", "dbo");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.CreateDate)
@@ -140,7 +144,7 @@ public partial class HucidbContext : DbContext
 
         modelBuilder.Entity<Customer>(entity =>
         {
-            entity.ToTable("Customer");
+            entity.ToTable("Customer", "dbo");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.Address).HasDefaultValueSql("('')");
@@ -178,7 +182,7 @@ public partial class HucidbContext : DbContext
 
         modelBuilder.Entity<Employee>(entity =>
         {
-            entity.ToTable("Employee");
+            entity.ToTable("Employee", "dbo");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.Birthday).HasColumnType("date");
@@ -232,7 +236,7 @@ public partial class HucidbContext : DbContext
 
         modelBuilder.Entity<Fund>(entity =>
         {
-            entity.ToTable("Fund");
+            entity.ToTable("Fund", "dbo");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.CreateDate)
@@ -252,7 +256,7 @@ public partial class HucidbContext : DbContext
 
         modelBuilder.Entity<FundDetail>(entity =>
         {
-            entity.ToTable("FundDetail");
+            entity.ToTable("FundDetail", "dbo");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.CreateDate)
@@ -281,7 +285,7 @@ public partial class HucidbContext : DbContext
         {
             entity
                 .HasNoKey()
-                .ToTable("HistoryAction");
+                .ToTable("HistoryAction", "dbo");
 
             entity.Property(e => e.CreateDate)
                 .HasDefaultValueSql("(format(getdate(),'yyyy-MM-dd HH:mm'))")
@@ -301,7 +305,7 @@ public partial class HucidbContext : DbContext
 
         modelBuilder.Entity<Import>(entity =>
         {
-            entity.ToTable("Import");
+            entity.ToTable("Import", "dbo");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.CreateDate)
@@ -331,7 +335,7 @@ public partial class HucidbContext : DbContext
 
         modelBuilder.Entity<ImportDetail>(entity =>
         {
-            entity.ToTable("ImportDetail");
+            entity.ToTable("ImportDetail", "dbo");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.ProductName).HasDefaultValueSql("('')");
@@ -364,7 +368,7 @@ public partial class HucidbContext : DbContext
 
         modelBuilder.Entity<Location>(entity =>
         {
-            entity.ToTable("Location");
+            entity.ToTable("Location", "dbo");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.ParentId).HasDefaultValueSql("((0))");
@@ -372,7 +376,7 @@ public partial class HucidbContext : DbContext
 
         modelBuilder.Entity<Order>(entity =>
         {
-            entity.ToTable("Order");
+            entity.ToTable("Order", "dbo");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.CreateEmployeeName).HasDefaultValueSql("('')");
@@ -457,7 +461,7 @@ public partial class HucidbContext : DbContext
 
         modelBuilder.Entity<OrderCommission>(entity =>
         {
-            entity.ToTable("OrderCommission");
+            entity.ToTable("OrderCommission", "dbo");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.CreateDate).HasColumnType("datetime");
@@ -476,7 +480,7 @@ public partial class HucidbContext : DbContext
 
         modelBuilder.Entity<OrderDetail>(entity =>
         {
-            entity.ToTable("OrderDetail");
+            entity.ToTable("OrderDetail", "dbo");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.ProductImage).HasDefaultValueSql("('')");
@@ -497,9 +501,22 @@ public partial class HucidbContext : DbContext
                 .HasConstraintName("FK_OrderDetail_Product");
         });
 
+        modelBuilder.Entity<OrderPaymentMethod>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__OrderPay__3214EC076B01BAD4");
+
+            entity.ToTable("OrderPaymentMethod");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+
+            entity.HasOne(d => d.Order).WithMany(p => p.OrderPaymentMethods)
+                .HasForeignKey(d => d.OrderId)
+                .HasConstraintName("FK__OrderPaym__Order__54CB950F");
+        });
+
         modelBuilder.Entity<OrderSource>(entity =>
         {
-            entity.ToTable("OrderSource");
+            entity.ToTable("OrderSource", "dbo");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.SourceName).HasDefaultValueSql("('')");
@@ -507,7 +524,7 @@ public partial class HucidbContext : DbContext
 
         modelBuilder.Entity<OrderTakeCare>(entity =>
         {
-            entity.ToTable("OrderTakeCare");
+            entity.ToTable("OrderTakeCare", "dbo");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.CreateDate)
@@ -527,7 +544,7 @@ public partial class HucidbContext : DbContext
 
         modelBuilder.Entity<OtherCost>(entity =>
         {
-            entity.ToTable("OtherCost");
+            entity.ToTable("OtherCost", "dbo");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.CreateDate)
@@ -542,7 +559,7 @@ public partial class HucidbContext : DbContext
 
         modelBuilder.Entity<Product>(entity =>
         {
-            entity.ToTable("Product");
+            entity.ToTable("Product", "dbo");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.CreateDate)
@@ -583,7 +600,7 @@ public partial class HucidbContext : DbContext
 
         modelBuilder.Entity<ProductType>(entity =>
         {
-            entity.ToTable("ProductType");
+            entity.ToTable("ProductType", "dbo");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.Name)
@@ -593,7 +610,7 @@ public partial class HucidbContext : DbContext
 
         modelBuilder.Entity<Promotion>(entity =>
         {
-            entity.ToTable("Promotion");
+            entity.ToTable("Promotion", "dbo");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.CreateDate).HasColumnType("datetime");
@@ -613,14 +630,14 @@ public partial class HucidbContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK_Rule_1");
 
-            entity.ToTable("Rule");
+            entity.ToTable("Rule", "dbo");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
         });
 
         modelBuilder.Entity<SalaryType>(entity =>
         {
-            entity.ToTable("SalaryType");
+            entity.ToTable("SalaryType", "dbo");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.Name).HasMaxLength(50);
@@ -640,14 +657,14 @@ public partial class HucidbContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK_ShipingMethod");
 
-            entity.ToTable("ShippingMethod");
+            entity.ToTable("ShippingMethod", "dbo");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
         });
 
         modelBuilder.Entity<StatusImport>(entity =>
         {
-            entity.ToTable("StatusImport");
+            entity.ToTable("StatusImport", "dbo");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.Name).HasDefaultValueSql("('')");
@@ -655,7 +672,7 @@ public partial class HucidbContext : DbContext
 
         modelBuilder.Entity<StatusOrder>(entity =>
         {
-            entity.ToTable("StatusOrder");
+            entity.ToTable("StatusOrder", "dbo");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.Name).HasDefaultValueSql("('')");
@@ -663,7 +680,7 @@ public partial class HucidbContext : DbContext
 
         modelBuilder.Entity<StatusPayment>(entity =>
         {
-            entity.ToTable("StatusPayment");
+            entity.ToTable("StatusPayment", "dbo");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
         });
@@ -672,14 +689,14 @@ public partial class HucidbContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK_StatusShiping");
 
-            entity.ToTable("StatusShipping");
+            entity.ToTable("StatusShipping", "dbo");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
         });
 
         modelBuilder.Entity<Supplier>(entity =>
         {
-            entity.ToTable("Supplier");
+            entity.ToTable("Supplier", "dbo");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.Address).HasDefaultValueSql("('')");
@@ -724,7 +741,7 @@ public partial class HucidbContext : DbContext
 
         modelBuilder.Entity<TimeKeeping>(entity =>
         {
-            entity.ToTable("TimeKeeping");
+            entity.ToTable("TimeKeeping", "dbo");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.CreateDate)
@@ -744,7 +761,7 @@ public partial class HucidbContext : DbContext
 
         modelBuilder.Entity<TypeAction>(entity =>
         {
-            entity.ToTable("TypeAction");
+            entity.ToTable("TypeAction", "dbo");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.Name).HasDefaultValueSql("('')");
@@ -752,7 +769,7 @@ public partial class HucidbContext : DbContext
 
         modelBuilder.Entity<TypeFund>(entity =>
         {
-            entity.ToTable("TypeFund");
+            entity.ToTable("TypeFund", "dbo");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.Name).HasDefaultValueSql("('')");
@@ -760,7 +777,7 @@ public partial class HucidbContext : DbContext
 
         modelBuilder.Entity<Voucher>(entity =>
         {
-            entity.ToTable("Voucher");
+            entity.ToTable("Voucher", "dbo");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.CreateDate)
@@ -792,7 +809,7 @@ public partial class HucidbContext : DbContext
 
         modelBuilder.Entity<VoucherStatus>(entity =>
         {
-            entity.ToTable("VoucherStatus");
+            entity.ToTable("VoucherStatus", "dbo");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.Name).HasDefaultValueSql("('')");
