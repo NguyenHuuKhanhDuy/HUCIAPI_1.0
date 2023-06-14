@@ -1074,6 +1074,7 @@ namespace Services.Implement
             DateTime endDate,
             Guid employeeCreateId,
             Guid customerId,
+            Guid brandId,
             int page,
             int pageSize,
             bool isGetWithoutDate,
@@ -1128,6 +1129,23 @@ namespace Services.Implement
             if(employeeCreateId != Guid.Empty)
             {
                 orders = orders.Where(x => x.CreateEmployeeId == employeeCreateId).ToList();
+            }
+
+            //fillter with brand
+            if (brandId != Guid.Empty)
+            {
+                var productIdsByBrandId = await _dbContext.Products.AsNoTracking().Where(x => x.BrandId == brandId && !x.IsDeleted).Select(x => x.Id).ToListAsync();
+                var orderIds = new List<Guid>();
+
+                if (productIdsByBrandId != null && productIdsByBrandId.Any())
+                {
+                    orderIds = await _dbContext.OrderDetails.AsNoTracking().Where(x => productIdsByBrandId.Contains(x.ProductId)).Select(x => x.Id).ToListAsync();
+                }
+
+                if(orderIds != null && orderIds.Any())
+                {
+                    orders = orders.Where(x => orderIds.Contains(x.Id)).ToList();
+                }
             }
 
             //fillter for date
@@ -1291,5 +1309,23 @@ namespace Services.Implement
             order.IsRemovedCallTakeCare = true;
             await _dbContext.SaveChangesAsync();
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public async Task<StatisticalOrderToday> GetStatisticalTodayAsync()
+        {
+            DateTime today = GetDateTimeNow();
+            var statisticalOrderToday = new StatisticalOrderToday();
+            var order = await _dbContext.Orders.AsNoTracking().Where(x => x.OrderDate.Date == today.Date).ToListAsync();
+
+            statisticalOrderToday.TotalOrder = order.Count;
+            statisticalOrderToday.Order = await GetOrderWithOrderDetail(order);
+
+            return statisticalOrderToday;
+        }
+
+
     }
 }

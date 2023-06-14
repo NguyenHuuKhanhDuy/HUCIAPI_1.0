@@ -135,6 +135,7 @@ namespace API.Controllers
             DateTime endDate,
             Guid employeeCreateId,
             Guid customerId,
+            Guid brandId,
             string? phone,
             int page = BaseConstants.PageDefault,
             int pageSize = BaseConstants.PageSizeDefault,
@@ -148,7 +149,7 @@ namespace API.Controllers
         {
             _logger.LogInformation($"Start get order with page: {page}, pageSize: {pageSize}");
             
-            var orders = await _orderServices.GetOrdersWithPaginationAsync(startDate, endDate, employeeCreateId, customerId, page, pageSize, isGetWithoutDate, statusOrderId, sourceOrderId, orderStatusPaymentId, orderStatusShippingId, orderShippingMethodId, phone);
+            var orders = await _orderServices.GetOrdersWithPaginationAsync(startDate, endDate, employeeCreateId, customerId, brandId, page, pageSize, isGetWithoutDate, statusOrderId, sourceOrderId, orderStatusPaymentId, orderStatusShippingId, orderShippingMethodId, phone);
 
             _logger.LogInformation($"End get order with page: {page}, pageSize: {pageSize} \r\n{GetStringFromJson(orders)}");
 
@@ -222,6 +223,14 @@ namespace API.Controllers
             _logger.LogInformation($"End get order detail by id.");
 
             return HandleResponseStatusOk(orders);
+        }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetStatisticalTodayAsync()
+        {
+            _logger.LogInformation($"Start get Statistical Order : {DateTime.UtcNow.Date}...");
+            _logger.LogInformation($"End get Statistical Order : {DateTime.UtcNow.Date}...");
+            return HandleResponseStatusOk();
         }
     }  
 }

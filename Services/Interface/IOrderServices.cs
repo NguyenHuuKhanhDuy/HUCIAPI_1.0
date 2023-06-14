@@ -22,6 +22,7 @@ namespace Services.Interface
             DateTime endDate,
             Guid employeeCreateId,
             Guid customerId,
+            Guid brandId,
             int page,
             int pageSize,
             bool isGetWithoutDate,
@@ -33,6 +34,6 @@ namespace Services.Interface
             string phone);
         Task<StatusOrderDto> GetAllOrderStatusAsync();
         Task<List<OrderDto>> GetOrdersToCallTakeCareWithDateAgoAsyns(int fromDateAgo, int toDateAgo);
-
+        Task<StatisticalOrderToday> GetStatisticalTodayAsync();
     }
 }
