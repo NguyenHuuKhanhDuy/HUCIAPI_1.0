@@ -1325,7 +1325,5 @@ namespace Services.Implement
 
             return statisticalOrderToday;
         }
-
-
     }
 }
