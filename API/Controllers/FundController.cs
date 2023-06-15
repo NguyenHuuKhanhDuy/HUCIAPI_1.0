@@ -111,13 +111,13 @@ namespace API.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllFundAsync()
+        public async Task<IActionResult> GetFundByEmployeeIdAsync(Guid employeeId)
         {
-            _logger.LogInformation("Start get all fund...");
+            _logger.LogInformation($"Start get fund by employeeId: {employeeId}");
 
-            var funds = await _fundServices.GetAllFundsAsync();
+            var funds = await _fundServices.GetAllFundsAsync(employeeId);
 
-            _logger.LogInformation("End get all fund...");
+            _logger.LogInformation($"End get fund: {funds}");
 
             return HandleResponseStatusOk(funds);
         }

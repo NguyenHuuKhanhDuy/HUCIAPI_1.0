@@ -25,9 +25,11 @@ namespace Services.Implement
         /// <exception cref="BusinessException"></exception>
         public async Task<FundDto> CreateFundAsync(FundVM fundVM)
         {
-            var employee = await _dbContext.Employees.FirstOrDefaultAsync(x => x.Id == fundVM.UserCreateId && !x.IsDeleted);
+            var employeeCreate = await _dbContext.Employees.FirstOrDefaultAsync(x => x.Id == fundVM.UserCreateId && !x.IsDeleted);
 
-            if(employee == null)
+            var employeeAssign = await _dbContext.Employees.FirstOrDefaultAsync(x => x.Id == fundVM.UserAssignId && !x.IsDeleted);
+
+            if (employeeCreate == null || employeeAssign == null)
             {
                 throw new BusinessException(EmployeeConstants.EMPLOYEE_NOT_EXIST);
             }
@@ -37,8 +39,8 @@ namespace Services.Implement
             await _dbContext.SaveChangesAsync();
 
             var fundDto = MapFFundTFundDto(fund);
-            fundDto.UserCreateName = employee.Name;
-
+            fundDto.UserCreateName = employeeCreate.Name;
+            fundDto.UserAssignName = employeeAssign.Name;
             var typeFund = await _dbContext.TypeFunds.FirstOrDefaultAsync(x => x.Id == FundConstants.COLLECT);
 
             if (typeFund == null)
@@ -55,9 +57,9 @@ namespace Services.Implement
             };
 
             var fundDetailDto = await CreateFundDetailAsync(fundDetailVM);
-            fundDetailDto.UserCreateName = employee.Name;
+            fundDetailDto.UserCreateName = employeeCreate.Name;
             fundDto.FundDetails.Add(fundDetailDto);
-            
+
             return fundDto;
         }
 
@@ -106,15 +108,15 @@ namespace Services.Implement
             {
                 fund.TotalFund += fundVM.AmountMoney;
             }
-            else if(typeFund.Id == FundConstants.PAY_OUT)
+            else if (typeFund.Id == FundConstants.PAY_OUT)
             {
                 fund.TotalFund -= fundVM.AmountMoney;
             }
-                
+
             fundVM.TypeFundName = typeFund.Name;
 
             var employee = await _dbContext.Employees.AsNoTracking().FirstOrDefaultAsync(x => x.Id == fundVM.UserCreateId && !x.IsDeleted);
-
+            
             if (employee == null)
             {
                 throw new BusinessException(EmployeeConstants.EMPLOYEE_NOT_EXIST);
@@ -145,7 +147,8 @@ namespace Services.Implement
             var fund = await FindFundAsync(fundVM?.Id);
             var employee = await _dbContext.Employees.FirstOrDefaultAsync(x => x.Id == fundVM.UserUpdateId && !x.IsDeleted);
 
-            if(employee == null)
+            var employeeAssign = await _dbContext.Employees.AsNoTracking().FirstOrDefaultAsync(x => x.Id == fundVM.UserAssignId && !x.IsDeleted);
+            if (employee == null || employeeAssign == null)
             {
                 throw new BusinessException(EmployeeConstants.EMPLOYEE_NOT_EXIST);
             }
@@ -176,6 +179,8 @@ namespace Services.Implement
             MapFFundUpdateVMTFund(fund, fundVM);
 
             var fundDto = MapFFundTFundDto(fund);
+            fundDto.UserCreateName = employee.Name;
+            fundDto.UserAssignName = employeeAssign.Name;
 
             if (isChangeTotalFund)
             {
@@ -210,14 +215,14 @@ namespace Services.Implement
         /// <exception cref="BusinessException"></exception>
         private async Task<Fund> FindFundAsync(Guid? fundId)
         {
-            if(fundId == null || fundId == Guid.Empty)
+            if (fundId == null || fundId == Guid.Empty)
             {
                 throw new BusinessException(FundConstants.FUND_NOT_EXIST);
             }
 
             var fund = await _dbContext.Funds.FirstOrDefaultAsync(x => x.Id == fundId && !x.IsDeleted);
 
-            if(fund == null)
+            if (fund == null)
             {
                 throw new BusinessException(FundConstants.FUND_NOT_EXIST);
             }
@@ -238,7 +243,7 @@ namespace Services.Implement
             var fundDto = MapFFundTFundDto(fund);
             fundDto.UserCreateName = employee.Name;
             fundDto.FundDetails = await GetFundDetailDtoAsync(fundDto.Id);
-            
+
             return fundDto;
         }
 
@@ -270,11 +275,23 @@ namespace Services.Implement
         /// 
         /// </summary>
         /// <returns></returns>
-        public async Task<List<FundDto>> GetAllFundsAsync()
+        public async Task<List<FundDto>> GetAllFundsAsync(Guid employeeId)
         {
             var funds = await _dbContext.Funds.Where(x => !x.IsDeleted).ToListAsync();
             var employees = await _dbContext.Employees.AsNoTracking().ToListAsync();
+            var employee = employees.FirstOrDefault(x => x.Id == employeeId);
+
+            if(employee == null)
+            {
+                throw new BusinessException(EmployeeConstants.EMPLOYEE_NOT_EXIST);
+            }
+
             var fundDtos = new List<FundDto>();
+
+            if (employee.RuleId != EmployeeConstants.AdminRoleId)
+            {
+                funds = funds.Where(x => x.EmployeeAssignId == employeeId).ToList();
+            }
 
             foreach (var fund in funds)
             {

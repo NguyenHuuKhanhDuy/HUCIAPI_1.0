@@ -10,6 +10,6 @@ namespace Services.Interface
         Task DeleteFundAsync(Guid fundId);
         Task<FundDetailDto> CreateFundDetailAsync(FundDetailVM fundVM);
         Task<FundDto> GetFundByIdAsync(Guid fundId);
-        Task<List<FundDto>> GetAllFundsAsync();
+        Task<List<FundDto>> GetAllFundsAsync(Guid employeeId);
     }
 }

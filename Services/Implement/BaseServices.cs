@@ -457,6 +457,7 @@ namespace Services.Implement
                 IsActive = BaseConstants.IsActiveDefault,
                 IsDeleted = BaseConstants.IsDeletedDefault,
                 UserCreateId = fundVM.UserCreateId,
+                EmployeeAssignId = fundVM.UserAssignId,
                 Note = fundVM.Note
             };
         }
@@ -471,6 +472,7 @@ namespace Services.Implement
                 CreateDate = fund.CreateDate,
                 IsActive = fund.IsActive.HasValue ? fund.IsActive.Value : true,
                 UserCreateId = fund.UserCreateId,
+                UserAssignId = fund.EmployeeAssignId,
                 Note = fund.Note
             };
         }
@@ -480,6 +482,7 @@ namespace Services.Implement
             fund.Name = fundUpdateVM.Name;
             fund.TotalFund = fundUpdateVM.TotalFund;
             fund.Note = fundUpdateVM.Note;
+            fund.EmployeeAssignId = fundUpdateVM.UserAssignId;
         }
 
         //Fund Detail

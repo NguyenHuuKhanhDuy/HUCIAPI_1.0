@@ -16,6 +16,10 @@
 
         public string UserCreateName { get; set; } = string.Empty;
 
+        public Guid UserAssignId { get; set; }
+
+        public string UserAssignName { get; set; } = string.Empty;
+
         public string Note { get; set; }
 
         public List<FundDetailDto> FundDetails { get; set; } = new List<FundDetailDto>();

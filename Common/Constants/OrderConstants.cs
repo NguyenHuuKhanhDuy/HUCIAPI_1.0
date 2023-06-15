@@ -29,7 +29,7 @@
 
         public const string VOUCHER_EXCEED = "voucher exceeds the number of uses";
 
-        public const string PREFIX_ORDER_NUMBER = "DH0";
+        public const string PREFIX_ORDER_NUMBER = "DH";
 
         public const int ORDER_SOURCE_TIKTOK = 1;
         public const int ORDER_SOURCE_TAKE_CARE = 2;

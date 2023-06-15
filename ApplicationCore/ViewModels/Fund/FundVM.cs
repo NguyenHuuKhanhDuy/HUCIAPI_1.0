@@ -8,6 +8,8 @@
 
         public Guid UserCreateId { get; set; }
 
+        public Guid UserAssignId { get; set; }
+
         public string Note { get; set; }
     }
 }

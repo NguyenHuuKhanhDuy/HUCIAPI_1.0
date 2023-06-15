@@ -21,7 +21,9 @@ public partial class Fund
 
     public string Note { get; set; } = null!;
 
-    public virtual ICollection<FundDetail> FundDetails { get; } = new List<FundDetail>();
+    public Guid EmployeeAssignId { get; set; }
 
-    public virtual Employee UserCreate { get; set; } = null!;
+    public virtual Employee EmployeeAssign { get; set; } = null!;
+
+    public virtual ICollection<FundDetail> FundDetails { get; } = new List<FundDetail>();
 }

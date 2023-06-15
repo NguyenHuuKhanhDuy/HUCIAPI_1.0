@@ -8,8 +8,10 @@
 
         public int TotalFund { get; set; }
 
-        public string Note { get; set; }
+        public string Note { get; set; } = null!;
 
         public Guid UserUpdateId { get; set; }
+
+        public Guid UserAssignId { get; set; }
     }
 }

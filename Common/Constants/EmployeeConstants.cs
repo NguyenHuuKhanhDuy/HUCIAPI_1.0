@@ -25,6 +25,7 @@
         public const string PASS_DEFAULT = "passDefault";
 
         public const string AdminName = "admin";
+        public const int AdminRoleId = 1;
         public const string CanNotRemoveAdmin = "Can't remove admin";
     }
 }

@@ -248,8 +248,8 @@ public partial class HucidbContext : DbContext
             entity.Property(e => e.Name).HasDefaultValueSql("('')");
             entity.Property(e => e.Note).HasDefaultValueSql("('')");
 
-            entity.HasOne(d => d.UserCreate).WithMany(p => p.Funds)
-                .HasForeignKey(d => d.UserCreateId)
+            entity.HasOne(d => d.EmployeeAssign).WithMany(p => p.Funds)
+                .HasForeignKey(d => d.EmployeeAssignId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Fund_Employee");
         });

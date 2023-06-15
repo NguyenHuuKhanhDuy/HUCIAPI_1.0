@@ -4,15 +4,12 @@ using ApplicationCore.ModelsDto.Product;
 using ApplicationCore.ViewModels.Customer;
 using ApplicationCore.ViewModels.Order;
 using ApplicationCore.ViewModels.Product;
-using AutoMapper.Execution;
 using Common.Constants;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
-using OfficeOpenXml.Style;
 using Services.Interface;
-using System.Drawing.Printing;
 
 namespace Services.Implement
 {
@@ -159,8 +156,29 @@ namespace Services.Implement
         /// <returns></returns>
         public async Task<string> GetOrderNumber()
         {
-            int number = await _dbContext.Orders.CountAsync() + 1;
-            return OrderConstants.PREFIX_ORDER_NUMBER + number;
+            var orders = await _dbContext.Orders.AsNoTracking().ToListAsync();
+            var orderNumber = GenerateOrderNumber();
+
+            while (orders.FirstOrDefault(x => x.OrderNumber == orderNumber) != null)
+            {
+                orderNumber = GenerateOrderNumber();
+            }
+            
+            return orderNumber;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public string GenerateOrderNumber()
+        {
+            Random random = new Random();
+            int randomNumber = random.Next(1, 100000); // Generate a random number between 1 and 99999
+
+            string orderNumber = OrderConstants.PREFIX_ORDER_NUMBER + randomNumber.ToString("D5"); // Format the random number with leading zeros if necessary
+
+            return orderNumber;
         }
 
         /// <summary>
