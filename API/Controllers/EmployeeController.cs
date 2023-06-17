@@ -183,5 +183,17 @@ namespace API.Controllers
 
             return HandleResponseStatusOk(report);
         }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetAllRolesAsync()
+        {
+            _logger.LogInformation("Start get all role...");
+
+            var roles = await _employeeService.GetAllRolesAsync();
+
+            _logger.LogInformation($"End get all role...{GetStringFromJson(roles)}");
+
+            return HandleResponseStatusOk(roles);
+        }
     }
 }

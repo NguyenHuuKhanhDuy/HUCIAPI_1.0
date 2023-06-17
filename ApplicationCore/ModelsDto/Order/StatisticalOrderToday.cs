@@ -6,7 +6,7 @@ namespace ApplicationCore.ModelsDto.Order
     {
         public int TotalOrder { get; set; }
 
-        public List<OrderDto> Order { get; set; } = new List<OrderDto>();
+        public List<OrderDto> Orders { get; set; } = new List<OrderDto>();
 
         public List<StatisticalProductToday> Products { get; set; } = new List<StatisticalProductToday>();
     }

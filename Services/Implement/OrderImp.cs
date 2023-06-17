@@ -1336,10 +1336,32 @@ namespace Services.Implement
         {
             DateTime today = GetDateTimeNow();
             var statisticalOrderToday = new StatisticalOrderToday();
-            var order = await _dbContext.Orders.AsNoTracking().Where(x => x.OrderDate.Date == today.Date).ToListAsync();
+            var orders = await _dbContext.Orders.AsNoTracking().Where(x => x.OrderDate.Date == today.Date).ToListAsync();
 
-            statisticalOrderToday.TotalOrder = order.Count;
-            statisticalOrderToday.Order = await GetOrderWithOrderDetail(order);
+            statisticalOrderToday.TotalOrder = orders.Count;
+            statisticalOrderToday.Orders = await GetOrderWithOrderDetail(orders);
+
+            var products = new List<Product>();
+            var orderDetails = new List<OrderDetail>();
+
+            if(orders != null && orders.Any())
+            {
+                orderDetails = await _dbContext.OrderDetails.AsNoTracking().Where(x => orders.Select(y => y.Id).Contains(x.OrderId)).ToListAsync();
+            }
+
+            if (orderDetails != null && orderDetails.Any())
+            {
+                products = await _dbContext.Products.AsNoTracking().Where(x => orderDetails.Select(y => y.ProductId).Contains(x.Id) && !x.IsDeleted).ToListAsync();
+            }
+
+            foreach (var product in products)
+            {
+                statisticalOrderToday.Products.Add(new StatisticalProductToday
+                {
+                    Product = MapFProductTProductDto(product),
+                    Quantity = orderDetails.Where(x => x.ProductId == product.Id).Sum(x => x.Quantity)
+                });
+            }
 
             return statisticalOrderToday;
         }

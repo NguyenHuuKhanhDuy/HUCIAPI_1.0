@@ -229,8 +229,12 @@ namespace API.Controllers
         public async Task<IActionResult> GetStatisticalTodayAsync()
         {
             _logger.LogInformation($"Start get Statistical Order : {DateTime.UtcNow.Date}...");
-            _logger.LogInformation($"End get Statistical Order : {DateTime.UtcNow.Date}...");
-            return HandleResponseStatusOk();
+
+            var orders = await _orderServices.GetStatisticalTodayAsync();
+
+            _logger.LogInformation($"End get Statistical Order : {GetStringFromJson(orders)}...");
+
+            return HandleResponseStatusOk(orders);
         }
     }  
 }

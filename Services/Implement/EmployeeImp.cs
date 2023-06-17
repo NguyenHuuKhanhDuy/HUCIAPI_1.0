@@ -398,5 +398,27 @@ namespace Services.Implement
 
             return reportDto;
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public async Task<List<RoleDto>> GetAllRolesAsync()
+        {
+            var rolesDto = new List<RoleDto>();
+            var roles = await _dbContext.Rules.AsNoTracking().ToListAsync();
+
+            foreach (var item in roles)
+            {
+                rolesDto.Add(new RoleDto
+                {
+                    Id = item.Id,
+                    Name = item.Name
+                });
+            }
+
+            return rolesDto;
+        }
     }
 }
