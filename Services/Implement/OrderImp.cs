@@ -1101,7 +1101,8 @@ namespace Services.Implement
             int orderStatusPaymentId,
             int orderStatusShippingId,
             int orderShippingMethodId,
-            string phone)
+            string phone,
+            string search)
         {
             var orderPage = new OrderPaginationDto
             {
@@ -1178,7 +1179,25 @@ namespace Services.Implement
                 orders = orders.Where(x => x.CustomerPhone == phone).ToList();
             }
 
-            //filter for phone 
+            //filter for search
+            if (!string.IsNullOrEmpty(search))
+            {
+                var words = ExtractWordsFromConnectionString(search);
+
+                if (words != null && words.Any())
+                {
+                    orders = orders.Where(x => words.Any(w => x.OrderNumber.ToLower().Contains(w)
+                    || x.CustomerName.ToLower().Contains(w)
+                    || x.CustomerPhone.ToLower().Contains(w)
+                    || x.CustomerAddress.ToLower().Contains(w)
+                    || x.ProvinceName.ToLower().Contains(w)
+                    || x.DistrictName.ToLower().Contains(w)
+                    || x.WardName.ToLower().Contains(w))
+                    ).ToList();
+                }
+            }
+
+            //filter for customer Id 
             if (customerId != Guid.Empty)
             {
                 orders = orders.Where(x => x.CustomerId == customerId).ToList();
@@ -1198,6 +1217,27 @@ namespace Services.Implement
             orderPage.Orders = await GetOrderWithOrderDetail(totalOrdersPerPage);
 
             return orderPage;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connectionString"></param>
+        /// <returns></returns>
+        public List<string> ExtractWordsFromConnectionString(string connectionString)
+        {
+            List<string> words = new List<string>();
+
+            // Split the connection string into words based on whitespace characters
+            string[] splitWords = connectionString.Split(new char[] { ' ', '\t', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+
+            // Add each word to the list
+            foreach (string word in splitWords)
+            {
+                words.Add(word.ToLower());
+            }
+
+            return words;
         }
 
         /// <summary>

@@ -31,7 +31,8 @@ namespace Services.Interface
             int orderStatusPaymentId,
             int orderStatusShippingId,
             int orderShippingMethodId,
-            string phone);
+            string phone,
+            string search);
         Task<StatusOrderDto> GetAllOrderStatusAsync();
         Task<List<OrderDto>> GetOrdersToCallTakeCareWithDateAgoAsyns(int fromDateAgo, int toDateAgo);
         Task<StatisticalOrderToday> GetStatisticalTodayAsync();
