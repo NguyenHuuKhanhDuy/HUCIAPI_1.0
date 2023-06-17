@@ -77,7 +77,7 @@ namespace Services.Implement
         {
             var ip = await FindIpAsync(vm.Id);
             ip.Ipv4 = vm.Ipv4;
-            ip.Notes = vm.Notes;
+            ip.Notes = !string.IsNullOrEmpty(vm.Notes) ? vm.Notes : string.Empty;
             await _dbContext.SaveChangesAsync();
 
             var dto = MapFIPTIPDto(ip);
