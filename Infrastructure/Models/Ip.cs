@@ -12,4 +12,6 @@ public partial class Ip
     public DateTime CreateDate { get; set; }
 
     public bool IsDeleted { get; set; }
+
+    public string Notes { get; set; } = null!;
 }

@@ -7,5 +7,7 @@
         public string Ipv4 { get; set; } = null!;
 
         public DateTime CreateDate { get; set; }
+
+        public string Notes { get; set; } = null!;
     }
 }

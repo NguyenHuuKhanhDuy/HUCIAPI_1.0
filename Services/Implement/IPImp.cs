@@ -28,7 +28,8 @@ namespace Services.Implement
                 Id = Guid.NewGuid(),
                 Ipv4 = vm.Ipv4,
                 CreateDate = GetDateTimeNow(),
-                IsDeleted = BaseConstants.IsDeletedDefault
+                IsDeleted = BaseConstants.IsDeletedDefault,
+                Notes = vm.Notes
             };
 
             await _dbContext.AddAsync(ip);
@@ -76,6 +77,7 @@ namespace Services.Implement
         {
             var ip = await FindIpAsync(vm.Id);
             ip.Ipv4 = vm.Ipv4;
+            ip.Notes = vm.Notes;
             await _dbContext.SaveChangesAsync();
 
             var dto = MapFIPTIPDto(ip);

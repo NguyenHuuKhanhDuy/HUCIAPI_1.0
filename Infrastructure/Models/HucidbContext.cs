@@ -364,6 +364,7 @@ public partial class HucidbContext : DbContext
                 .HasDefaultValueSql("(format(getdate(),'yyyy-MM-dd HH:mm'))")
                 .HasColumnType("datetime");
             entity.Property(e => e.Ipv4).IsUnicode(false);
+            entity.Property(e => e.Notes).HasDefaultValueSql("('')");
         });
 
         modelBuilder.Entity<Location>(entity =>

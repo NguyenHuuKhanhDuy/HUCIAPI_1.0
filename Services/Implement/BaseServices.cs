@@ -631,7 +631,8 @@ namespace Services.Implement
             {
                 Id = ip.Id,
                 Ipv4 = ip.Ipv4,
-                CreateDate = ip.CreateDate
+                CreateDate = ip.CreateDate,
+                Notes = ip.Notes
             };
         }
 
