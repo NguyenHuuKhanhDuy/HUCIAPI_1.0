@@ -11,5 +11,6 @@ namespace Common.Constants
         public const string USER_EMPTY = "User is empty";
         public const string USER_NOT_EXIST = "Username does not exist";
         public const string PASSWORD_INCORRECT = "Password incorrect";
+        public const string IpCanNotLogin = "Your IP address is unable to log in to this page.";
     }
 }

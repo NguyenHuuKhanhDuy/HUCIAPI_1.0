@@ -7,7 +7,7 @@ namespace Services.Interface
 {
     public interface IEmployeeServices
     {
-        Task<EmployeeDto> Login(UserVM userVM);
+        Task<EmployeeDto> Login(UserVM userVM, string ip);
 
         Task<EmployeeDto> CreateEmployeeAsync(EmployeeVM employeeVM);
 

@@ -42,7 +42,9 @@ namespace API.Controllers
                 return StatusCode(statusCode, new DataResponse(userVM, LoginConstants.USER_EMPTY, statusCode));
             }
 
-            EmployeeDto employeeDto = await _employeeServices.Login(userVM);
+            var ipAddress = HttpContext?.Connection?.RemoteIpAddress?.ToString();
+
+            EmployeeDto employeeDto = await _employeeServices.Login(userVM, ipAddress);
 
             _logger.LogInformation($"End login: {GetStringFromJson(employeeDto)}");
 
@@ -53,7 +55,7 @@ namespace API.Controllers
         public async Task<IActionResult> CreateOrderFromLadiPage([FromBody] OrderForLadipageVM orderVM) 
         {
             _logger.LogInformation($"Start create order from Ladipage: {GetStringFromJson(orderVM)}");
-            //var ipAddress = HttpContext.Connection.RemoteIpAddress.ToString();
+            
             var order = await _orderServices.CreateOrderFromLadipageAsync(orderVM);
 
             _logger.LogInformation($"End create order from Ladipage: {GetStringFromJson(orderVM)}");

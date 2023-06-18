@@ -29,7 +29,7 @@ namespace Services.Implement
                 Ipv4 = vm.Ipv4,
                 CreateDate = GetDateTimeNow(),
                 IsDeleted = BaseConstants.IsDeletedDefault,
-                Notes = vm.Notes
+                Notes = !string.IsNullOrEmpty(vm.Notes) ? vm.Notes : string.Empty
             };
 
             await _dbContext.AddAsync(ip);

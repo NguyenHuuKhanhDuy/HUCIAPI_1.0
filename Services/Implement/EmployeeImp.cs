@@ -31,9 +31,15 @@ namespace Services.Implement
             _config = config;
             _orderServices = orderServices;
         }
-        public async Task<EmployeeDto> Login(UserVM userVM)
+
+        public async Task<EmployeeDto> Login(UserVM userVM, string ip)
         {
-            var employee = _dbContext.Employees.Where(p => p.Username == userVM.Username).FirstOrDefault();
+            if (userVM.Username.ToLower() != EmployeeConstants.AdminName.ToLower())
+            {
+                await CheckIpAsync(ip);
+            }
+
+            var employee = _dbContext.Employees.Where(p => p.Username.ToLower() == userVM.Username.ToLower()).FirstOrDefault();
 
             if (employee == null || employee.IsDeleted)
             {
@@ -58,6 +64,15 @@ namespace Services.Implement
             return employeeDto;
         }
 
+        private async Task CheckIpAsync(string ipAddress)
+        {
+            var ip = await _dbContext.Ips.AsNoTracking().FirstOrDefaultAsync(x => x.Ipv4 == ipAddress && !x.IsDeleted);
+
+            if(ip == null)
+            {
+                throw new BusinessException($"Your IP address: {ipAddress} is unable to log in to this page.");
+            }
+        }
         /// <summary>
         /// 
         /// </summary>
