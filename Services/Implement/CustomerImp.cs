@@ -83,14 +83,19 @@ namespace Services.Implement
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="customerId"></param>
+        /// <returns></returns>
         public async Task DeleteCustomerAsync(Guid customerId)
         {
             await CheckCustomerId(customerId);
             Customer customer = await _dbContext.Customers.FindAsync(customerId);
 
-            customer.IsDeleted = true;
+            //customer.IsDeleted = true;
             customer.CustomerNumber += BaseConstants.DELETE;
-            customer.Name += BaseConstants.DELETE;
+            //customer.Name += BaseConstants.DELETE;
 
             await _dbContext.SaveChangesAsync();
         }

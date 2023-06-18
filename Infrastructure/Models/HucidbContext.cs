@@ -156,7 +156,7 @@ public partial class HucidbContext : DbContext
                 .HasColumnType("datetime");
             entity.Property(e => e.CreateUserName).HasDefaultValueSql("('')");
             entity.Property(e => e.CustomerNumber)
-                .HasMaxLength(10)
+                .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.DistrictName).HasDefaultValueSql("('')");
             entity.Property(e => e.Email)
@@ -394,7 +394,7 @@ public partial class HucidbContext : DbContext
                 .HasColumnType("datetime");
             entity.Property(e => e.OrderNote).HasDefaultValueSql("('')");
             entity.Property(e => e.OrderNumber)
-                .HasMaxLength(10)
+                .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.OrderPaymentMethodName).HasDefaultValueSql("('')");
             entity.Property(e => e.OrderShippingMethodName).HasDefaultValueSql("('')");
@@ -577,7 +577,7 @@ public partial class HucidbContext : DbContext
                 .HasDefaultValueSql("((1))");
             entity.Property(e => e.Name).HasDefaultValueSql("('')");
             entity.Property(e => e.ProductNumber)
-                .HasMaxLength(10)
+                .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasDefaultValueSql("('')");
 
