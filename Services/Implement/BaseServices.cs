@@ -216,8 +216,8 @@ namespace Services.Implement
         public void MapFCustomerVMTCustomer(Customer customer, CustomerVM customerVM)
         {
             customer.Name = customerVM.Name;
-            customer.Email = customerVM.Email;
-            customer.Phone = customerVM.Phone;
+            customer.Email = !string.IsNullOrEmpty(customerVM.Email) ? customerVM.Email : string.Empty;
+            customer.Phone = !string.IsNullOrEmpty(customerVM.Phone) ? customerVM.Phone : string.Empty;
             customer.Birthday = customerVM.Birthday;
             customer.ProvinceId = customerVM.ProvinceId;
             customer.DistrictId = customerVM.DistrictId;
@@ -231,8 +231,8 @@ namespace Services.Implement
         public void MapFCustomerUpdateVMTCustomer(Customer customer, CustomerUpdateVM customerVM)
         {
             customer.Name = customerVM.Name;
-            customer.Email = customerVM.Email;
-            customer.Phone = customerVM.Phone;
+            customer.Email = !string.IsNullOrEmpty(customerVM.Email) ? customerVM.Email : string.Empty;
+            customer.Phone = !string.IsNullOrEmpty(customerVM.Phone) ? customerVM.Phone : string.Empty;
             customer.Birthday = customerVM.Birthday;
             customer.ProvinceId = customerVM.ProvinceId;
             customer.DistrictId = customerVM.DistrictId;
