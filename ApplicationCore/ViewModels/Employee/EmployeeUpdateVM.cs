@@ -52,7 +52,7 @@ namespace ApplicationCore.ViewModels.Employee
         [Required]
         public string Password { get; set; } = null!;
 
-        public string Image { get; set; } = null!;
+        public string? Image { get; set; }
 
     }
 }
