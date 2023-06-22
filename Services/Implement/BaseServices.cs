@@ -335,7 +335,7 @@ namespace Services.Implement
             order.OrderStatusShippingId = orderVM.OrderStatusShippingId;
             order.OrderShippingMethodId = orderVM.OrderShippingMethodId;
             order.OrderSourceId = orderVM.OrderSourceId;
-            order.OrderNote = orderVM.OrderNote;
+            order.OrderNote = !string.IsNullOrEmpty(orderVM.OrderNote) ? orderVM.OrderNote : string.Empty;
             order.CreateEmployeeId = orderVM.CreateEmployeeId;
             order.OrderPaymentMethodId = orderVM.OrderPaymentMethodId;
         }
@@ -348,6 +348,7 @@ namespace Services.Implement
             order.OrderStatusShippingId = orderVM.OrderStatusShippingId;
             order.OrderShippingMethodId = orderVM.OrderShippingMethodId;
             order.OrderSourceId = orderVM.OrderSourceId;
+            order.OrderNote = !string.IsNullOrEmpty(orderVM.OrderNote) ? orderVM.OrderNote : string.Empty;
         }
 
         public OrderDto MapFOrderTOrderDto(Order order)

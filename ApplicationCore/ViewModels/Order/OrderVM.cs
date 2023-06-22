@@ -54,7 +54,7 @@ namespace ApplicationCore.ViewModels.Order
 
         public DateTime OrderDate { get; set; }
 
-        public string OrderNote { get; set; } = null!;
+        public string? OrderNote { get; set; }
 
         [Required]
         [RegularExpression(RegexConstants.REGEX_GUID, ErrorMessage = EmployeeConstants.INVALID_USER_CREATE)]
