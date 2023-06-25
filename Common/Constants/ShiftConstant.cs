@@ -2,7 +2,7 @@
 {
     public static class ShiftConstant
     {
-        public const string ShiftNotExist = "Shift not exists";
-        public const string CanNotParseToTime = "Can't parse to time";
+        public const string ShiftNotExist = "Ca làm việc không tồn tại";
+        public const string CanNotParseToTime = "Không thể chuyển đổi thành thời gian";
     }
 }

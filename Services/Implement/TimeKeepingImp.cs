@@ -81,7 +81,19 @@ namespace Services.Implement
         /// <returns></returns>
         public async Task<List<TimeKeepingDto>> GetAllTimeKeepingAsync()
         {
-            var timeKeepings = await _dbContext.TimeKeepings.AsNoTracking().Where(x => !x.IsDeleted).ToListAsync();
+            DateTime currentDate = DateTime.Now; // You can use any DateTime object here
+
+            // Get the first day of the month
+            DateTime firstDayOfMonth = new DateTime(currentDate.Year, currentDate.Month, 1);
+
+            // Get the last day of the month by getting the first day of the next month and subtracting one day
+            DateTime lastDayOfMonth = new DateTime(currentDate.Year, currentDate.Month, 1).AddMonths(1).AddDays(-1);
+
+            var timeKeepings = await _dbContext.TimeKeepings.AsNoTracking().Where(x => x.CreateDate.Date <= lastDayOfMonth.Date 
+                                                                    && x.CreateDate >= firstDayOfMonth.Date 
+                                                                    && !x.IsDeleted)
+                                                                    .OrderByDescending(x => x.CreateDate)
+                                                                    .ToListAsync();
             var employees = await _dbContext.Employees.AsNoTracking().ToListAsync();
             var timeKeepingDtos = new List<TimeKeepingDto>();
 

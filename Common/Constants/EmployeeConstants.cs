@@ -2,30 +2,30 @@
 {
     public static class EmployeeConstants
     {
-        public const string EMPLOYEE_EMPTY = "Employee is empty";
-        public const string EMPLOYEE_NOT_EXIST = "Employee not exist";
-        public const string INVALID_EMAIL = "Invalid email address";
-        public const string INVALID_PHONE = "Invalid phone number";
-        public const string INVALID_BIRTHDAY = "Invalid birthday (ex: 31/12/2023)";
-        public const string INVALID_GENGER = "Invalid gender";
-        public const string INVALID_PROVINCE = "Invalid province id";
-        public const string INVALID_DISTRICT = "Invalid district id";
-        public const string INVALID_SALARY = "Invalid salary";
-        public const string INVALID_SALARY_TYPE = "Invalid salary type";
-        public const string INVALID_RULE = "Invalid rule id";
-        public const string INVALID_WARD = "Invalid ward id";
-        public const string INVALID_USER_CREATE = "Invalid id of user create";
-        public const string EXIST_EMAIL = "Email already exists";
-        public const string EXIST_PHONE = "Phone already exists";
-        public const string EXIST_USERNAME = "Username already exists";
+        public const string EMPLOYEE_EMPTY = "Nhân viên trống";
+        public const string EMPLOYEE_NOT_EXIST = "Nhân viên không tồn tại";
+        public const string INVALID_EMAIL = "Địa chỉ email không hợp lệ";
+        public const string INVALID_PHONE = "Số điện thoại không hợp lệ";
+        public const string INVALID_BIRTHDAY = "Ngày sinh không hợp lệ (vd: 31/12/2023)";
+        public const string INVALID_GENGER = "Giới tính không hợp lệ";
+        public const string INVALID_PROVINCE = "Mã tỉnh/thành phố không hợp lệ";
+        public const string INVALID_DISTRICT = "Mã quận/huyện không hợp lệ";
+        public const string INVALID_SALARY = "Lương không hợp lệ";
+        public const string INVALID_SALARY_TYPE = "Loại lương không hợp lệ";
+        public const string INVALID_RULE = "Mã quy định không hợp lệ";
+        public const string INVALID_WARD = "Mã phường/xã không hợp lệ";
+        public const string INVALID_USER_CREATE = "Mã người tạo không hợp lệ";
+        public const string EXIST_EMAIL = "Email đã tồn tại";
+        public const string EXIST_PHONE = "Số điện thoại đã tồn tại";
+        public const string EXIST_USERNAME = "Tên đăng nhập đã tồn tại";
 
-        public const string RULE_NOTE_EXIST = "Rule not exists";
-        public const string SALARY_TYPE_NOTE_EXIST = "Salary type not exists";
+        public const string RULE_NOTE_EXIST = "Quy định không tồn tại";
+        public const string SALARY_TYPE_NOTE_EXIST = "Loại lương không tồn tại";
 
         public const string PASS_DEFAULT = "passDefault";
 
         public const string AdminName = "admin";
         public const int AdminRoleId = 1;
-        public const string CanNotRemoveAdmin = "Can't remove admin";
+        public const string CanNotRemoveAdmin = "Không thể xóa admin";
     }
 }

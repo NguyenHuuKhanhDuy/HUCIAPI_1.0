@@ -2,6 +2,6 @@
 {
     public static class CallTakeCareConstants
     {
-        public const string OrderTakeCareNotExist = "Call take care not exist";
+        public const string OrderTakeCareNotExist = "Cuộc gọi chăm sóc không tồn tại";
     }
 }

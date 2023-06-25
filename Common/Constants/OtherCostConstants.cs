@@ -2,6 +2,6 @@
 {
     public static class OtherCostConstants
     {
-        public const string OtherCostNotExist = "Other cost not exist";
+        public const string OtherCostNotExist = "Chi phí khác không tồn tại";
     }
 }

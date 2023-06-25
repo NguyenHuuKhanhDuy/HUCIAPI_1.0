@@ -250,22 +250,9 @@ namespace Services.Implement
             List<Employee> employeesNotCurrentEmployee = await _dbContext.Employees.Where(x => !x.IsDeleted && x.Id != employeeVM.Id).ToListAsync();
             CheckEmployeeInformation(_mapper.Map<EmployeeVM>(employeeVM), employeesNotCurrentEmployee);
 
-            employee.Name = employeeVM.Name;
-            employee.Email = employeeVM.Email;
-            employee.Phone = employeeVM.Phone;
-            employee.Birthday = employeeVM.Birthday;
-            employee.Gender = employeeVM.Gender.Value;
-            employee.ProvinceId = employeeVM.ProvinceId.Value;
-            employee.DistrictId = employeeVM.DistrictId.Value;
-            employee.WardId = employeeVM.WardId.Value;
-            employee.Notes = employeeVM.Notes;
-            employee.Salary = employeeVM.Salary.Value;
-            employee.SalaryTypeId = employeeVM.SalaryTypeId.Value;
-            employee.RuleId = employeeVM.RuleId.Value;
-            employee.Address = employeeVM.Address;
-            employee.Username = employeeVM.Username;
+            MapFEmployeeUpdateVMTEmployee(employee, employeeVM);
 
-            if (employee.Password != employeeVM.Password)
+            if (employee.Password != employeeVM.Password && !string.IsNullOrEmpty(employeeVM.Password))
             {
                 employee.Password = HashPassword(employeeVM.Password);
             }

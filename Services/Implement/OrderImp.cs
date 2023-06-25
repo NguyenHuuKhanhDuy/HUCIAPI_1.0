@@ -1158,7 +1158,7 @@ namespace Services.Implement
 
                 if (productIdsByBrandId != null && productIdsByBrandId.Any())
                 {
-                    orderIds = await _dbContext.OrderDetails.AsNoTracking().Where(x => productIdsByBrandId.Contains(x.ProductId)).Select(x => x.Id).ToListAsync();
+                    orderIds = await _dbContext.OrderDetails.AsNoTracking().Where(x => productIdsByBrandId.Contains(x.ProductId)).Select(x => x.OrderId).ToListAsync();
                 }
 
                 if(orderIds != null && orderIds.Any())
@@ -1188,11 +1188,7 @@ namespace Services.Implement
                 {
                     orders = orders.Where(x => words.Any(w => x.OrderNumber.ToLower().Contains(w)
                     || x.CustomerName.ToLower().Contains(w)
-                    || x.CustomerPhone.ToLower().Contains(w)
-                    || x.CustomerAddress.ToLower().Contains(w)
-                    || x.ProvinceName.ToLower().Contains(w)
-                    || x.DistrictName.ToLower().Contains(w)
-                    || x.WardName.ToLower().Contains(w))
+                    || x.CustomerPhone.ToLower().Contains(w))
                     ).ToList();
                 }
             }

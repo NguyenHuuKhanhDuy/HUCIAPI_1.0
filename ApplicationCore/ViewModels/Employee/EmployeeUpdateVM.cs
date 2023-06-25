@@ -46,11 +46,9 @@ namespace ApplicationCore.ViewModels.Employee
 
         public string? Address { get; set; }
 
-        [Required]
-        public string Username { get; set; } = null!;
+        public string? Username { get; set; } = null!;
 
-        [Required]
-        public string Password { get; set; } = null!;
+        public string? Password { get; set; } = null!;
 
         public string? Image { get; set; }
 

@@ -15,6 +15,7 @@ using ApplicationCore.ModelsDto.Shift;
 using ApplicationCore.ModelsDto.Supplier;
 using ApplicationCore.ViewModels.Commission;
 using ApplicationCore.ViewModels.Customer;
+using ApplicationCore.ViewModels.Employee;
 using ApplicationCore.ViewModels.Fund;
 using ApplicationCore.ViewModels.Order;
 using ApplicationCore.ViewModels.OtherCost;
@@ -64,6 +65,16 @@ namespace Services.Implement
         public string FormatDateTime(DateTime dt, string format)
         {
             return dt.ToString(format);
+        }
+
+        public string GetStringNewOrBefore(string? param, string valueDefault)
+        {
+            return !string.IsNullOrEmpty(param) ? param : valueDefault;
+        }
+
+        public int GetIntNewOrBefore(int?  param, int defaultValue)
+        {
+            return param.HasValue ? param.Value : defaultValue;
         }
 
         /// <summary>
@@ -267,6 +278,25 @@ namespace Services.Implement
             dto.Address = customer.Address;
 
             return dto;
+        }
+
+        //Map Employee
+        public void MapFEmployeeUpdateVMTEmployee(Employee employee, EmployeeUpdateVM vm)
+        {
+            employee.Name = GetStringNewOrBefore(vm.Name, employee.Name);
+            employee.Email = GetStringNewOrBefore(vm.Email, employee.Email);
+            employee.Phone = GetStringNewOrBefore(vm.Phone, employee.Phone);
+            employee.Birthday = vm.Birthday;
+            employee.Gender = GetIntNewOrBefore(vm.Gender, employee.Gender);
+            employee.ProvinceId = GetIntNewOrBefore(vm.ProvinceId, employee.ProvinceId);
+            employee.DistrictId = GetIntNewOrBefore(vm.DistrictId, employee.DistrictId);
+            employee.WardId = GetIntNewOrBefore(vm.WardId, employee.WardId);
+            employee.Notes = GetStringNewOrBefore(vm.Notes, employee.Notes);
+            employee.Salary = GetIntNewOrBefore(vm.Salary, employee.Salary);
+            employee.SalaryTypeId = GetIntNewOrBefore(vm.SalaryTypeId, employee.SalaryTypeId);
+            employee.RuleId = GetIntNewOrBefore(vm.RuleId, employee.RuleId);
+            employee.Address = GetStringNewOrBefore(vm.Address, !string.IsNullOrEmpty(employee.Address) ? employee.Address : string.Empty); ;
+            employee.Username = GetStringNewOrBefore(vm.Username, employee.Username);
         }
 
         //Map Supplier

@@ -8,10 +8,8 @@ namespace Common.Constants
 {
     public static class BrandConstants
     {
-        public const string EXIST_BRAND_NAME = "Brand name already exists";
-        public const string INVALID_BRAND_ID = "Invalid brand id";
-        public const string BRAND_NOT_EXIST = "Brand not exist";
-
-
+        public const string EXIST_BRAND_NAME = "Tên thương hiệu đã tồn tại";
+        public const string INVALID_BRAND_ID = "ID thương hiệu không hợp lệ";
+        public const string BRAND_NOT_EXIST = "Thương hiệu không tồn tại";
     }
 }
