@@ -41,7 +41,7 @@ namespace ApplicationCore.ViewModels.Employee
         [Range(0, 1, ErrorMessage = EmployeeConstants.INVALID_SALARY_TYPE)]
         public int? SalaryTypeId { get; set; }
 
-        [Range(0, 3, ErrorMessage = EmployeeConstants.INVALID_RULE)]
+        [Range(0, int.MaxValue, ErrorMessage = EmployeeConstants.INVALID_RULE)]
         public int? RuleId { get; set; }
 
         public string? Address { get; set; }

@@ -12,7 +12,7 @@
         public const string INVALID_DISTRICT = "Mã quận/huyện không hợp lệ";
         public const string INVALID_SALARY = "Lương không hợp lệ";
         public const string INVALID_SALARY_TYPE = "Loại lương không hợp lệ";
-        public const string INVALID_RULE = "Mã quy định không hợp lệ";
+        public const string INVALID_RULE = "Mã phân quyền không hợp lệ";
         public const string INVALID_WARD = "Mã phường/xã không hợp lệ";
         public const string INVALID_USER_CREATE = "Mã người tạo không hợp lệ";
         public const string EXIST_EMAIL = "Email đã tồn tại";
