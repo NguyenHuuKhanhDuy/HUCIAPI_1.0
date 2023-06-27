@@ -9,7 +9,6 @@ namespace ApplicationCore.ViewModels.Employee
         [Required]
         public Guid Id { get; set; }
 
-        [Required]
         public string? Name { get; set; } = null!;
 
         [RegularExpression(RegexConstants.REGEX_EMAIL, ErrorMessage = EmployeeConstants.INVALID_EMAIL)]
