@@ -297,6 +297,7 @@ namespace Services.Implement
             employee.RuleId = GetIntNewOrBefore(vm.RuleId, employee.RuleId);
             employee.Address = GetStringNewOrBefore(vm.Address, !string.IsNullOrEmpty(employee.Address) ? employee.Address : string.Empty); ;
             employee.Username = GetStringNewOrBefore(vm.Username, employee.Username);
+            employee.Image = GetStringNewOrBefore(vm.Image, !string.IsNullOrEmpty(employee.Image) ? employee.Image : string.Empty);
         }
 
         //Map Supplier
