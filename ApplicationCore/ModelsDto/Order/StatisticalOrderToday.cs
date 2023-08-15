@@ -4,9 +4,8 @@ namespace ApplicationCore.ModelsDto.Order
 {
     public class StatisticalOrderToday
     {
-        public int TotalOrder { get; set; }
-
-        public List<OrderDto> Orders { get; set; } = new List<OrderDto>();
+        public OrderBySourceDtos TotalOrder { get; set; } = new OrderBySourceDtos();
+        public List<OrderBySourceDtos> OrderBySources { get; set; } = new List<OrderBySourceDtos>();
 
         public List<StatisticalProductToday> Products { get; set; } = new List<StatisticalProductToday>();
     }

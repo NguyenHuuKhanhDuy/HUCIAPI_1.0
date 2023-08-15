@@ -9,5 +9,5 @@ public partial class TypeFund
 
     public string Name { get; set; } = null!;
 
-    public virtual ICollection<FundDetail> FundDetails { get; } = new List<FundDetail>();
+    public virtual ICollection<FundDetail> FundDetails { get; set; } = new List<FundDetail>();
 }

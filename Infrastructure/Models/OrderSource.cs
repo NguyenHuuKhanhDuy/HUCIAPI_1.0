@@ -11,5 +11,5 @@ public partial class OrderSource
 
     public int PercentCommission { get; set; }
 
-    public virtual ICollection<Order> Orders { get; } = new List<Order>();
+    public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
 }

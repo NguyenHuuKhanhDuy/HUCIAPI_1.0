@@ -4,6 +4,7 @@ using ApplicationCore.ModelsDto.CallTakeCare;
 using ApplicationCore.ModelsDto.Commission;
 using ApplicationCore.ModelsDto.Customer;
 using ApplicationCore.ModelsDto.Fund;
+using ApplicationCore.ModelsDto.Import;
 using ApplicationCore.ModelsDto.IP;
 using ApplicationCore.ModelsDto.Order;
 using ApplicationCore.ModelsDto.OrderCommission;
@@ -17,6 +18,7 @@ using ApplicationCore.ViewModels.Commission;
 using ApplicationCore.ViewModels.Customer;
 using ApplicationCore.ViewModels.Employee;
 using ApplicationCore.ViewModels.Fund;
+using ApplicationCore.ViewModels.Import;
 using ApplicationCore.ViewModels.Order;
 using ApplicationCore.ViewModels.OtherCost;
 using ApplicationCore.ViewModels.Product;
@@ -688,6 +690,56 @@ namespace Services.Implement
                 Id = source.Id,
                 SourceName = source.SourceName,
                 PercentCommission = source.PercentCommission,
+            };
+        }
+
+        //import
+        public Import MapFImportVMTImport(ImportVM vm)
+        {
+            return new Import
+            {
+                Id = Guid.NewGuid(),
+                CreateDate = GetDateTimeNow(),
+                IsDelete = BaseConstants.IsDeletedDefault,
+                StatusImportId = vm.StatusImportId,
+                UserCreateId = vm.UserCreateId,
+                SupplierId = vm.SupplierId,
+            };
+        }
+
+        public ImportDto MapFImportTImportDto(Import import)
+        {
+            return new ImportDto
+            {
+                Id = import.Id,
+                ImportNumber = import.ImportNumber,
+                CreateDate = import.CreateDate,
+                Total = import.Total,
+                StatusImportId = import.StatusImportId,
+                StatusImportName = import.StatusImportName,
+                UserCreateId = import.UserCreateId,
+                UserCreateName = import.UserCreate?.Name, // Assuming UserCreate has a Name property
+                SupplierId = import.SupplierId,
+                SupplierName = import.Supplier?.Name
+            };
+        }
+
+        public void MapFImportUpdateVMTImport(Import import, ImportUpdateVM vm)
+        {
+            import.SupplierId = vm.SupplierId;
+            import.StatusImportId = vm.StatusImportId;
+        }
+
+        public ImportDetailDto MapFImportDetailTDto(ImportDetail detail)
+        {
+            return new ImportDetailDto
+            {
+                Id = detail.Id,
+                ProductId = detail.ProductId,
+                ProductNumber = detail.ProductNumber,
+                ProductName = detail.ProductName,
+                ProductPriceImport = detail.ProductPriceImport,
+                Quantity = detail.Quantity
             };
         }
     }

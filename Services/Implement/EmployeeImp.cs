@@ -136,6 +136,7 @@ namespace Services.Implement
 
             Employee employee = _mapper.Map<Employee>(employeeVM);
             employee.Id = Guid.NewGuid();
+            employee.Password = HashPassword(employee.Password);
             await GetNameFieldHaveId(employee);
             employee.IsDeleted = false;
             await _dbContext.Employees.AddAsync(employee);
@@ -152,7 +153,6 @@ namespace Services.Implement
             employee.WardName = await GetNameLocationById(employee.WardId);
             employee.RuleName = await GetRuleNameById(employee.RuleId);
             employee.Address = $"{employee.Address}, {employee.WardName}, {employee.DistrictName}, {employee.ProvinceName}";
-            employee.Password = HashPassword(employee.Password);
         }
 
         /// <summary>

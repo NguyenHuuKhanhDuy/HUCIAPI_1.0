@@ -9,5 +9,5 @@ public partial class VoucherStatus
 
     public string Name { get; set; } = null!;
 
-    public virtual ICollection<Voucher> Vouchers { get; } = new List<Voucher>();
+    public virtual ICollection<Voucher> Vouchers { get; set; } = new List<Voucher>();
 }

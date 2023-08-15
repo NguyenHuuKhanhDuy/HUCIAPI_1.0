@@ -1373,9 +1373,11 @@ namespace Services.Implement
             DateTime today = GetDateTimeNow();
             var statisticalOrderToday = new StatisticalOrderToday();
             var orders = await _dbContext.Orders.AsNoTracking().Where(x => x.OrderDate.Date == today.Date).ToListAsync();
-
-            statisticalOrderToday.TotalOrder = orders.Count;
-            statisticalOrderToday.Orders = await GetOrderWithOrderDetail(orders);
+            statisticalOrderToday.TotalOrder.Total = orders.Count();
+            statisticalOrderToday.TotalOrder.TotalPrice = orders.Sum(x => x.TotalPayment);
+            statisticalOrderToday.TotalOrder.AveragePrice = (float)statisticalOrderToday.TotalOrder.TotalPrice/(float) orders.Count();
+            statisticalOrderToday.TotalOrder.TotalPriceWaitingOrder = orders.Where(x => x.OrderSourceId == OrderConstants.OrderStatusWaiting).Count();
+            await GetOrderBySourceAsync(orders, statisticalOrderToday);
 
             var products = new List<Product>();
             var orderDetails = new List<OrderDetail>();
@@ -1400,6 +1402,27 @@ namespace Services.Implement
             }
 
             return statisticalOrderToday;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="orders"></param>
+        /// <param name="statisticalOrderToday"></param>
+        /// <returns></returns>
+        private async Task GetOrderBySourceAsync(List<Order> orders, StatisticalOrderToday statisticalOrderToday)
+        {
+            var orderSources = await _dbContext.OrderSources.ToListAsync();
+            foreach (var item in orderSources)
+            {
+                var orderTemp = orders.Where(x => x.OrderSourceId == item.Id).ToList();
+                var temp = new OrderBySourceDtos();
+                temp.NameSource = item.SourceName;
+                temp.Total = orderTemp.Count();
+                temp.TotalPrice = orderTemp.Sum(x => x.TotalPayment);
+                temp.AveragePrice = (float)temp.TotalPrice / (float)temp.Total;
+                statisticalOrderToday.OrderBySources.Add(temp);
+            }
         }
     }
 }

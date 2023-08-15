@@ -83,15 +83,19 @@ public partial class Order
 
     public string OrderPaymentMethodName { get; set; } = null!;
 
+    public DateTime SendDate { get; set; }
+
+    public bool? IsUseExcelFile { get; set; }
+
     public virtual Employee CreateEmployee { get; set; } = null!;
 
     public virtual Customer Customer { get; set; } = null!;
 
     public virtual Location District { get; set; } = null!;
 
-    public virtual ICollection<OrderCommission> OrderCommissions { get; } = new List<OrderCommission>();
+    public virtual ICollection<OrderCommission> OrderCommissions { get; set; } = new List<OrderCommission>();
 
-    public virtual ICollection<OrderDetail> OrderDetails { get; } = new List<OrderDetail>();
+    public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
 
     public virtual OrderPaymentMethod OrderPaymentMethod { get; set; } = null!;
 
@@ -105,7 +109,7 @@ public partial class Order
 
     public virtual StatusShipping OrderStatusShipping { get; set; } = null!;
 
-    public virtual ICollection<OrderTakeCare> OrderTakeCares { get; } = new List<OrderTakeCare>();
+    public virtual ICollection<OrderTakeCare> OrderTakeCares { get; set; } = new List<OrderTakeCare>();
 
     public virtual Location Province { get; set; } = null!;
 

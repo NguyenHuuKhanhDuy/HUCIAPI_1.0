@@ -23,7 +23,7 @@ public partial class Import
 
     public Guid SupplierId { get; set; }
 
-    public virtual ICollection<ImportDetail> ImportDetails { get; } = new List<ImportDetail>();
+    public virtual ICollection<ImportDetail> ImportDetails { get; set; } = new List<ImportDetail>();
 
     public virtual StatusImport StatusImport { get; set; } = null!;
 

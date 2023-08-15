@@ -19,6 +19,8 @@ public partial class ImportDetail
 
     public int Quantity { get; set; }
 
+    public bool IsDeleted { get; set; }
+
     public virtual Import Import { get; set; } = null!;
 
     public virtual Product Product { get; set; } = null!;

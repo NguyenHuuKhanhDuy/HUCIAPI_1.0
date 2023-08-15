@@ -72,6 +72,7 @@ builder.Services.AddTransient<ICallTakeCareServices, CallTakeCareImp>();
 builder.Services.AddTransient<IIPServices, IPImp>();
 builder.Services.AddTransient<IShiftServices, ShiftImp>();
 builder.Services.AddTransient<IOrderSourceServices, OrderSourceImp>();
+builder.Services.AddTransient<IImportServices, ImportImp>();
 
 //add authen services
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>

@@ -9,5 +9,5 @@ public partial class StatusShipping
 
     public string? Name { get; set; }
 
-    public virtual ICollection<Order> Orders { get; } = new List<Order>();
+    public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
 }

@@ -389,6 +389,9 @@ public partial class HucidbContext : DbContext
                 .IsUnicode(false)
                 .HasDefaultValueSql("('')");
             entity.Property(e => e.DistrictName).HasDefaultValueSql("('')");
+            entity.Property(e => e.IsUseExcelFile)
+                .IsRequired()
+                .HasDefaultValueSql("((1))");
             entity.Property(e => e.OrderDate)
                 .HasDefaultValueSql("(format(getdate(),'yyyy-MM-dd HH:mm'))")
                 .HasColumnType("datetime");
@@ -403,6 +406,9 @@ public partial class HucidbContext : DbContext
             entity.Property(e => e.OrderStatusPaymentName).HasDefaultValueSql("('')");
             entity.Property(e => e.OrderStatusShippingName).HasDefaultValueSql("('')");
             entity.Property(e => e.ProvinceName).HasDefaultValueSql("('')");
+            entity.Property(e => e.SendDate)
+                .HasDefaultValueSql("(format(getdate(),'yyyy-MM-dd HH:mm'))")
+                .HasColumnType("datetime");
             entity.Property(e => e.VoucherName).HasDefaultValueSql("('')");
             entity.Property(e => e.WardName).HasDefaultValueSql("('')");
 

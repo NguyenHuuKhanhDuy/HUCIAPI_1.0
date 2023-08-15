@@ -9,5 +9,5 @@ public partial class Rule
 
     public int Id { get; set; }
 
-    public virtual ICollection<Employee> Employees { get; } = new List<Employee>();
+    public virtual ICollection<Employee> Employees { get; set; } = new List<Employee>();
 }

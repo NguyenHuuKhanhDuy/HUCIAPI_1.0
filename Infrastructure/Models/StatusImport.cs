@@ -9,5 +9,5 @@ public partial class StatusImport
 
     public string Name { get; set; } = null!;
 
-    public virtual ICollection<Import> Imports { get; } = new List<Import>();
+    public virtual ICollection<Import> Imports { get; set; } = new List<Import>();
 }
