@@ -5,6 +5,8 @@ namespace Infrastructure.Models;
 
 public partial class HistoryAction
 {
+    public Guid Id { get; set; }
+
     public Guid IdAction { get; set; }
 
     public string Description { get; set; } = null!;

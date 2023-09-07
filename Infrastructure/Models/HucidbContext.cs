@@ -6,6 +6,10 @@ namespace Infrastructure.Models;
 
 public partial class HucidbContext : DbContext
 {
+    public HucidbContext()
+    {
+    }
+
     public HucidbContext(DbContextOptions<HucidbContext> options)
         : base(options)
     {
@@ -283,21 +287,20 @@ public partial class HucidbContext : DbContext
 
         modelBuilder.Entity<HistoryAction>(entity =>
         {
-            entity
-                .HasNoKey()
-                .ToTable("HistoryAction", "dbo");
+            entity.ToTable("HistoryAction", "dbo");
 
+            entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.CreateDate)
                 .HasDefaultValueSql("(format(getdate(),'yyyy-MM-dd HH:mm'))")
                 .HasColumnType("datetime");
             entity.Property(e => e.Description).HasDefaultValueSql("('')");
 
-            entity.HasOne(d => d.TypeAction).WithMany()
+            entity.HasOne(d => d.TypeAction).WithMany(p => p.HistoryActions)
                 .HasForeignKey(d => d.TypeActionId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_HistoryAction_TypeAction");
 
-            entity.HasOne(d => d.UserCreate).WithMany()
+            entity.HasOne(d => d.UserCreate).WithMany(p => p.HistoryActions)
                 .HasForeignKey(d => d.UserCreateId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_HistoryAction_Employee");

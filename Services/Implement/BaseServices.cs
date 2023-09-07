@@ -27,6 +27,8 @@ using ApplicationCore.ViewModels.Supplier;
 using Common.Constants;
 using Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace Services.Implement
 {
@@ -741,6 +743,31 @@ namespace Services.Implement
                 ProductPriceImport = detail.ProductPriceImport,
                 Quantity = detail.Quantity
             };
+        }
+
+        public List<TOut> MapList<TIn, TOut>(List<TIn> sources)
+        {
+            var result = new List<TOut>();
+
+            foreach (var source in sources)
+            {
+                result.Add((TOut)Map<TIn, TOut>(source));
+            }
+
+            return result;
+        }
+
+        public TOut Map<TIn, TOut>(TIn source)
+        {
+            string json = JsonConvert.SerializeObject(
+                source,
+                Formatting.Indented,
+                new JsonSerializerSettings()
+                {
+                    ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+                }
+                );
+            return (TOut)JsonConvert.DeserializeObject<TOut>(json);
         }
     }
 }

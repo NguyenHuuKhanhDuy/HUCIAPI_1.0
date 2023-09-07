@@ -73,6 +73,7 @@ builder.Services.AddTransient<IIPServices, IPImp>();
 builder.Services.AddTransient<IShiftServices, ShiftImp>();
 builder.Services.AddTransient<IOrderSourceServices, OrderSourceImp>();
 builder.Services.AddTransient<IImportServices, ImportImp>();
+builder.Services.AddTransient<IHistoryAction, HistoryActionImp>();
 
 //add authen services
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
@@ -106,6 +107,7 @@ app.UseSwagger();
 app.UseSwaggerUI();
 app.UseHttpsRedirection();
 app.ConfigureCustomExceptionMiddleware();
+app.UseMiddleware<JwtMiddleware>();
 app.UseCors("corsapp");
 
 app.UseAuthentication();

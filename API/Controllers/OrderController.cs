@@ -13,6 +13,8 @@ namespace API.Controllers
 #if !DEBUG    
     [Authorize]
 #endif
+    //[Authorize]
+
     public class OrderController : BaseController
     {
         private readonly IOrderServices _orderServices;
@@ -65,9 +67,11 @@ namespace API.Controllers
         [HttpDelete("[action]")]
         public async Task<IActionResult> DeleteOrderAsync(Guid orderId)
         {
+            var userId = HttpContext.Items["UserId"];
+
             _logger.LogInformation("Start delete order...");
 
-            await _orderServices.DeleteOrderAsync(orderId);
+            await _orderServices.DeleteOrderAsync(orderId, Guid.Parse(userId.ToString()));
 
             _logger.LogInformation("End delete order...");
 
@@ -145,12 +149,13 @@ namespace API.Controllers
             int sourceOrderId = 0,
             int orderStatusPaymentId = 0,
             int orderStatusShippingId = 0,
-            int orderShippingMethodId = 0
+            int orderShippingMethodId = 0,
+            bool isGetOrderDeleted = false
             )
         {
             _logger.LogInformation($"Start get order with page: {page}, pageSize: {pageSize}");
             
-            var orders = await _orderServices.GetOrdersWithPaginationAsync(startDate, endDate, employeeCreateId, customerId, brandId, page, pageSize, isGetWithoutDate, statusOrderId, sourceOrderId, orderStatusPaymentId, orderStatusShippingId, orderShippingMethodId, phone, search);
+            var orders = await _orderServices.GetOrdersWithPaginationAsync(startDate, endDate, employeeCreateId, customerId, brandId, page, pageSize, isGetWithoutDate, statusOrderId, sourceOrderId, orderStatusPaymentId, orderStatusShippingId, orderShippingMethodId, phone, search, isGetOrderDeleted);
 
             _logger.LogInformation($"End get order with page: {page}, pageSize: {pageSize} \r\n{GetStringFromJson(orders)}");
 

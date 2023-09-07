@@ -61,6 +61,8 @@ public partial class Employee
 
     public virtual ICollection<Fund> Funds { get; set; } = new List<Fund>();
 
+    public virtual ICollection<HistoryAction> HistoryActions { get; set; } = new List<HistoryAction>();
+
     public virtual ICollection<Import> Imports { get; set; } = new List<Import>();
 
     public virtual ICollection<OrderCommission> OrderCommissions { get; set; } = new List<OrderCommission>();

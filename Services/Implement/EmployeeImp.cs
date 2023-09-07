@@ -66,7 +66,12 @@ namespace Services.Implement
 
         private async Task CheckIpAsync(string ipAddress)
         {
-            var ip = await _dbContext.Ips.AsNoTracking().FirstOrDefaultAsync(x => x.Ipv4 == ipAddress && !x.IsDeleted);
+            var ips = await _dbContext.Ips.AsNoTracking().ToListAsync();
+
+            if (!ips.Any())
+                return;
+
+            var ip = ips.FirstOrDefault(x => x.Ipv4 == ipAddress && !x.IsDeleted);
 
             if(ip == null)
             {

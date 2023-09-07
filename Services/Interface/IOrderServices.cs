@@ -9,7 +9,7 @@ namespace Services.Interface
     {
         Task<OrderDto> CreateOrderAsync(OrderVM orderVM, bool isSetOtherDate);
         Task<OrderDto> UpdateOrderAsync(OrderUpdateVM orderVM);
-        Task DeleteOrderAsync(Guid orderId);
+        Task DeleteOrderAsync(Guid orderId, Guid userId);
         Task RemoveCallTakeOrderAsync(Guid orderId);
         Task<List<OrderDto>> GetAllOrderAsync();
         Task<List<OrderDto>> GetOrderByDateAsync(DateTime startDate, DateTime endDate);
@@ -32,7 +32,8 @@ namespace Services.Interface
             int orderStatusShippingId,
             int orderShippingMethodId,
             string phone,
-            string search);
+            string search,
+            bool isGetOrderDeleted);
         Task<StatusOrderDto> GetAllOrderStatusAsync();
         Task<List<OrderDto>> GetOrdersToCallTakeCareWithDateAgoAsyns(int fromDateAgo, int toDateAgo);
         Task<StatisticalOrderToday> GetStatisticalTodayAsync();

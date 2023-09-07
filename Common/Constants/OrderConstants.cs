@@ -39,5 +39,13 @@
         public const int OrderStatusWaiting = 1;
         public const int OrderStatusSuccess = 6;
         public const int OrderStatucCompleted = 3;
+
+        public static class TypeAction
+        {
+            public const int Default = 0;
+            public const int Add = 1;
+            public const int Delete = 2;
+            public const int Update = 3;
+        }
     }
 }

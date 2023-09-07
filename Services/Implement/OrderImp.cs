@@ -17,10 +17,12 @@ namespace Services.Implement
     {
         private readonly HucidbContext _dbContext;
         private readonly ICustomerServices _customerServices;
-        public OrderImp(HucidbContext dbContext, ICustomerServices customerServices) : base(dbContext)
+        private readonly IHistoryAction _historyActionServices;
+        public OrderImp(HucidbContext dbContext, ICustomerServices customerServices, IHistoryAction historyActionServices) : base(dbContext)
         {
             _dbContext = dbContext;
             _customerServices = customerServices;
+            _historyActionServices = historyActionServices;
         }
 
         /// <summary>
@@ -456,7 +458,7 @@ namespace Services.Implement
         /// <param name="orderId"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public async Task DeleteOrderAsync(Guid orderId)
+        public async Task DeleteOrderAsync(Guid orderId, Guid userId)
         {
             var order = await _dbContext.Orders.FirstOrDefaultAsync(x => x.Id == orderId && !x.IsDeleted);
 
@@ -465,13 +467,13 @@ namespace Services.Implement
                 throw new BusinessException(OrderConstants.ORDER_NOT_EXISTS);
             }
 
-            await HandleCancelOrDeleteOrderAsync(order);
+            await HandleCancelOrDeleteOrderAsync(order, userId);
             order.IsDeleted = true;
             order.OrderNumber += BaseConstants.DELETE;
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task HandleCancelOrDeleteOrderAsync(Order order)
+        public async Task HandleCancelOrDeleteOrderAsync(Order order, Guid userId)
         {
             var orderDetails = await _dbContext.OrderDetails.AsNoTracking().Where(x => x.OrderId == order.Id && !x.IsDeleted).ToListAsync();
             var products = await _dbContext.Products
@@ -497,6 +499,27 @@ namespace Services.Implement
             {
                 customer.OrderCount -= 1;
             }
+
+            var orderCommisions = await _dbContext.OrderCommissions.Where(x => x.OrderId == order.Id).ToListAsync();
+
+            orderCommisions.ForEach(x =>
+            {
+                x.IsDeleted = true;
+            });
+
+            var typeAction = await _dbContext.TypeActions.FindAsync(OrderConstants.TypeAction.Delete);
+            var action = new HistoryAction()
+            {
+                Id = Guid.NewGuid(),
+                IdAction = order.Id,
+                Description = "Xóa đơn hàng",
+                TypeActionName = typeAction!.Name,
+                CreateDate = GetDateTimeNow(),
+                UserCreateId = userId,
+                TypeActionId = typeAction!.Id,
+            };
+
+            await _dbContext.HistoryActions.AddAsync(action);
         }
 
         /// <summary>
@@ -592,6 +615,7 @@ namespace Services.Implement
                         orderDto.products = orderDetailForOrder?.Select(x => MapFOrderDetailTOrderDetailDto(x)).ToList();
                     }
 
+                    orderDto.History = await _historyActionServices.GetHistoryAction(orderDto.Id);
                     orderDtos.Add(orderDto);
                 }
             }
@@ -1102,7 +1126,8 @@ namespace Services.Implement
             int orderStatusShippingId,
             int orderShippingMethodId,
             string phone,
-            string search)
+            string search,
+            bool isGetOrderDeleted)
         {
             var orderPage = new OrderPaginationDto
             {
@@ -1112,7 +1137,7 @@ namespace Services.Implement
                 TotalPage = BaseConstants.INT_DEFAULT,
             };
 
-            var orders = await _dbContext.Orders.AsNoTracking().OrderByDescending(x => x.OrderDate).ToListAsync();
+            var orders = await _dbContext.Orders.AsNoTracking().Where(x => x.IsDeleted == isGetOrderDeleted).OrderByDescending(x => x.OrderDate).ToListAsync();
 
             //fillter with orderStatus
             if(statusOrderId != BaseConstants.INT_DEFAULT)
@@ -1260,6 +1285,7 @@ namespace Services.Implement
                     orderDto.products = orderDetailForOrder.Select(x => MapFOrderDetailTOrderDetailDto(x)).ToList();
                 }
 
+                orderDto.History = await _historyActionServices.GetHistoryAction(orderDto.Id);
                 ordersList.Add(orderDto);
             }
 
@@ -1424,5 +1450,6 @@ namespace Services.Implement
                 statisticalOrderToday.OrderBySources.Add(temp);
             }
         }
+
     }
 }

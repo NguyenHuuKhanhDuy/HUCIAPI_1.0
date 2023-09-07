@@ -17,6 +17,8 @@ public partial class OrderCommission
 
     public DateTime CreateDate { get; set; }
 
+    public bool IsDeleted { get; set; }
+
     public virtual Employee Employee { get; set; } = null!;
 
     public virtual Order Order { get; set; } = null!;

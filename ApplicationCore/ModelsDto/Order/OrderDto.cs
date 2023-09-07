@@ -1,4 +1,5 @@
-﻿using Infrastructure.Models;
+﻿using ApplicationCore.ModelsDto.HistoryAction;
+using Infrastructure.Models;
 
 namespace ApplicationCore.ModelsDto.Order
 {
@@ -77,5 +78,7 @@ namespace ApplicationCore.ModelsDto.Order
         public string OrderPaymentMethodName { get; set; } = null!;
 
         public List<OrderDetailDto> products { get; set; } = new List<OrderDetailDto>();
+
+        public List<HistoryActionDto> History { get; set; } = new List<HistoryActionDto>();
     }
 }
