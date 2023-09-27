@@ -135,8 +135,7 @@ namespace API.Controllers
         /// <returns></returns>
         [HttpGet("[action]")]
         public async Task<IActionResult> GetOrderForPaginationAsync(
-            DateTime startDate, 
-            DateTime endDate,
+            DateTime date,
             Guid employeeCreateId,
             Guid customerId,
             Guid brandId,
@@ -155,7 +154,7 @@ namespace API.Controllers
         {
             _logger.LogInformation($"Start get order with page: {page}, pageSize: {pageSize}");
             
-            var orders = await _orderServices.GetOrdersWithPaginationAsync(startDate, endDate, employeeCreateId, customerId, brandId, page, pageSize, isGetWithoutDate, statusOrderId, sourceOrderId, orderStatusPaymentId, orderStatusShippingId, orderShippingMethodId, phone, search, isGetOrderDeleted);
+            var orders = await _orderServices.GetOrdersWithPaginationAsync(date, employeeCreateId, customerId, brandId, page, pageSize, isGetWithoutDate, statusOrderId, sourceOrderId, orderStatusPaymentId, orderStatusShippingId, orderShippingMethodId, phone, search, isGetOrderDeleted);
 
             _logger.LogInformation($"End get order with page: {page}, pageSize: {pageSize} \r\n{GetStringFromJson(orders)}");
 
@@ -241,6 +240,19 @@ namespace API.Controllers
             _logger.LogInformation($"End get Statistical Order : {GetStringFromJson(orders)}...");
 
             return HandleResponseStatusOk(orders);
+        }
+
+        [HttpPut("[action]")]
+        public async Task<IActionResult> UpSaleOrderAsync(Guid orderId, bool isUpSaleOrder)
+        {
+            var userId = HttpContext.Items["UserId"];
+            _logger.LogInformation($"Start up sale order: {orderId}, IsUpSaleOrder: {isUpSaleOrder}, Employee: {userId}");
+
+            await _orderServices.UpSaleOrderAsync(orderId, Guid.Parse(userId.ToString()), isUpSaleOrder);
+
+            _logger.LogInformation($"Start up sale order: {orderId}, IsUpSaleOrder: {isUpSaleOrder}, Employee: {userId}");
+
+            return HandleResponseStatusOk();
         }
     }
 }

@@ -23,13 +23,8 @@ builder.Services.AddControllers().ConfigureApiBehaviorOptions(options =>
         BaseController.ValidateModelState;
 });
 
-#if DEBUG
 var connectionString = builder.Configuration.GetConnectionString("HUCIDB_SERVER");
 builder.Services.AddDbContext<HucidbContext>(options => options.UseSqlServer(connectionString));
-#else
-var connectionString = builder.Configuration.GetConnectionString("HUCIDB_SERVER");
-builder.Services.AddDbContext<HucidbContext>(options => options.UseSqlServer(connectionString));
-#endif
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -38,8 +33,6 @@ builder.Services.AddSwaggerGen();
 //add automapper
 builder.Services.AddControllersWithViews();
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
-
-
 
 // Add services to the container.
 builder.Logging.ClearProviders(); 

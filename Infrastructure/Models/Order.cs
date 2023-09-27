@@ -87,6 +87,8 @@ public partial class Order
 
     public bool? IsUseExcelFile { get; set; }
 
+    public bool IsUpSale { get; set; }
+
     public virtual Employee CreateEmployee { get; set; } = null!;
 
     public virtual Customer Customer { get; set; } = null!;

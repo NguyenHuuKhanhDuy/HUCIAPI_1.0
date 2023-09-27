@@ -507,7 +507,7 @@ namespace Services.Implement
                 x.IsDeleted = true;
             });
 
-            var typeAction = await _dbContext.TypeActions.FindAsync(OrderConstants.TypeAction.Delete);
+            var typeAction = await _dbContext.TypeActions.FindAsync(TypeActionConstants.Delete);
             var action = new HistoryAction()
             {
                 Id = Guid.NewGuid(),
@@ -1112,8 +1112,7 @@ namespace Services.Implement
         /// <param name="pageSize"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public async Task<OrderPaginationDto> GetOrdersWithPaginationAsync(DateTime startDate,
-            DateTime endDate,
+        public async Task<OrderPaginationDto> GetOrdersWithPaginationAsync(DateTime date,
             Guid employeeCreateId,
             Guid customerId,
             Guid brandId,
@@ -1195,13 +1194,16 @@ namespace Services.Implement
             //fillter for date
             if (!isGetWithoutDate)
             {
+                var startDate = new DateTime(date.Year, date.Month, 1);
+                var endDate = startDate.AddMonths(1).AddDays(-1);
+
                 orders = orders.Where(x => x.OrderDate.Date >= startDate.Date && x.OrderDate.Date <= endDate.Date).ToList();
             }
 
             //filter for phone 
             if (!string.IsNullOrEmpty(phone))
             {
-                orders = orders.Where(x => x.CustomerPhone == phone).ToList();
+                orders = orders.Where(x => x.CustomerPhone.Contains(phone)).ToList();
             }
 
             //filter for search
@@ -1399,11 +1401,17 @@ namespace Services.Implement
             DateTime today = GetDateTimeNow();
             var statisticalOrderToday = new StatisticalOrderToday();
             var orders = await _dbContext.Orders.AsNoTracking().Where(x => x.OrderDate.Date == today.Date).ToListAsync();
-            statisticalOrderToday.TotalOrder.Total = orders.Count();
-            statisticalOrderToday.TotalOrder.TotalPrice = orders.Sum(x => x.TotalPayment);
-            statisticalOrderToday.TotalOrder.AveragePrice = (float)statisticalOrderToday.TotalOrder.TotalPrice/(float) orders.Count();
-            statisticalOrderToday.TotalOrder.TotalPriceWaitingOrder = orders.Where(x => x.OrderSourceId == OrderConstants.OrderStatusWaiting).Count();
-            await GetOrderBySourceAsync(orders, statisticalOrderToday);
+
+            if (orders != null)
+            {
+
+                statisticalOrderToday.TotalOrder.Total = orders.Count();
+                statisticalOrderToday.TotalOrder.TotalPrice = orders.Sum(x => x.TotalPayment);
+                statisticalOrderToday.TotalOrder.AveragePrice = (int)statisticalOrderToday.TotalOrder.TotalPrice / (int)orders.Count();
+                statisticalOrderToday.TotalOrder.TotalPriceWaitingOrder = orders.Where(x => x.OrderSourceId == OrderConstants.OrderStatusWaiting).Sum(x => x.TotalPayment);
+                await GetOrderBySourceAsync(orders, statisticalOrderToday);
+                await GetOrderByRole(orders, statisticalOrderToday);
+            }
 
             var products = new List<Product>();
             var orderDetails = new List<OrderDetail>();
@@ -1441,15 +1449,135 @@ namespace Services.Implement
             var orderSources = await _dbContext.OrderSources.ToListAsync();
             foreach (var item in orderSources)
             {
-                var orderTemp = orders.Where(x => x.OrderSourceId == item.Id).ToList();
+                var ordersTemp = orders.Where(x => x.OrderSourceId == item.Id).ToList();
                 var temp = new OrderBySourceDtos();
                 temp.NameSource = item.SourceName;
-                temp.Total = orderTemp.Count();
-                temp.TotalPrice = orderTemp.Sum(x => x.TotalPayment);
-                temp.AveragePrice = (float)temp.TotalPrice / (float)temp.Total;
+                temp.Total = ordersTemp.Count();
+                temp.TotalPrice = ordersTemp.Sum(x => x.TotalPayment);
+                GetCountOrderByStatus(ordersTemp, temp.Count);
+                if (temp.Total != 0)
+                {
+                    temp.AveragePrice = (int)temp.TotalPrice / (int)temp.Total;
+                }
+
                 statisticalOrderToday.OrderBySources.Add(temp);
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="orders"></param>
+        /// <param name="countOrderByStatus"></param>
+        private void GetCountOrderByStatus(List<Order> orders, List<CountOrderByStatus> countOrderByStatus)
+        {
+
+            var countDelete = new CountOrderByStatus
+            {
+                StatusName = OrderConstants.OrderStatusDeletedName,
+                Total = orders.Where(x => x.IsDeleted).Count()
+            };
+
+            countOrderByStatus.Add(countDelete);
+
+            countOrderByStatus.Add(new CountOrderByStatus
+            {
+                StatusName = OrderConstants.OrderStatusWaitingName,
+                Total = orders.Where(x => x.OrderStatusId == OrderConstants.OrderStatusWaiting).Count() - countDelete.Total
+            });
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="orders"></param>
+        /// <param name="statisticalOrderToday"></param>
+        /// <returns></returns>
+        private async Task GetOrderByRole(List<Order> orders, StatisticalOrderToday statisticalOrderToday)
+        {
+            var roles = await _dbContext.Rules.ToListAsync();
+            var employees = await _dbContext.Employees.Where(x => !x.IsDeleted).ToListAsync();
+
+            if (roles != null && roles.Any())
+            {
+                foreach ( var role in roles)
+                {
+                    var statisticalByRole = new StatisticalByRole();
+                    var tempEmployee = employees.Where(x => x.RuleId == role.Id).ToList();
+                    statisticalByRole.Id = role.Id;
+                    statisticalByRole.RoleName = role.Name;
+
+                    if (tempEmployee != null && tempEmployee.Any())
+                    {
+                        statisticalByRole.Employee = GetOrderEmployee(orders, tempEmployee);
+                    }
+
+                    statisticalOrderToday.Roles.Add(statisticalByRole);
+                }
+            }
+
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="orders"></param>
+        /// <param name="employees"></param>
+        /// <returns></returns>
+        private List<StatisticalEmployee> GetOrderEmployee(List<Order> orders, List<Employee> employees)
+        {
+            var statisticalEmployees = new List<StatisticalEmployee>();
+
+            foreach (var item in employees)
+            {
+                var statisticalEmployee = new StatisticalEmployee();
+                statisticalEmployee.EmployeeName = item.Name;
+                statisticalEmployee.TotalOrder = orders.Where(x => x.CreateEmployeeId == item.Id).Count();
+                if (statisticalEmployee.TotalOrder != 0)
+                {
+                    statisticalEmployee.AveragePrice = (int)orders.Where(x => x.CreateEmployeeId == item.Id).Sum(x => x.TotalPayment) / (int)statisticalEmployee.TotalOrder;
+                }
+
+                statisticalEmployees.Add(statisticalEmployee);
+            }
+
+            return statisticalEmployees;
+        }
+
+        public async Task UpSaleOrderAsync(Guid orderId, Guid userId, bool isUpSaleOrder)
+        {
+            var employee = await _dbContext.Employees.FirstOrDefaultAsync(x => x.Id == userId && !x.IsDeleted);
+            var order = await _dbContext.Orders.FirstOrDefaultAsync(x => x.Id == orderId && !x.IsDeleted);
+            if (employee == null)
+                throw new BusinessException(EmployeeConstants.EMPLOYEE_NOT_EXIST);
+
+            if (order == null)
+                throw new BusinessException(OrderConstants.ORDER_NOT_EXISTS);
+
+            if (!isUpSaleOrder)
+            {
+                if (employee.RuleId != EmployeeConstants.AdminRoleId)
+                    throw new BusinessException(EmployeeConstants.EmployeeDoNotPermission);
+            }
+
+            var firstIsUpSale = order.IsUpSale ? "Đã Upsale" : "Chưa Upsale";
+            var afterUpDateIsUpSale = isUpSaleOrder ? "Đã Upsale" : "Chưa Upsale";
+            var typeAction = await _dbContext.TypeActions.FindAsync(TypeActionConstants.Update);
+            var action = new HistoryAction()
+            {
+                Id = Guid.NewGuid(),
+                IdAction = order.Id,
+                Description = string.Format(OrderConstants.ActionUpSale, firstIsUpSale, afterUpDateIsUpSale),
+                TypeActionName = typeAction!.Name,
+                CreateDate = GetDateTimeNow(),
+                UserCreateId = userId,
+                TypeActionId = typeAction!.Id,
+            };
+
+            await _dbContext.HistoryActions.AddAsync(action);
+            order.IsUpSale = isUpSaleOrder;
+
+            await _dbContext.SaveChangesAsync();
+        }
     }
 }

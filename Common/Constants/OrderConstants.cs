@@ -40,12 +40,9 @@
         public const int OrderStatusSuccess = 6;
         public const int OrderStatucCompleted = 3;
 
-        public static class TypeAction
-        {
-            public const int Default = 0;
-            public const int Add = 1;
-            public const int Delete = 2;
-            public const int Update = 3;
-        }
+        public const string OrderStatusDeletedName = "deleted";
+        public const string OrderStatusWaitingName = "wait";
+        public const string ActionUpSale = "Cập nhật từ \'{0}\' sang \'{1}\'";
+
     }
 }

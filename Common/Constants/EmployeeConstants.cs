@@ -27,5 +27,6 @@
         public const string AdminName = "admin";
         public const int AdminRoleId = 1;
         public const string CanNotRemoveAdmin = "Không thể xóa admin";
+        public const string EmployeeDoNotPermission = "Nhân viên không có quyền thao tác";
     }
 }

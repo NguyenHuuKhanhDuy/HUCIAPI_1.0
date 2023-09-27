@@ -18,8 +18,7 @@ namespace Services.Interface
         Task<OrderDto> CreateOrderFromLadipageAsync(OrderForLadipageVM orderVM);
         Task<string> UpdateStatusShippingGHTKAsync(IFormFile excelFile);
         Task<string> UpdateStatusShippingEMSAsync(IFormFile excelFile);
-        Task<OrderPaginationDto> GetOrdersWithPaginationAsync(DateTime startDate,
-            DateTime endDate,
+        Task<OrderPaginationDto> GetOrdersWithPaginationAsync(DateTime date,
             Guid employeeCreateId,
             Guid customerId,
             Guid brandId,
@@ -37,5 +36,6 @@ namespace Services.Interface
         Task<StatusOrderDto> GetAllOrderStatusAsync();
         Task<List<OrderDto>> GetOrdersToCallTakeCareWithDateAgoAsyns(int fromDateAgo, int toDateAgo);
         Task<StatisticalOrderToday> GetStatisticalTodayAsync();
+        Task UpSaleOrderAsync(Guid orderId, Guid userId, bool isUpSaleOrder);
     }
 }
