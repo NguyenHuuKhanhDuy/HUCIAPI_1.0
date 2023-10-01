@@ -1,11 +1,13 @@
 ﻿using ApplicationCore.Exceptions;
 using ApplicationCore.ModelsDto.CallTakeCare;
+using ApplicationCore.ModelsDto.HistoryAction;
 using ApplicationCore.ModelsDto.Order;
 using ApplicationCore.ViewModels.CallTakeCare;
 using Common.Constants;
 using Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
 using Services.Interface;
+using System;
 
 namespace Services.Implement
 {
@@ -130,6 +132,47 @@ namespace Services.Implement
             }
 
             return callTakeCareDtos;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="orderId"></param>
+        /// <returns></returns>
+        public List<CallTakeCareDto> GetAllCallTakeCaresByOrderId(List<OrderTakeCare> callTakeCares, List<Employee> employees)
+        {
+            var callTakeCareDtos = new List<CallTakeCareDto>();
+
+            foreach (var item in callTakeCares)
+            {
+                var employee = employees.FirstOrDefault(x => x.Id == item.UserCreateId);
+
+                if (employee == null)
+                    continue;
+
+                callTakeCareDtos.Add(MapFOrderTakeCareTCallTakeCareDto(item, employee.Name));
+            }
+
+            return callTakeCareDtos;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="orders"></param>
+        /// <returns></returns>
+        public async Task GetCallTakeCareForOrderDtos(List<OrderDto> orders)
+        {
+            var callTakeCares = await _dbContext.OrderTakeCares.AsNoTracking().Where(x => !x.IsDeleted).ToListAsync();
+            var employees = await _dbContext.Employees.AsNoTracking().ToListAsync();
+
+            if (!callTakeCares.Any())
+                return;
+            foreach (var item in orders)
+            {
+                var employee = employees.FirstOrDefault(x => x.Id == item.CreateEmployeeId);
+                item.CallTakeCares = GetAllCallTakeCaresByOrderId(callTakeCares.Where(x => x.OrderId == item.Id).ToList(), employees);
+            }
         }
     }
 }

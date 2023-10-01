@@ -1,4 +1,5 @@
-﻿using ApplicationCore.ModelsDto.HistoryAction;
+﻿using ApplicationCore.ModelsDto.CallTakeCare;
+using ApplicationCore.ModelsDto.HistoryAction;
 using Infrastructure.Models;
 
 namespace ApplicationCore.ModelsDto.Order
@@ -80,5 +81,7 @@ namespace ApplicationCore.ModelsDto.Order
         public List<OrderDetailDto> products { get; set; } = new List<OrderDetailDto>();
 
         public List<HistoryActionDto> History { get; set; } = new List<HistoryActionDto>();
+
+        public List<CallTakeCareDto> CallTakeCares { get; set; } = new List<CallTakeCareDto>();
     }
 }

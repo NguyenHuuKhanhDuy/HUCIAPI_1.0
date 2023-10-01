@@ -37,7 +37,7 @@
         public const int PERCENT_COMMISSION_TAKE_CARE = 5;
 
         public const int OrderStatusWaiting = 1;
-        public const int OrderStatusSuccess = 6;
+        public const int OrderStatusSuccess = 2;
         public const int OrderStatucCompleted = 3;
 
         public const string OrderStatusDeletedName = "deleted";

@@ -18,11 +18,16 @@ namespace Services.Implement
         private readonly HucidbContext _dbContext;
         private readonly ICustomerServices _customerServices;
         private readonly IHistoryAction _historyActionServices;
-        public OrderImp(HucidbContext dbContext, ICustomerServices customerServices, IHistoryAction historyActionServices) : base(dbContext)
+        private readonly ICallTakeCareServices _callTakeCareServices;
+        public OrderImp(HucidbContext dbContext,
+            ICustomerServices customerServices,
+            IHistoryAction historyActionServices,
+            ICallTakeCareServices callTakeCareServices) : base(dbContext)
         {
             _dbContext = dbContext;
             _customerServices = customerServices;
             _historyActionServices = historyActionServices;
+            _callTakeCareServices = callTakeCareServices;
         }
 
         /// <summary>
@@ -1238,6 +1243,7 @@ namespace Services.Implement
             orderPage.TotalPage = (int)Math.Ceiling((double)totalOrder / pageSize);
 
             orderPage.Orders = await GetOrderWithOrderDetail(totalOrdersPerPage);
+            await _callTakeCareServices.GetCallTakeCareForOrderDtos(orderPage.Orders);
 
             return orderPage;
         }

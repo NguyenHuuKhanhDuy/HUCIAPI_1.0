@@ -10,5 +10,6 @@ namespace Services.Interface
         Task<CallTakeCareDto> UpdateCallTakeCareAsync(CallTakeCareUpdateVM vm);
         Task DeleteCallTakeCareAsync(Guid callTakeCareId);
         Task<List<CallTakeCareDto>> GetAllCallTakeCaresByOrderIdAsync(Guid orderId);
+        Task GetCallTakeCareForOrderDtos(List<OrderDto> orders);
     }
 }
