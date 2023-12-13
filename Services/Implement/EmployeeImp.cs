@@ -2,13 +2,12 @@
 using ApplicationCore.ModelsDto;
 using ApplicationCore.ModelsDto.Employee;
 using ApplicationCore.ViewModels.Employee;
-using AutoMapper;
-using AutoMapper.Configuration.Conventions;
 using Common.Constants;
 using Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Services.Helper;
 using Services.Interface;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
@@ -20,14 +19,12 @@ namespace Services.Implement
     public class EmployeeImp : BaseServices, IEmployeeServices
     {
         private readonly HucidbContext _dbContext;
-        private readonly IMapper _mapper;
         private readonly IConfiguration _config;
         private readonly IOrderServices _orderServices;
 
-        public EmployeeImp(HucidbContext dbContext, IMapper mapper, IConfiguration config, IOrderServices orderServices) : base(dbContext)
+        public EmployeeImp(HucidbContext dbContext, IConfiguration config, IOrderServices orderServices) : base(dbContext)
         {
             _dbContext = dbContext;
-            _mapper = mapper;
             _config = config;
             _orderServices = orderServices;
         }
@@ -51,7 +48,7 @@ namespace Services.Implement
                 throw new BusinessException(LoginConstants.PASSWORD_INCORRECT);
             }
 
-            EmployeeDto employeeDto = _mapper.Map<EmployeeDto>(employee);
+            var employeeDto = DataMapper.Map<Employee, EmployeeDto>(employee);
 
             var employeeCreate = await _dbContext.Employees.FindAsync(employeeDto.CreateUserId);
             if (employeeCreate != null)
@@ -66,12 +63,12 @@ namespace Services.Implement
 
         private async Task CheckIpAsync(string ipAddress)
         {
-            var ips = await _dbContext.Ips.AsNoTracking().ToListAsync();
+            var ips = await _dbContext.Ips.AsNoTracking().Where(x => !x.IsDeleted).ToListAsync();
 
             if (!ips.Any())
                 return;
 
-            var ip = ips.FirstOrDefault(x => x.Ipv4 == ipAddress && !x.IsDeleted);
+            var ip = ips.FirstOrDefault(x => x.Ipv4 == ipAddress);
 
             if(ip == null)
             {
@@ -139,7 +136,7 @@ namespace Services.Implement
                 throw new BusinessException(EmployeeConstants.SALARY_TYPE_NOTE_EXIST);
             }
 
-            Employee employee = _mapper.Map<Employee>(employeeVM);
+            var employee = DataMapper.Map<EmployeeVM, Employee>(employeeVM);
             employee.Id = Guid.NewGuid();
             employee.Password = HashPassword(employee.Password);
             await GetNameFieldHaveId(employee);
@@ -147,7 +144,7 @@ namespace Services.Implement
             await _dbContext.Employees.AddAsync(employee);
             await _dbContext.SaveChangesAsync();
 
-            EmployeeDto dto = _mapper.Map<EmployeeDto>(employee);
+            var dto = DataMapper.Map<Employee, EmployeeDto>(employee);
             return dto;
         }
 
@@ -216,7 +213,7 @@ namespace Services.Implement
             {
                 if (employee.IsDeleted == false)
                 {
-                    var employeeDto = _mapper.Map<EmployeeDto>(employee);
+                    var employeeDto = DataMapper.Map<Employee, EmployeeDto>(employee);
                     employeeDto.CreateUserName = allEmployee.Where(x => x.Id == employeeDto.CreateUserId).FirstOrDefault().Name;
                     employeeDtos.Add(employeeDto);
                 }
@@ -239,7 +236,7 @@ namespace Services.Implement
                 throw new BusinessException(EmployeeConstants.EMPLOYEE_NOT_EXIST);
             }
 
-            var employeeDto = _mapper.Map<EmployeeDto>(employee);
+            var employeeDto = DataMapper.Map<Employee, EmployeeDto>(employee);
             employeeDto.CreateUserName = _dbContext.Employees.FirstOrDefault(x => x.Id == employeeDto.CreateUserId).Name;
             return employeeDto;
         }
@@ -253,7 +250,7 @@ namespace Services.Implement
             }
 
             List<Employee> employeesNotCurrentEmployee = await _dbContext.Employees.Where(x => !x.IsDeleted && x.Id != employeeVM.Id).ToListAsync();
-            CheckEmployeeInformation(_mapper.Map<EmployeeVM>(employeeVM), employeesNotCurrentEmployee);
+            CheckEmployeeInformation(DataMapper.Map<EmployeeUpdateVM, EmployeeVM>(employeeVM), employeesNotCurrentEmployee);
 
             MapFEmployeeUpdateVMTEmployee(employee, employeeVM);
 
@@ -266,7 +263,7 @@ namespace Services.Implement
 
             await _dbContext.SaveChangesAsync();
 
-            EmployeeDto employeeDto = _mapper.Map<EmployeeDto>(employee);
+            var employeeDto = DataMapper.Map<Employee, EmployeeDto>(employee);
             return employeeDto;
         }
 

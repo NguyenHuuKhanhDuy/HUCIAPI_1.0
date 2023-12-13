@@ -1,10 +1,11 @@
 ﻿using ApplicationCore.Exceptions;
 using ApplicationCore.ModelsDto.Category;
 using ApplicationCore.ViewModels.Catogory;
-using AutoMapper;
+
 using Common.Constants;
 using Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
+using Services.Helper;
 using Services.Interface;
 
 namespace Services.Implement
@@ -12,11 +13,9 @@ namespace Services.Implement
     public class CategoryImp : BaseServices, ICategoryServices
     {
         private readonly HucidbContext _dbContext;
-        private readonly IMapper _mapper;
-        public CategoryImp(HucidbContext dbContext, IMapper mapper) : base(dbContext)
+        public CategoryImp(HucidbContext dbContext) : base(dbContext)
         {
             _dbContext = dbContext;
-            _mapper = mapper;
         }
 
         public async Task<CategoryDto> CreateCategoryAsync(CategoryVM categoryVM)
@@ -50,7 +49,7 @@ namespace Services.Implement
             await _dbContext.Categories.AddAsync(category);
             await _dbContext.SaveChangesAsync();
 
-            CategoryDto categoryDto = _mapper.Map<CategoryDto>(category);
+            var categoryDto = DataMapper.Map<Category, CategoryDto>(category);
             return categoryDto;
         }
 
@@ -89,7 +88,7 @@ namespace Services.Implement
 
             await _dbContext.SaveChangesAsync();
 
-            CategoryDto categoryDto = _mapper.Map<CategoryDto>(category);
+            var categoryDto = DataMapper.Map<Category, CategoryDto>(category);
             return categoryDto;
         }
 
@@ -111,7 +110,7 @@ namespace Services.Implement
         {
             List<Category> categories = await _dbContext.Categories.Where(x => !x.IsDeleted).ToListAsync();
 
-            List<CategoryDto> categoriesDto = _mapper.Map<List<CategoryDto>>(categories);
+            var categoriesDto = DataMapper.MapList<Category, CategoryDto>(categories);
 
             return categoriesDto;
         }

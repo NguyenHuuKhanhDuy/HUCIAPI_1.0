@@ -26,6 +26,7 @@ namespace ApplicationCore.Helper.HandleException
                 await HandleExceptionAsync(httpContext, ex);
             }
         }
+
         private async Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
             _logger.LogError($"Something wrong: {exception}");
@@ -33,20 +34,20 @@ namespace ApplicationCore.Helper.HandleException
             switch (exception)
             {
                 case ValidateException:
-                    response.status = StatusCodeConstants.STATUS_EXP_VALIDATE;
-                    response.message = exception.Message;
+                    response.Status = StatusCodeConstants.STATUS_EXP_VALIDATE;
+                    response.Message = exception.Message;
                     break;
                 case BusinessException:
-                    response.status = StatusCodeConstants.STATUS_INTERNAL_SERVER_ERROR;
-                    response.message = exception.Message;
+                    response.Status = StatusCodeConstants.STATUS_INTERNAL_SERVER_ERROR;
+                    response.Message = exception.Message;
                     break;
                 default:
-                    response.status = StatusCodeConstants.STATUS_INTERNAL_SERVER_ERROR;
-                    response.message = exception.Message;
+                    response.Status = StatusCodeConstants.STATUS_INTERNAL_SERVER_ERROR;
+                    response.Message = exception.Message;
                     break;
             }
             context.Response.ContentType = "application/json";
-            context.Response.StatusCode = response.status;
+            context.Response.StatusCode = response.Status;
             await context.Response.WriteAsync(response.ToString());
         }
     }

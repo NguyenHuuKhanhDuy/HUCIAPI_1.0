@@ -5,6 +5,7 @@ using Azure;
 using Common.Constants;
 using Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
+using Services.Helper;
 using Services.Interface;
 
 namespace Services.Implement
@@ -70,12 +71,6 @@ namespace Services.Implement
         /// <exception cref="BusinessException"></exception>
         public void CheckCustomerInformation(string email, string phone, List<Customer> customers)
         {
-            //var exist = customers.Where(x => x.Email == email).FirstOrDefault();
-            //if (exist != null)
-            //{
-            //    throw new BusinessException(EmployeeConstants.EXIST_EMAIL);
-            //}
-
             var exist = customers.Where(x => x.Phone == phone).FirstOrDefault();
             if (exist != null)
             {
@@ -93,9 +88,9 @@ namespace Services.Implement
             await CheckCustomerId(customerId);
             Customer customer = await _dbContext.Customers.FindAsync(customerId);
 
-            //customer.IsDeleted = true;
+            customer.IsDeleted = true;
             customer.CustomerNumber += BaseConstants.DELETE;
-            //customer.Name += BaseConstants.DELETE;
+            customer.Name += BaseConstants.DELETE;
 
             await _dbContext.SaveChangesAsync();
         }
@@ -145,12 +140,8 @@ namespace Services.Implement
         {
             var customers = await _dbContext.Customers.Where(x => !x.IsDeleted).OrderByDescending(x => x.CreateDate).ToListAsync();
 
-
-            List<CustomerDto> dtos = new List<CustomerDto>();
-            foreach(Customer customer in customers)
-            {
-                dtos.Add(MapFCustomerTCustomerDto(customer));
-            }
+            var dtos = DataMapper.MapList<Customer, CustomerDto>(customers);
+            
             return dtos;
         }
 
@@ -184,7 +175,7 @@ namespace Services.Implement
                                         .Take(pageSize)
                                         .ToList();
 
-            foreach(var customer in customers)
+            foreach(var customer in customerPerPage)
             {
                 customerPagination.customer.Add(MapFCustomerTCustomerDto(customer));
             }

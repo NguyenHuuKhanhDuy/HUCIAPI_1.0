@@ -29,6 +29,18 @@ namespace ApplicationCore.ViewModels.Order
 
         public string? OrderNote { get; set; }
 
+        public string? CustomerName { get; set; }
+
+        public string? CustomerPhone { get; set; }
+
+        public string? CustomerAddress { get; set; }
+
+        public int ProvinceId { get; set; }
+
+        public int DistrictId { get; set; }
+
+        public int WardId { get; set; }
+
         public List<ProductInsideOrderVM> products { get; set; } = new List<ProductInsideOrderVM>();
 
     }

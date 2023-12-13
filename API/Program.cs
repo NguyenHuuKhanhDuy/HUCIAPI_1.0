@@ -1,5 +1,4 @@
 using API.Controllers;
-using ApplicationCore.AutoMapper;
 using ApplicationCore.Helper.HandleException;
 using ApplicationCore.Helper.Logger;
 using Infrastructure.Models;
@@ -13,6 +12,7 @@ using Services.Implement;
 using Services.Interface;
 using System.Text;
 
+System.Console.Title = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -32,7 +32,6 @@ builder.Services.AddSwaggerGen();
 
 //add automapper
 builder.Services.AddControllersWithViews();
-builder.Services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
 
 // Add services to the container.
 builder.Logging.ClearProviders(); 

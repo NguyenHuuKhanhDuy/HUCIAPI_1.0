@@ -1,22 +1,18 @@
-﻿using ApplicationCore.Helper;
-using Common.Constants;
-using Microsoft.AspNetCore.Http;
+﻿using Common.Constants;
 using System.ComponentModel.DataAnnotations;
 
 namespace ApplicationCore.ViewModels.Employee
 {
-    public class EmployeeVM /*: IValidatableObject*/
+    public class EmployeeVM
     {
         [Required]
         public string? Name { get; set; } = null!;
 
-        [RegularExpression(RegexConstants.REGEX_EMAIL, ErrorMessage = EmployeeConstants.INVALID_EMAIL)]
         public string? Email { get; set; }
 
         [RegularExpression(RegexConstants.REGEX_PHONE, ErrorMessage = EmployeeConstants.INVALID_PHONE)]
         public string? Phone { get; set; }
 
-        //[RegularExpression(RegexConstants.REGEX_BIRTHDAY, ErrorMessage = EmployeeConstants.INVALID_BIRTHDAY)]
         public DateTime? Birthday { get; set; }
 
         [Range(0, 2, ErrorMessage = EmployeeConstants.INVALID_GENGER)]
@@ -53,12 +49,7 @@ namespace ApplicationCore.ViewModels.Employee
 
         [Required]
         public string Password { get; set; } = null!;
-        public string? Image { get; set; }
 
-        //public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-        //{
-        //    DataResponse response = new DataResponse(null, "", 3);
-        //    yield return new ValidationResult("hihi");
-        //}
+        public string? Image { get; set; }
     }
 }

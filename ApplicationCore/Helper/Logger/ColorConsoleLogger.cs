@@ -39,7 +39,7 @@ namespace ApplicationCore.Helper.Logger
                 Console.WriteLine($"[{time}: {logLevel}]");
 
                 Console.ForegroundColor = originalColor;
-                Console.Write($"     {_name} - ");
+                Console.Write($"      - ");
 
                 Console.ForegroundColor = config.LogLevelToColorMap[logLevel];
                 Console.Write($"{formatter(state, exception)}");

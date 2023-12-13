@@ -3,6 +3,7 @@ using ApplicationCore.ModelsDto.Import;
 using ApplicationCore.ViewModels.Import;
 using ApplicationCore.ViewModels.Product;
 using Common.Constants;
+using Common.Enums;
 using Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
 using Services.Interface;
@@ -30,7 +31,7 @@ namespace Services.Implement
             var products = await _dbContext.Products.Where(x => !x.IsDeleted).ToListAsync();
             var statusImports = await _dbContext.StatusImports.AsNoTracking().ToListAsync();
             CheckInfoImport(vm, employees, suppliers, products);
-            var imports = await _dbContext.Imports.AsNoTracking().Where(x => !x.IsDelete).ToListAsync();
+            var imports = await _dbContext.Imports.AsNoTracking().ToListAsync();
             var import = MapFImportVMTImport(vm);
             import.ImportNumber = GetImportNumber(imports);
             import.StatusImportName = statusImports.FirstOrDefault(x => x.Id == import.StatusImportId)!.Name;
@@ -165,6 +166,11 @@ namespace Services.Implement
                 throw new BusinessException($"{ImportConstants.ImportNotExistWithId}: {vm.Id} ");
             }
 
+            if (import.StatusImportId == (int)ImportEnum.Done)
+            {
+                throw new BusinessException(ImportConstants.ImportIsCompleted);
+            }
+
             var employees = await _dbContext.Employees.AsNoTracking().Where(x => !x.IsDeleted).ToListAsync();
             var suppliers = await _dbContext.Suppliers.AsNoTracking().Where(x => !x.IsDeleted).ToListAsync();
             var products = await _dbContext.Products.Where(x => !x.IsDeleted).ToListAsync();
@@ -283,15 +289,21 @@ namespace Services.Implement
         /// <returns></returns>
         public async Task<List<ImportDto>> GetAllImportAsync()
         {
-            var imports = await _dbContext.Imports.Where(x => !x.IsDelete).ToListAsync();
-
+            var imports = await _dbContext.Imports.Where(x => !x.IsDelete).OrderByDescending(x => x.CreateDate).ToListAsync();
+            var employeeIds = imports.Select(x => x.UserCreateId).ToList();
+            var shupplierIds = imports.Select(x => x.SupplierId).ToList();
+            var employees = await _dbContext.Employees.AsNoTracking().Where(x => employeeIds.Contains(x.Id)).ToListAsync();
+            var suppliers = await _dbContext.Suppliers.AsNoTracking().Where(x => shupplierIds.Contains(x.Id)).ToListAsync();
             var importDtos = new List<ImportDto>();
 
-            if( imports.Any() )
+            if(imports.Any())
             {
                 imports.ForEach(import =>
                 {
-                    importDtos.Add(MapFImportTImportDto(import));
+                    var supplier = suppliers.FirstOrDefault(x => x.Id == import.SupplierId);
+                    var employee = employees.FirstOrDefault(x => x.Id == import.UserCreateId);
+
+                    importDtos.Add(MapFImportTImportDto(import, employee?.Name, supplier?.Name));
                 });
             }
 

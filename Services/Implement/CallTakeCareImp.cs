@@ -1,13 +1,11 @@
 ﻿using ApplicationCore.Exceptions;
 using ApplicationCore.ModelsDto.CallTakeCare;
-using ApplicationCore.ModelsDto.HistoryAction;
 using ApplicationCore.ModelsDto.Order;
 using ApplicationCore.ViewModels.CallTakeCare;
 using Common.Constants;
 using Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
 using Services.Interface;
-using System;
 
 namespace Services.Implement
 {
@@ -67,25 +65,18 @@ namespace Services.Implement
         /// <exception cref="BusinessException"></exception>
         public async Task<CallTakeCareDto> UpdateCallTakeCareAsync(CallTakeCareUpdateVM vm)
         {
-            var callTakeCare = await _dbContext.OrderTakeCares.FirstOrDefaultAsync(x => x.Id == vm.Id && !x.IsDeleted);
+            var callTakeCare = await _dbContext.OrderTakeCares.Include(x => x.UserCreate).FirstOrDefaultAsync(x => x.Id == vm.Id && !x.IsDeleted);
             
             if (callTakeCare == null)
             {
                 throw new BusinessException(CallTakeCareConstants.OrderTakeCareNotExist);
             }
 
-            var employee = await _dbContext.Employees.AsNoTracking().FirstOrDefaultAsync(x => x.Id == callTakeCare.UserCreateId);
-
-            if (employee == null)
-            {
-                throw new BusinessException(TimeKeepingConstants.UserCreateNotExist);
-            }
-
             callTakeCare.Notes = vm.Notes;
 
             await _dbContext.SaveChangesAsync();
 
-            var callTakeCareDto = MapFOrderTakeCareTCallTakeCareDto(callTakeCare, employee.Name);
+            var callTakeCareDto = MapFOrderTakeCareTCallTakeCareDto(callTakeCare, callTakeCare.UserCreate.Name);
 
             return callTakeCareDto;
         }
@@ -116,19 +107,14 @@ namespace Services.Implement
         /// <returns></returns>
         public async Task<List<CallTakeCareDto>> GetAllCallTakeCaresByOrderIdAsync(Guid orderId)
         {
-            var callTakeCares = await _dbContext.OrderTakeCares.AsNoTracking().Where(x => x.OrderId == orderId && !x.IsDeleted).OrderByDescending(x => x.CreateDate).ToListAsync();
+            var callTakeCares = await _dbContext.OrderTakeCares.Include(x => x.UserCreate).AsNoTracking().Where(x => x.OrderId == orderId && !x.IsDeleted).OrderByDescending(x => x.CreateDate).ToListAsync();
             var employees = await _dbContext.Employees.AsNoTracking().ToListAsync();
 
             var callTakeCareDtos = new List<CallTakeCareDto>();
 
             foreach (var item in callTakeCares)
             {
-                var employee = employees.FirstOrDefault(x => x.Id == item.UserCreateId);
-
-                if (employee == null)
-                    continue;
-
-                callTakeCareDtos.Add(MapFOrderTakeCareTCallTakeCareDto(item, employee.Name));
+                callTakeCareDtos.Add(MapFOrderTakeCareTCallTakeCareDto(item, item.UserCreate.Name));
             }
 
             return callTakeCareDtos;
@@ -139,18 +125,13 @@ namespace Services.Implement
         /// </summary>
         /// <param name="orderId"></param>
         /// <returns></returns>
-        public List<CallTakeCareDto> GetAllCallTakeCaresByOrderId(List<OrderTakeCare> callTakeCares, List<Employee> employees)
+        public List<CallTakeCareDto> GetAllCallTakeCaresByOrderId(List<OrderTakeCare> callTakeCares)
         {
             var callTakeCareDtos = new List<CallTakeCareDto>();
 
             foreach (var item in callTakeCares)
             {
-                var employee = employees.FirstOrDefault(x => x.Id == item.UserCreateId);
-
-                if (employee == null)
-                    continue;
-
-                callTakeCareDtos.Add(MapFOrderTakeCareTCallTakeCareDto(item, employee.Name));
+                callTakeCareDtos.Add(MapFOrderTakeCareTCallTakeCareDto(item, item.UserCreate.Name));
             }
 
             return callTakeCareDtos;
@@ -163,15 +144,13 @@ namespace Services.Implement
         /// <returns></returns>
         public async Task GetCallTakeCareForOrderDtos(List<OrderDto> orders)
         {
-            var callTakeCares = await _dbContext.OrderTakeCares.AsNoTracking().Where(x => !x.IsDeleted).ToListAsync();
-            var employees = await _dbContext.Employees.AsNoTracking().ToListAsync();
+            var callTakeCares = await _dbContext.OrderTakeCares.Include(x => x.UserCreate).AsNoTracking().Where(x => !x.IsDeleted).ToListAsync();
 
             if (!callTakeCares.Any())
                 return;
             foreach (var item in orders)
             {
-                var employee = employees.FirstOrDefault(x => x.Id == item.CreateEmployeeId);
-                item.CallTakeCares = GetAllCallTakeCaresByOrderId(callTakeCares.Where(x => x.OrderId == item.Id).ToList(), employees);
+                item.CallTakeCares = GetAllCallTakeCaresByOrderId(callTakeCares.Where(x => x.OrderId == item.Id).ToList());
             }
         }
     }

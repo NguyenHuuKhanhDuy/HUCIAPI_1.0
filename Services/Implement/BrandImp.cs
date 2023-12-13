@@ -1,22 +1,22 @@
 ﻿using ApplicationCore.Exceptions;
 using ApplicationCore.ModelsDto.Brand;
 using ApplicationCore.ViewModels.Brand;
-using AutoMapper;
+
 using Common.Constants;
 using Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
+using Services.Helper;
 using Services.Interface;
+using System.Collections.Generic;
 
 namespace Services.Implement
 {
     public class BrandImp : BaseServices, IBrandServices
     {
         private readonly HucidbContext _dbContext;
-        private readonly IMapper _mapper;
-        public BrandImp(HucidbContext dbContext, IMapper mapper) : base(dbContext)
+        public BrandImp(HucidbContext dbContext) : base(dbContext)
         {
             _dbContext = dbContext;
-            _mapper = mapper;
         }
         /// <summary>
         /// Create new brand
@@ -39,7 +39,7 @@ namespace Services.Implement
             await _dbContext.Brands.AddAsync(brand);
             await _dbContext.SaveChangesAsync();
 
-            BrandDto brandDto = _mapper.Map<BrandDto>(brand);
+            var brandDto = DataMapper.Map<Brand, BrandDto>(brand);
 
             return brandDto;
         }
@@ -63,7 +63,7 @@ namespace Services.Implement
             brand.Name= brandVM.Name;
             await _dbContext.SaveChangesAsync();
 
-            BrandDto brandDto = _mapper.Map<BrandDto>(brand);
+            var brandDto = DataMapper.Map<Brand, BrandDto>(brand);
 
             return brandDto;
         }
@@ -99,9 +99,9 @@ namespace Services.Implement
 
         public async Task<List<BrandDto>> GetAllBrandsAsync()
         {
-            List<Brand> brands = await _dbContext.Brands.Where(x => !x.IsDeleted).ToListAsync();
+            var brands = await _dbContext.Brands.Where(x => !x.IsDeleted).ToListAsync();
 
-            List<BrandDto> result = _mapper.Map<List<BrandDto>>(brands);
+            var result = DataMapper.MapList<Brand, BrandDto>(brands);
 
             return result;
         }

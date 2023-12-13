@@ -5,10 +5,12 @@ using ApplicationCore.ViewModels.Customer;
 using ApplicationCore.ViewModels.Order;
 using ApplicationCore.ViewModels.Product;
 using Common.Constants;
+using Common.Enums;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
+using Services.Helper;
 using Services.Interface;
 
 namespace Services.Implement
@@ -512,7 +514,7 @@ namespace Services.Implement
                 x.IsDeleted = true;
             });
 
-            var typeAction = await _dbContext.TypeActions.FindAsync(TypeActionConstants.Delete);
+            var typeAction = await _dbContext.TypeActions.FindAsync((int)TypeActionEnum.Delete);
             var action = new HistoryAction()
             {
                 Id = Guid.NewGuid(),
@@ -604,23 +606,24 @@ namespace Services.Implement
         /// <returns></returns>
         public async Task<List<OrderDto>> GetAllOrderAsync()
         {
-            List<OrderDto> orderDtos = new List<OrderDto>();
+            var orderDtos = new List<OrderDto>();
             var orders = await _dbContext.Orders.Where(x => !x.IsDeleted).OrderByDescending(x => x.OrderDate).ToListAsync();
+            var historyAction = await _dbContext.HistoryActions.Include(x => x.UserCreate).ToListAsync();
             var ordersDetails = await _dbContext.OrderDetails.ToListAsync();
 
             if (orders.Any())
             {
                 foreach (var order in orders)
                 {
-                    var orderDto = MapFOrderTOrderDto(order);
+                    var orderDto = DataMapper.Map<Order, OrderDto>(order);
                     var orderDetailForOrder = ordersDetails?.Where(x => x.OrderId == order.Id).ToList();
 
                     if (orderDetailForOrder != null && orderDetailForOrder.Any())
                     {
-                        orderDto.products = orderDetailForOrder?.Select(x => MapFOrderDetailTOrderDetailDto(x)).ToList();
+                        orderDto.products = DataMapper.MapList<OrderDetail, OrderDetailDto>(orderDetailForOrder);
                     }
 
-                    orderDto.History = await _historyActionServices.GetHistoryAction(orderDto.Id);
+                    orderDto.History = _historyActionServices.GetHistoryAction(orderDto.Id, historyAction);
                     orderDtos.Add(orderDto);
                 }
             }
@@ -650,27 +653,6 @@ namespace Services.Implement
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="statusId"></param>
-        /// <returns></returns>
-        public async Task<List<OrderDto>> GetOrderByStatusIdAsync(int statusId)
-        {
-            var orderDtos = new List<OrderDto>();
-            var orders = await _dbContext.Orders.Where(x => x.OrderStatusId == statusId).OrderBy(x => x.OrderDate).ToListAsync();
-
-            if (orders.Any())
-            {
-                foreach (var order in orders)
-                {
-                    orderDtos.Add(MapFOrderTOrderDto(order));
-                }
-            }
-
-            return orderDtos;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
         /// <param name="orderId"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
@@ -688,7 +670,7 @@ namespace Services.Implement
 
             if (orderDetails.Any())
             {
-                orderDto.products = orderDetails?.Select(x => MapFOrderDetailTOrderDetailDto(x)).ToList();
+                orderDto.products = DataMapper.MapList<OrderDetail, OrderDetailDto>(orderDetails);
             }
 
             return orderDto;
@@ -752,37 +734,6 @@ namespace Services.Implement
             {
                 order.CustomerId = customer.Id;
             }
-
-            //var productNumbersWithQuantitys = GetProductCodesFromName(orderVM.Product);
-            //var products = await _dbContext.Products.Where(x => !x.IsDeleted).ToListAsync();
-
-            //foreach (var productNumberWithQuantity in productNumbersWithQuantitys)
-            //{
-            //    string[] parts = productNumberWithQuantity.Split('_');
-
-            //    // Extract the two parts
-            //    string quantityString = parts[0];
-            //    int quantity;
-            //    bool success = int.TryParse(quantityString, out quantity);
-            //    string productNumber = parts[1];
-
-            //    var product = products.FirstOrDefault(x => x.ProductNumber == productNumber);
-            //    if (product == null)
-            //    {
-            //        throw new BusinessException(ProductConstants.PRODUCT_NOT_EXIST);
-            //    }
-
-
-
-            //    var productInsideOrder = new ProductInsideOrderVM
-            //    {
-            //        ProductId = product.Id,
-            //        Quantity = success ? quantity : 1,
-            //        Discount = 0
-            //    };
-
-            //    order.products.Add(productInsideOrder);
-            //}
 
             var product = await _dbContext.Products.AsNoTracking().FirstOrDefaultAsync(x => !x.IsDeleted && x.Name == orderVM.Product);
 
@@ -1282,18 +1233,19 @@ namespace Services.Implement
                 return ordersList;
 
             var orderDetails = await _dbContext.OrderDetails.AsNoTracking().Where(x => !x.IsDeleted && orders.Select(x => x.Id).Contains(x.OrderId)).ToListAsync();
+            var historyAction = await _dbContext.HistoryActions.Include(x => x.UserCreate).ToListAsync();
 
             foreach (var order in orders)
             {
-                var orderDto = MapFOrderTOrderDto(order);
+                var orderDto = DataMapper.Map<Order, OrderDto>(order);
                 var orderDetailForOrder = orderDetails?.Where(x => x.OrderId == order.Id).ToList();
 
                 if (orderDetailForOrder != null && orderDetailForOrder.Any())
                 {
-                    orderDto.products = orderDetailForOrder.Select(x => MapFOrderDetailTOrderDetailDto(x)).ToList();
+                    orderDto.products = DataMapper.MapList<OrderDetail, OrderDetailDto>(orderDetailForOrder);
                 }
 
-                orderDto.History = await _historyActionServices.GetHistoryAction(orderDto.Id);
+                orderDto.History = _historyActionServices.GetHistoryAction(orderDto.Id, historyAction);
                 ordersList.Add(orderDto);
             }
 
@@ -1375,7 +1327,7 @@ namespace Services.Implement
                                                 .OrderByDescending(x => x.OrderDate).ToListAsync();
 
             var orderDtos = await GetOrderWithOrderDetail(orders);
-
+            await _callTakeCareServices.GetCallTakeCareForOrderDtos(orderDtos);
             return orderDtos;
         }
 
@@ -1568,7 +1520,7 @@ namespace Services.Implement
 
             var firstIsUpSale = order.IsUpSale ? "Đã Upsale" : "Chưa Upsale";
             var afterUpDateIsUpSale = isUpSaleOrder ? "Đã Upsale" : "Chưa Upsale";
-            var typeAction = await _dbContext.TypeActions.FindAsync(TypeActionConstants.Update);
+            var typeAction = await _dbContext.TypeActions.FindAsync((int)TypeActionEnum.Update);
             var action = new HistoryAction()
             {
                 Id = Guid.NewGuid(),

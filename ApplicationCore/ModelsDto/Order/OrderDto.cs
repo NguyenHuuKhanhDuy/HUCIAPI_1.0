@@ -78,6 +78,8 @@ namespace ApplicationCore.ModelsDto.Order
 
         public string OrderPaymentMethodName { get; set; } = null!;
 
+        public bool IsUpSale { get; set; }
+
         public List<OrderDetailDto> products { get; set; } = new List<OrderDetailDto>();
 
         public List<HistoryActionDto> History { get; set; } = new List<HistoryActionDto>();

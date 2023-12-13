@@ -384,6 +384,12 @@ namespace Services.Implement
             order.OrderShippingMethodId = orderVM.OrderShippingMethodId;
             order.OrderSourceId = orderVM.OrderSourceId;
             order.OrderNote = !string.IsNullOrEmpty(orderVM.OrderNote) ? orderVM.OrderNote : string.Empty;
+            order.CustomerName = GetStringNewOrBefore(orderVM?.CustomerName, order.CustomerName);
+            order.CustomerPhone = GetStringNewOrBefore(orderVM?.CustomerPhone, order.CustomerPhone);
+            order.CustomerAddress = GetStringNewOrBefore(orderVM?.CustomerAddress, order.CustomerAddress);
+            order.WardId = GetIntNewOrBefore(orderVM?.WardId, order.WardId);
+            order.DistrictId = GetIntNewOrBefore(orderVM?.DistrictId, order.DistrictId);
+            order.ProvinceId = GetIntNewOrBefore(orderVM?.ProvinceId, order.ProvinceId);
         }
 
         public OrderDto MapFOrderTOrderDto(Order order)
@@ -425,7 +431,8 @@ namespace Services.Implement
                 OrderSourceId = order.OrderSourceId,
                 OrderSourceName = order.OrderSourceName,
                 OrderPaymentMethodId = order.OrderPaymentMethodId,
-                OrderPaymentMethodName = order.OrderPaymentMethodName
+                OrderPaymentMethodName = order.OrderPaymentMethodName,
+                IsUpSale = order.IsUpSale
             };
 
             return orderDto;
@@ -709,7 +716,7 @@ namespace Services.Implement
             };
         }
 
-        public ImportDto MapFImportTImportDto(Import import)
+        public ImportDto MapFImportTImportDto(Import import, string? userCreateName = null, string? supplierName = null)
         {
             return new ImportDto
             {
@@ -720,9 +727,9 @@ namespace Services.Implement
                 StatusImportId = import.StatusImportId,
                 StatusImportName = import.StatusImportName,
                 UserCreateId = import.UserCreateId,
-                UserCreateName = import.UserCreate?.Name, // Assuming UserCreate has a Name property
+                UserCreateName = userCreateName, // Assuming UserCreate has a Name property
                 SupplierId = import.SupplierId,
-                SupplierName = import.Supplier?.Name
+                SupplierName = supplierName
             };
         }
 
@@ -743,31 +750,6 @@ namespace Services.Implement
                 ProductPriceImport = detail.ProductPriceImport,
                 Quantity = detail.Quantity
             };
-        }
-
-        public List<TOut> MapList<TIn, TOut>(List<TIn> sources)
-        {
-            var result = new List<TOut>();
-
-            foreach (var source in sources)
-            {
-                result.Add((TOut)Map<TIn, TOut>(source));
-            }
-
-            return result;
-        }
-
-        public TOut Map<TIn, TOut>(TIn source)
-        {
-            string json = JsonConvert.SerializeObject(
-                source,
-                Formatting.Indented,
-                new JsonSerializerSettings()
-                {
-                    ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
-                }
-                );
-            return (TOut)JsonConvert.DeserializeObject<TOut>(json);
         }
     }
 }
