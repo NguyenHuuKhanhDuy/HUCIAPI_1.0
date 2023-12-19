@@ -8,7 +8,7 @@ namespace Services.Interface
     public interface IOrderServices
     {
         Task<OrderDto> CreateOrderAsync(OrderVM orderVM, bool isSetOtherDate, bool isWholeSale = false);
-        Task<OrderDto> UpdateOrderAsync(OrderUpdateVM orderVM);
+        Task<OrderDto> UpdateOrderAsync(OrderUpdateVM orderVM, bool isWholeSaleOrder = false);
         Task DeleteOrderAsync(Guid orderId, Guid userId);
         Task RemoveCallTakeOrderAsync(Guid orderId);
         Task<List<OrderDto>> GetAllOrderAsync();

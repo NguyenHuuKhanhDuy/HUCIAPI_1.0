@@ -437,7 +437,7 @@ namespace Services.Implement
         /// <param name="orderVM"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public async Task<OrderDto> UpdateOrderAsync(OrderUpdateVM orderVM)
+        public async Task<OrderDto> UpdateOrderAsync(OrderUpdateVM orderVM, bool isWholeSaleOrder = false)
         {
             var order = await _dbContext.Orders.FirstOrDefaultAsync(x => x.Id == orderVM.Id && !x.IsDeleted);
 
@@ -449,7 +449,7 @@ namespace Services.Implement
             MapFOrderUpdateVMTOrder(order, orderVM);
             await CheckInforForOrderForUpdate(order);
 
-            await UpdateOrderDetailsForOrder(orderVM, order);
+            await UpdateOrderDetailsForOrder(orderVM, order, isWholeSaleOrder);
             if (order.OrderStatusId == OrderConstants.OrderStatusSuccess)
             {
                 var commissions = await _dbContext.Commissions.Where(x => !x.IsDelete).ToListAsync();
@@ -469,7 +469,7 @@ namespace Services.Implement
         /// <param name="orderVM"></param>
         /// <param name="order"></param>
         /// <returns></returns>
-        private async Task UpdateOrderDetailsForOrder(OrderUpdateVM orderVM, Order order)
+        private async Task UpdateOrderDetailsForOrder(OrderUpdateVM orderVM, Order order, bool isWholeSaleOrder)
         {
             var orderDetailsDB = await _dbContext.OrderDetails.Where(x => x.OrderId == orderVM.Id).ToListAsync();
 
@@ -479,7 +479,7 @@ namespace Services.Implement
             var orderDetailsDelete = orderDetailsDB.Where(x => !productIds.Contains(x.ProductId)).ToList();
 
             var productInsideOrders = await GetProductDtoByIdsAsync(orderVM.products);
-            var orderDetails = await GetOrderDetailsAndCalculatePrice(order, productInsideOrders, orderVM.products);
+            var orderDetails = await GetOrderDetailsAndCalculatePrice(order, productInsideOrders, orderVM.products, isWholeSaleOrder);
 
             var orderDetailAddDB = orderDetails.Where(x => !orderDetailsUpdate.Select(y => y.ProductId).Contains(x.ProductId)).ToList();
 

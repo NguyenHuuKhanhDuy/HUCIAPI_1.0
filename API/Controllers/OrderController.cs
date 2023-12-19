@@ -48,11 +48,11 @@ namespace API.Controllers
         /// <param name="orderVM"></param>
         /// <returns></returns>
         [HttpPut("[action]")]
-        public async Task<IActionResult> UpdateOrderAsync(OrderUpdateVM orderVM)
+        public async Task<IActionResult> UpdateOrderAsync(OrderUpdateVM orderVM, bool isWholeSaleOrder = false)
         {
             _logger.LogInformation("Start update order...");
 
-            var order = await _orderServices.UpdateOrderAsync(orderVM);
+            var order = await _orderServices.UpdateOrderAsync(orderVM, isWholeSaleOrder);
 
             _logger.LogInformation("End update order...");
 
