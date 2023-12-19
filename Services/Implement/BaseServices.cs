@@ -127,7 +127,7 @@ namespace Services.Implement
             productDto.Id = product.Id;
             productDto.ProductNumber = product.ProductNumber;
             productDto.Name = product.Name;
-            productDto.Price = product.Price;
+            productDto.NormalPrice = product.NormalPrice;
             productDto.WholesalePrice = product.WholesalePrice;
             productDto.Image = product.Image;
             productDto.OnHand = product.OnHand;
@@ -148,7 +148,7 @@ namespace Services.Implement
             comboDto.Id = product.Id;
             comboDto.ProductNumber = product.ProductNumber;
             comboDto.Name = product.Name;
-            comboDto.Price = product.Price;
+            comboDto.Price = product.NormalPrice;
             comboDto.WholesalePrice = product.WholesalePrice;
             comboDto.Image = product.Image;
             comboDto.OnHand = product.OnHand;
@@ -166,7 +166,7 @@ namespace Services.Implement
         {
             Product product = new Product();
             product.Name = productVM.Name;
-            product.Price = productVM.Price;
+            product.NormalPrice = productVM.NormalPrice;
             product.WholesalePrice = productVM.WholesalePrice;
             product.Image = productVM.Image;
             product.OnHand = productVM.OnHand;
@@ -183,7 +183,7 @@ namespace Services.Implement
         {
             Product product = new Product();
             product.Name = productVM.Name;
-            product.Price = productVM.Price;
+            product.NormalPrice = productVM.NormalPrice;
             product.WholesalePrice = productVM.WholesalePrice;
             product.Image = productVM.Image;
             product.OnHand = 0;
@@ -199,7 +199,7 @@ namespace Services.Implement
         public void MapFComboUpdateVMTProduct(ComboUpdateVM productVM, Product product)
         {
             product.Name = productVM.Name;
-            product.Price = productVM.Price;
+            product.NormalPrice = productVM.Price;
             product.WholesalePrice = productVM.WholesalePrice;
             product.Image = productVM.Image;
             product.OnHand = 0;
@@ -211,7 +211,7 @@ namespace Services.Implement
         public void MapFProductUpdateVMTProduct(ProductUpdateVM productUpdateVM, Product product)
         {
             product.Name = productUpdateVM.Name;
-            product.Price = productUpdateVM.Price;
+            product.NormalPrice = productUpdateVM.Price;
             product.WholesalePrice = productUpdateVM.WholesalePrice;
             product.OnHand = productUpdateVM.Quantity;
             product.BrandId = productUpdateVM.BrandId;

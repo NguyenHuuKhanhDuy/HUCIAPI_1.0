@@ -7,7 +7,7 @@ namespace Services.Interface
 {
     public interface IOrderServices
     {
-        Task<OrderDto> CreateOrderAsync(OrderVM orderVM, bool isSetOtherDate);
+        Task<OrderDto> CreateOrderAsync(OrderVM orderVM, bool isSetOtherDate, bool isWholeSale = false);
         Task<OrderDto> UpdateOrderAsync(OrderUpdateVM orderVM);
         Task DeleteOrderAsync(Guid orderId, Guid userId);
         Task RemoveCallTakeOrderAsync(Guid orderId);
@@ -26,8 +26,6 @@ namespace Services.Interface
             bool isGetWithoutDate,
             int statusOrderId,
             int sourceOrderId,
-            int orderStatusPaymentId,
-            int orderStatusShippingId,
             int orderShippingMethodId,
             string phone,
             string search,

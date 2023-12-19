@@ -8,11 +8,13 @@ namespace ApplicationCore.ViewModels.Product
         [Required]
         public string Name { get; set; } = null!;
 
-        [Range(0, int.MaxValue, ErrorMessage = ProductConstants.INVALID_PRICE)]
-        public int Price { get; set; }
+        public int NormalPrice { get; set; }
 
-        [Range(0, int.MaxValue, ErrorMessage = ProductConstants.INVALID_WHOLESALE_PRICE)]
         public int WholesalePrice { get; set; }
+
+        public int SalePrice { get; set; }
+
+        public int OriginalPrice { get; set; }
 
         public string Image { get; set; } = null!;
 

@@ -31,11 +31,11 @@ namespace API.Controllers
         /// <param name="orderVM"></param>
         /// <returns></returns>
         [HttpPost("[action]")]
-        public async Task<IActionResult> CreateOrderAsync(OrderVM orderVM, bool isSetOrderDate = false)
+        public async Task<IActionResult> CreateOrderAsync(OrderVM orderVM, bool isSetOrderDate = false, bool isWholeSaleOrder = false)
         {
             _logger.LogInformation("Start create order...");
 
-            OrderDto order = await _orderServices.CreateOrderAsync(orderVM, isSetOrderDate);
+            OrderDto order = await _orderServices.CreateOrderAsync(orderVM, isSetOrderDate, isWholeSaleOrder);
 
             _logger.LogInformation("End create order...");
 
@@ -146,15 +146,13 @@ namespace API.Controllers
             bool isGetWithoutDate = true,
             int statusOrderId = 0, 
             int sourceOrderId = 0,
-            int orderStatusPaymentId = 0,
-            int orderStatusShippingId = 0,
             int orderShippingMethodId = 0,
             bool isGetOrderDeleted = false
             )
         {
             _logger.LogInformation($"Start get order with page: {page}, pageSize: {pageSize}");
             
-            var orders = await _orderServices.GetOrdersWithPaginationAsync(date, employeeCreateId, customerId, brandId, page, pageSize, isGetWithoutDate, statusOrderId, sourceOrderId, orderStatusPaymentId, orderStatusShippingId, orderShippingMethodId, phone, search, isGetOrderDeleted);
+            var orders = await _orderServices.GetOrdersWithPaginationAsync(date, employeeCreateId, customerId, brandId, page, pageSize, isGetWithoutDate, statusOrderId, sourceOrderId, orderShippingMethodId, phone, search, isGetOrderDeleted);
 
             _logger.LogInformation($"End get order with page: {page}, pageSize: {pageSize} \r\n{GetStringFromJson(orders)}");
 
@@ -191,24 +189,6 @@ namespace API.Controllers
             var orders = await _orderServices.GetOrdersToCallTakeCareWithDateAgoAsyns(fromDateAdo, toDateAgo);
 
             _logger.LogInformation($"End get order to call take care from {fromDateAdo} to {toDateAgo}. {GetStringFromJson(orders)}");
-
-            return HandleResponseStatusOk(orders);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="startDate"></param>
-        /// <param name="endDate"></param>
-        /// <returns></returns>
-        [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllOrderAsync()
-        {
-            _logger.LogInformation($"Start get all order...");
-
-            var orders = await _orderServices.GetAllOrderAsync();
-
-            _logger.LogInformation($"End get all order...");
 
             return HandleResponseStatusOk(orders);
         }

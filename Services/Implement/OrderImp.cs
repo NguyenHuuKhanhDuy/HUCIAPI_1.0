@@ -38,9 +38,9 @@ namespace Services.Implement
         /// <param name="orderVM"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public async Task<OrderDto> CreateOrderAsync(OrderVM orderVM, bool isSetOrderDate)
+        public async Task<OrderDto> CreateOrderAsync(OrderVM orderVM, bool isSetOrderDate, bool isWholeSale = false)
         {
-            Order order = new Order
+            var order = new Order
             {
                 CustomerId = Guid.Empty,
                 ProvinceId = BaseConstants.INT_DEFAULT,
@@ -48,7 +48,10 @@ namespace Services.Implement
                 WardId = BaseConstants.INT_DEFAULT,
                 OrderStatusId = 1,
                 OrderShippingMethodId = 1,
-                OrderSourceId = BaseConstants.INT_DEFAULT
+                OrderSourceId = BaseConstants.INT_DEFAULT,
+                IsOrderWholeSale = isWholeSale,
+                IsUpSale = false,
+                IsUseExcelFile = true
             };
 
             MapFOrderVMTOrder(order, orderVM);
@@ -61,7 +64,7 @@ namespace Services.Implement
             order.IsDeleted = order.IsRemovedCallTakeCare = BaseConstants.IsDeletedDefault;
 
             var productDtos = await GetProductDtoByIdsAsync(orderVM.products);
-            var orderDetails = await GetOrderDetailsAndCalculatePrice(order, productDtos, orderVM.products);
+            var orderDetails = await GetOrderDetailsAndCalculatePrice(order, productDtos, orderVM.products, isWholeSale);
 
             order.BenefitOrder = await CalculateBenefitOrder(order.OrderTotal, orderVM.products);
             await _dbContext.Orders.AddAsync(order);
@@ -70,7 +73,7 @@ namespace Services.Implement
             await _dbContext.OrderDetails.AddRangeAsync(orderDetails);
             await _dbContext.SaveChangesAsync();
 
-            OrderDto dto = MapFOrderTOrderDto(order);
+            var dto = DataMapper.Map<Order, OrderDto>(order);
 
             if (orderDetails.Any())
             {
@@ -87,19 +90,21 @@ namespace Services.Implement
         /// <param name="productDtos"></param>
         /// <param name="discounts"></param>
         /// <returns></returns>
-        private async Task<List<OrderDetail>> GetOrderDetailsAndCalculatePrice(Order order, List<ProductDto> productDtos, List<ProductInsideOrderVM> discounts)
+        private async Task<List<OrderDetail>> GetOrderDetailsAndCalculatePrice(Order order, List<ProductDto> productDtos, List<ProductInsideOrderVM> discounts, bool isWholeSaleOrder)
         {
             int total = BaseConstants.INT_DEFAULT;
             int productDiscount = BaseConstants.INT_DEFAULT;
             List<OrderDetail> orderDetails = new List<OrderDetail>();
 
-            foreach (ProductInsideOrderVM discount in discounts)
+            foreach (var discount in discounts)
             {
                 var product = productDtos.FirstOrDefault(x => x.Id == discount.ProductId);
                 if (product != null)
                 {
+                    var price = isWholeSaleOrder ? product.WholesalePrice : (product.SalePrice != 0 ? product.SalePrice : product.NormalPrice);
+
                     productDiscount += discount.Discount * discount.Quantity;
-                    total += product.Price * discount.Quantity;
+                    total += price * discount.Quantity;
 
                     orderDetails.Add(new OrderDetail
                     {
@@ -109,9 +114,9 @@ namespace Services.Implement
                         ProductNumber = product.ProductNumber,
                         ProductName = product.Name,
                         ProductImage = product.Image,
-                        ProductPrice = product.Price,
+                        ProductPrice = price,
                         Discount = discount.Discount,
-                        SubTotal = (product.Price - discount.Discount) * discount.Quantity,
+                        SubTotal = (price - discount.Discount) * discount.Quantity,
                         Quantity = discount.Quantity
                     });
                 }
@@ -308,7 +313,7 @@ namespace Services.Implement
                 throw new BusinessException(ProductConstants.PRODUCTS_IN_COMBO_NOT_EXIST);
             }
 
-            List<ProductDto> productDtos = new List<ProductDto>();
+            var productDtos = new List<ProductDto>();
 
             foreach (var productVM in productVMs)
             {
@@ -597,14 +602,10 @@ namespace Services.Implement
                 ProvinceId = BaseConstants.INT_DEFAULT,
                 DistrictId = BaseConstants.INT_DEFAULT,
                 WardId = BaseConstants.INT_DEFAULT,
-                VoucherId = Guid.Empty,
                 CreateEmployeeId = Guid.Empty,
                 OrderDiscount = BaseConstants.INT_DEFAULT,
                 OrderStatusId = 1,
                 OrderSourceId = OrderConstants.ORDER_SOURCE_TIKTOK,
-                OrderPaymentMethodId = 0,
-                OrderStatusPaymentId = 1,
-                OrderStatusShippingId = 1,
                 OrderShippingMethodId = BaseConstants.INT_DEFAULT,
                 OrderNote = "Order from Ladipage"
             };
@@ -974,45 +975,37 @@ namespace Services.Implement
             bool isGetWithoutDate,
             int statusOrderId,
             int sourceOrderId,
-            int orderStatusPaymentId,
-            int orderStatusShippingId,
             int orderShippingMethodId,
             string phone,
             string search,
             bool isGetOrderDeleted)
         {
-            var orderPage = new OrderPaginationDto
-            {
-                Page = page,
-                PageSize = pageSize,
-                TotalOrder = BaseConstants.INT_DEFAULT,
-                TotalPage = BaseConstants.INT_DEFAULT,
-            };
+            var orderPage = new OrderPaginationDto();
 
-            var orders = await _dbContext.Orders.AsNoTracking().Where(x => x.IsDeleted == isGetOrderDeleted).OrderByDescending(x => x.OrderDate).ToListAsync();
+            var orders = _dbContext.Orders.AsNoTracking().Where(x => x.IsDeleted == isGetOrderDeleted).OrderByDescending(x => x.OrderDate).AsQueryable();
 
             //fillter with orderStatus
             if(statusOrderId != BaseConstants.INT_DEFAULT)
             {
-                orders = orders.Where(x => x.OrderStatusId == statusOrderId).ToList();
+                orders = orders.Where(x => x.OrderStatusId == statusOrderId);
             }
 
             //fillter with source order
             if (sourceOrderId != BaseConstants.INT_DEFAULT)
             {
-                orders = orders.Where(x => x.OrderSourceId == sourceOrderId).ToList();
+                orders = orders.Where(x => x.OrderSourceId == sourceOrderId);
             }
 
             //fillter with shipping method
             if (orderShippingMethodId != BaseConstants.INT_DEFAULT)
             {
-                orders = orders.Where(x => x.OrderShippingMethodId == orderShippingMethodId).ToList();
+                orders = orders.Where(x => x.OrderShippingMethodId == orderShippingMethodId);
             }
 
             //fillter with employee create
             if(employeeCreateId != Guid.Empty)
             {
-                orders = orders.Where(x => x.CreateEmployeeId == employeeCreateId).ToList();
+                orders = orders.Where(x => x.CreateEmployeeId == employeeCreateId);
             }
 
             //fillter with brand
@@ -1028,7 +1021,7 @@ namespace Services.Implement
 
                 if(orderIds != null && orderIds.Any())
                 {
-                    orders = orders.Where(x => orderIds.Contains(x.Id)).ToList();
+                    orders = orders.Where(x => orderIds.Contains(x.Id));
                 }
             }
 
@@ -1038,13 +1031,13 @@ namespace Services.Implement
                 var startDate = new DateTime(date.Year, date.Month, 1);
                 var endDate = startDate.AddMonths(1).AddDays(-1);
 
-                orders = orders.Where(x => x.OrderDate.Date >= startDate.Date && x.OrderDate.Date <= endDate.Date).ToList();
+                orders = orders.Where(x => x.OrderDate.Date >= startDate.Date && x.OrderDate.Date <= endDate.Date);
             }
 
             //filter for phone 
             if (!string.IsNullOrEmpty(phone))
             {
-                orders = orders.Where(x => x.CustomerPhone.Contains(phone)).ToList();
+                orders = orders.Where(x => x.CustomerPhone.Contains(phone));
             }
 
             //filter for search
@@ -1057,28 +1050,18 @@ namespace Services.Implement
                     orders = orders.Where(x => words.Any(w => x.OrderNumber.ToLower().Contains(w)
                     || x.CustomerName.ToLower().Contains(w)
                     || x.CustomerPhone.ToLower().Contains(w))
-                    ).ToList();
+                    );
                 }
             }
 
             //filter for customer Id 
             if (customerId != Guid.Empty)
             {
-                orders = orders.Where(x => x.CustomerId == customerId).ToList();
+                orders = orders.Where(x => x.CustomerId == customerId);
             }
 
-            var totalOrdersPerPage = orders.OrderByDescending(o => o.OrderDate).Skip((page - 1) * pageSize).Take(pageSize).ToList();
-            var totalOrder = orders.Count();
-
-            if (totalOrder == 0)
-                return orderPage;
-
-            orderPage.Page = page;
-            orderPage.PageSize = pageSize;
-            orderPage.TotalOrder = totalOrder;
-            orderPage.TotalPage = (int)Math.Ceiling((double)totalOrder / pageSize);
-
-            orderPage.Orders = await GetOrderWithOrderDetail(totalOrdersPerPage);
+            var ordersData = await orders.ToListPagedAsync(page, pageSize, orderPage);
+            orderPage.Orders = await GetOrderWithOrderDetail(ordersData);
             await _callTakeCareServices.GetCallTakeCareForOrderDtos(orderPage.Orders);
 
             return orderPage;

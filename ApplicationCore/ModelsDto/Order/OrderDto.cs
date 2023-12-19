@@ -36,12 +36,6 @@ namespace ApplicationCore.ModelsDto.Order
 
         public int OrderTotal { get; set; }
 
-        public Guid? VoucherId { get; set; }
-
-        public string VoucherName { get; set; } = null!;
-
-        public int VoucherDiscount { get; set; }
-
         public int OrderDiscount { get; set; }
 
         public int TotalOrderDiscount { get; set; }
@@ -51,14 +45,6 @@ namespace ApplicationCore.ModelsDto.Order
         public int OrderStatusId { get; set; }
 
         public string OrderStatusName { get; set; } = null!;
-
-        public int OrderStatusPaymentId { get; set; }
-
-        public string OrderStatusPaymentName { get; set; } = null!;
-
-        public int OrderStatusShippingId { get; set; }
-
-        public string OrderStatusShippingName { get; set; } = null!;
 
         public int OrderShippingMethodId { get; set; }
 
@@ -73,10 +59,6 @@ namespace ApplicationCore.ModelsDto.Order
         public int OrderSourceId { get; set; }
 
         public string OrderSourceName { get; set; } = null!;
-
-        public int OrderPaymentMethodId { get; set; }
-
-        public string OrderPaymentMethodName { get; set; } = null!;
 
         public bool IsUpSale { get; set; }
 

@@ -71,6 +71,8 @@ public partial class Order
 
     public bool IsUpSale { get; set; }
 
+    public bool IsOrderWholeSale { get; set; }
+
     public virtual Employee CreateEmployee { get; set; } = null!;
 
     public virtual Customer Customer { get; set; } = null!;
