@@ -16,7 +16,6 @@ System.Console.Title = System.Reflection.Assembly.GetExecutingAssembly().GetName
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers().ConfigureApiBehaviorOptions(options =>
 {
     options.InvalidModelStateResponseFactory =  // the interjection

@@ -31,7 +31,7 @@ namespace Services.Implement
 
             product.ProductTypeName = nameRelationOfProduct.ProductTypeName;
             product.Id = Guid.NewGuid();
-            product.ProductNumber = await GetNumberProduct(product.ProductTypeId);
+            product.ProductNumber = GetNumberProduct(product.ProductTypeId);
             product.IsActive = true;
             product.CreateDate = GetDateTimeNow();
             product.IsDeleted = false;

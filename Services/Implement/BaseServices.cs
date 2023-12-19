@@ -363,24 +363,17 @@ namespace Services.Implement
             order.ProvinceId = orderVM.ProvinceId;
             order.DistrictId = orderVM.DistrictId;
             order.WardId = orderVM.WardId;
-            order.VoucherId = orderVM.VoucherId;
             order.OrderDiscount = orderVM.OrderDiscount;
             order.OrderStatusId = orderVM.OrderStatusId;
-            order.OrderStatusPaymentId = orderVM.OrderStatusPaymentId;
-            order.OrderStatusShippingId = orderVM.OrderStatusShippingId;
             order.OrderShippingMethodId = orderVM.OrderShippingMethodId;
             order.OrderSourceId = orderVM.OrderSourceId;
             order.OrderNote = !string.IsNullOrEmpty(orderVM.OrderNote) ? orderVM.OrderNote : string.Empty;
             order.CreateEmployeeId = orderVM.CreateEmployeeId;
-            order.OrderPaymentMethodId = orderVM.OrderPaymentMethodId;
         }
 
         public void MapFOrderUpdateVMTOrder(Order order, OrderUpdateVM orderVM)
         {
-            order.VoucherId = orderVM.VoucherId;
             order.OrderStatusId = orderVM.OrderStatusId;
-            order.OrderStatusPaymentId = orderVM.OrderStatusPaymentId;
-            order.OrderStatusShippingId = orderVM.OrderStatusShippingId;
             order.OrderShippingMethodId = orderVM.OrderShippingMethodId;
             order.OrderSourceId = orderVM.OrderSourceId;
             order.OrderNote = !string.IsNullOrEmpty(orderVM.OrderNote) ? orderVM.OrderNote : string.Empty;
@@ -411,18 +404,11 @@ namespace Services.Implement
                 WardId = order.WardId,
                 WardName = order.WardName,
                 OrderTotal = order.OrderTotal,
-                VoucherId = order.VoucherId,
-                VoucherName = order.VoucherName,
-                VoucherDiscount = order.VoucherDiscount,
                 OrderDiscount = order.OrderDiscount,
                 TotalOrderDiscount = order.TotalOrderDiscount,
                 TotalPayment = order.TotalPayment,
                 OrderStatusId = order.OrderStatusId,
                 OrderStatusName = order.OrderStatusName,
-                OrderStatusPaymentId = order.OrderStatusPaymentId,
-                OrderStatusPaymentName = order.OrderStatusPaymentName,
-                OrderStatusShippingId = order.OrderStatusShippingId,
-                OrderStatusShippingName = order.OrderStatusShippingName,
                 OrderShippingMethodId = order.OrderShippingMethodId,
                 OrderShippingMethodName = order.OrderShippingMethodName,
                 OrderNote = order.OrderNote,
@@ -430,8 +416,6 @@ namespace Services.Implement
                 CreateEmployeeName = order.CreateEmployeeName,
                 OrderSourceId = order.OrderSourceId,
                 OrderSourceName = order.OrderSourceName,
-                OrderPaymentMethodId = order.OrderPaymentMethodId,
-                OrderPaymentMethodName = order.OrderPaymentMethodName,
                 IsUpSale = order.IsUpSale
             };
 

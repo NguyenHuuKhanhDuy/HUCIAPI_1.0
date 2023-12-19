@@ -46,12 +46,8 @@ namespace Services.Implement
                 ProvinceId = BaseConstants.INT_DEFAULT,
                 DistrictId = BaseConstants.INT_DEFAULT,
                 WardId = BaseConstants.INT_DEFAULT,
-                VoucherId = Guid.Empty,
                 OrderStatusId = 1,
-                OrderStatusPaymentId = 1,
-                OrderStatusShippingId = 1,
                 OrderShippingMethodId = 1,
-                OrderPaymentMethodId = 0,
                 OrderSourceId = BaseConstants.INT_DEFAULT
             };
 
@@ -94,10 +90,8 @@ namespace Services.Implement
         private async Task<List<OrderDetail>> GetOrderDetailsAndCalculatePrice(Order order, List<ProductDto> productDtos, List<ProductInsideOrderVM> discounts)
         {
             int total = BaseConstants.INT_DEFAULT;
-            int voucherDiscount = BaseConstants.INT_DEFAULT;
             int productDiscount = BaseConstants.INT_DEFAULT;
             List<OrderDetail> orderDetails = new List<OrderDetail>();
-
 
             foreach (ProductInsideOrderVM discount in discounts)
             {
@@ -124,36 +118,8 @@ namespace Services.Implement
             }
 
             order.OrderTotal = total;
-            var voucher = await _dbContext.Vouchers.FirstOrDefaultAsync(x => x.Id == order.VoucherId && x.Id != Guid.Empty);
 
-            if (voucher != null)
-            {
-                if (voucher.DiscountPrice != 0)
-                {
-                    voucherDiscount = voucher.DiscountPrice;
-
-                    if (voucherDiscount > total)
-                    {
-                        order.TotalPayment = 0;
-                    }
-                }
-                else if (voucher.DiscountPercent != 0)
-                {
-                    voucherDiscount = (int)(((double)voucher.DiscountPercent / 100.0) * (total - productDiscount));
-
-                    if (voucherDiscount > total)
-                    {
-                        order.TotalPayment = 0;
-                    }
-                }
-
-                order.TotalOrderDiscount = voucherDiscount + productDiscount + order.OrderDiscount;
-
-                return orderDetails;
-            }
-
-            order.VoucherDiscount = voucherDiscount;
-            order.TotalOrderDiscount = voucherDiscount + productDiscount + order.OrderDiscount;
+            order.TotalOrderDiscount = productDiscount + order.OrderDiscount;
             order.TotalPayment = total - order.TotalOrderDiscount;
 
             return orderDetails;
@@ -199,19 +165,6 @@ namespace Services.Implement
         /// <exception cref="BusinessException"></exception>
         private async Task CheckInforForOrder(Order order, OrderVM orderVM)
         {
-            var voucher = await _dbContext.Vouchers.FirstOrDefaultAsync(x => x.Id == order.VoucherId);
-
-            if (voucher == null)
-            {
-                throw new BusinessException(OrderConstants.VOUCHER_NOT_EXISTS);
-            }
-
-            if (voucher.Quantity == 0)
-            {
-                throw new BusinessException(OrderConstants.VOUCHER_EXCEED);
-            }
-            order.VoucherName = voucher.Name;
-
             var status = await _dbContext.StatusOrders.AsNoTracking().FirstOrDefaultAsync(x => x.Id == order.OrderStatusId);
 
             if (status == null)
@@ -250,24 +203,6 @@ namespace Services.Implement
                 order.CustomerId = customer.Id;
             }
 
-            var paymentStatus = await _dbContext.StatusPayments.AsNoTracking().FirstOrDefaultAsync(x => x.Id == order.OrderStatusPaymentId);
-
-            if (paymentStatus == null)
-            {
-                throw new BusinessException(OrderConstants.PAYMENT_STATUS_NOT_EXISTS);
-            }
-
-            order.OrderStatusPaymentName = paymentStatus.Name;
-
-            var statusShipping = await _dbContext.StatusShippings.AsNoTracking().FirstOrDefaultAsync(x => x.Id == order.OrderStatusShippingId);
-
-            if (paymentStatus == null)
-            {
-                throw new BusinessException(OrderConstants.SHIPPING_STATUS_NOT_EXISTS);
-            }
-
-            order.OrderStatusShippingName = statusShipping.Name;
-
             var shippingMethod = await _dbContext.ShippingMethods.AsNoTracking().FirstOrDefaultAsync(x => x.Id == order.OrderShippingMethodId);
 
             if (shippingMethod == null)
@@ -293,13 +228,6 @@ namespace Services.Implement
                 throw new BusinessException(OrderConstants.SOURCE_ORDER_NOT_EXISTS);
             }
 
-            var orderPaymentMethod = await _dbContext.OrderPaymentMethods.AsNoTracking().FirstOrDefaultAsync(x => x.Id == order.OrderPaymentMethodId); 
-            
-            if (orderPaymentMethod == null) 
-            {
-                throw new BusinessException(OrderConstants.PAYMENT_METHOD_NOT_EXISTS);
-            }
-
             order.OrderSourceName = source.SourceName;
             order.ProvinceName = await GetNameLocationById(order.ProvinceId);
             order.DistrictName = await GetNameLocationById(order.DistrictId);
@@ -315,19 +243,6 @@ namespace Services.Implement
         /// <exception cref="BusinessException"></exception>
         private async Task CheckInforForOrderForUpdate(Order order)
         {
-            var voucher = await _dbContext.Vouchers.FirstOrDefaultAsync(x => x.Id == order.VoucherId);
-
-            if (voucher == null)
-            {
-                throw new BusinessException(OrderConstants.VOUCHER_NOT_EXISTS);
-            }
-
-            if (voucher.Quantity == 0)
-            {
-                throw new BusinessException(OrderConstants.VOUCHER_EXCEED);
-            }
-            order.VoucherName = voucher.Name;
-
             var status = await _dbContext.StatusOrders.AsNoTracking().FirstOrDefaultAsync(x => x.Id == order.OrderStatusId);
 
             if (status == null)
@@ -343,24 +258,6 @@ namespace Services.Implement
             {
                 throw new BusinessException(CustomerConstants.CUSTOMER_NOT_EXIST);
             }
-
-            var paymentStatus = await _dbContext.StatusPayments.AsNoTracking().FirstOrDefaultAsync(x => x.Id == order.OrderStatusPaymentId);
-
-            if (paymentStatus == null)
-            {
-                throw new BusinessException(OrderConstants.PAYMENT_STATUS_NOT_EXISTS);
-            }
-
-            order.OrderStatusPaymentName = paymentStatus.Name;
-
-            var statusShipping = await _dbContext.StatusShippings.AsNoTracking().FirstOrDefaultAsync(x => x.Id == order.OrderStatusShippingId);
-
-            if (paymentStatus == null)
-            {
-                throw new BusinessException(OrderConstants.SHIPPING_STATUS_NOT_EXISTS);
-            }
-
-            order.OrderStatusShippingName = statusShipping.Name;
 
             var shippingMethod = await _dbContext.ShippingMethods.AsNoTracking().FirstOrDefaultAsync(x => x.Id == order.OrderShippingMethodId);
 
@@ -1100,22 +997,10 @@ namespace Services.Implement
                 orders = orders.Where(x => x.OrderStatusId == statusOrderId).ToList();
             }
 
-            //fillter with status payment
-            if (orderStatusPaymentId != BaseConstants.INT_DEFAULT)
-            {
-                orders = orders.Where(x => x.OrderStatusPaymentId == orderStatusPaymentId).ToList();
-            }
-
             //fillter with source order
             if (sourceOrderId != BaseConstants.INT_DEFAULT)
             {
                 orders = orders.Where(x => x.OrderSourceId == sourceOrderId).ToList();
-            }
-
-            //fillter with status shipping
-            if (orderStatusShippingId != BaseConstants.INT_DEFAULT)
-            {
-                orders = orders.Where(x => x.OrderStatusShippingId == orderStatusShippingId).ToList();
             }
 
             //fillter with shipping method
@@ -1254,22 +1139,11 @@ namespace Services.Implement
 
         public async Task<StatusOrderDto> GetAllOrderStatusAsync()
         {
-            var statusShipping = await _dbContext.StatusShippings.ToListAsync();
             var orderSource = await _dbContext.OrderSources.ToListAsync();
-            var statusPayment = await _dbContext.StatusPayments.ToListAsync();
             var statusOrder = await _dbContext.StatusOrders.ToListAsync();
             var shippingMethod = await _dbContext.ShippingMethods.ToListAsync();
 
             var statusOrderDto = new StatusOrderDto();
-
-            foreach (var item in statusShipping)
-            {
-                statusOrderDto.StatusShipping.Add(new ModelStatusDto
-                {
-                    Id = item.Id,
-                    Name = item.Name
-                });
-            }
 
             foreach (var item in orderSource)
             {
@@ -1277,15 +1151,6 @@ namespace Services.Implement
                 {
                     Id = item.Id,
                     Name = item.SourceName
-                });
-            }
-
-            foreach (var item in statusPayment)
-            {
-                statusOrderDto.StatusPayment.Add(new ModelStatusDto
-                {
-                    Id = item.Id,
-                    Name = item.Name
                 });
             }
 

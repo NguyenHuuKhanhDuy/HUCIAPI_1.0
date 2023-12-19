@@ -41,7 +41,5 @@ public partial class Voucher
 
     public virtual Employee CreateUser { get; set; } = null!;
 
-    public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
-
     public virtual VoucherStatus VoucherStatus { get; set; } = null!;
 }

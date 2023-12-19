@@ -37,12 +37,6 @@ public partial class Order
 
     public int BenefitOrder { get; set; }
 
-    public Guid? VoucherId { get; set; }
-
-    public string VoucherName { get; set; } = null!;
-
-    public int VoucherDiscount { get; set; }
-
     public int OrderDiscount { get; set; }
 
     public int TotalOrderDiscount { get; set; }
@@ -52,18 +46,6 @@ public partial class Order
     public int OrderStatusId { get; set; }
 
     public string OrderStatusName { get; set; } = null!;
-
-    public int OrderStatusPaymentId { get; set; }
-
-    public string OrderStatusPaymentName { get; set; } = null!;
-
-    public int OrderStatusShippingId { get; set; }
-
-    public string OrderStatusShippingName { get; set; } = null!;
-
-    public int OrderShippingMethodId { get; set; }
-
-    public string OrderShippingMethodName { get; set; } = null!;
 
     public string OrderNote { get; set; } = null!;
 
@@ -77,11 +59,11 @@ public partial class Order
 
     public string OrderSourceName { get; set; } = null!;
 
+    public int OrderShippingMethodId { get; set; }
+
+    public string OrderShippingMethodName { get; set; } = null!;
+
     public bool IsRemovedCallTakeCare { get; set; }
-
-    public int OrderPaymentMethodId { get; set; }
-
-    public string OrderPaymentMethodName { get; set; } = null!;
 
     public DateTime SendDate { get; set; }
 
@@ -99,23 +81,15 @@ public partial class Order
 
     public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
 
-    public virtual OrderPaymentMethod OrderPaymentMethod { get; set; } = null!;
-
     public virtual ShippingMethod OrderShippingMethod { get; set; } = null!;
 
     public virtual OrderSource OrderSource { get; set; } = null!;
 
     public virtual StatusOrder OrderStatus { get; set; } = null!;
 
-    public virtual StatusPayment OrderStatusPayment { get; set; } = null!;
-
-    public virtual StatusShipping OrderStatusShipping { get; set; } = null!;
-
     public virtual ICollection<OrderTakeCare> OrderTakeCares { get; set; } = new List<OrderTakeCare>();
 
     public virtual Location Province { get; set; } = null!;
-
-    public virtual Voucher? Voucher { get; set; }
 
     public virtual Location Ward { get; set; } = null!;
 }
