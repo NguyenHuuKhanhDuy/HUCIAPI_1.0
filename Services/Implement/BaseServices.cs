@@ -148,7 +148,7 @@ namespace Services.Implement
             comboDto.Id = product.Id;
             comboDto.ProductNumber = product.ProductNumber;
             comboDto.Name = product.Name;
-            comboDto.Price = product.NormalPrice;
+            comboDto.NormalPrice = product.NormalPrice;
             comboDto.WholesalePrice = product.WholesalePrice;
             comboDto.Image = product.Image;
             comboDto.OnHand = product.OnHand;
@@ -199,8 +199,10 @@ namespace Services.Implement
         public void MapFComboUpdateVMTProduct(ComboUpdateVM productVM, Product product)
         {
             product.Name = productVM.Name;
-            product.NormalPrice = productVM.Price;
+            product.NormalPrice = productVM.NormalPrice;
             product.WholesalePrice = productVM.WholesalePrice;
+            product.SalePrice = productVM.SalePrice;
+            product.OriginalPrice = productVM.OriginalPrice;
             product.Image = productVM.Image;
             product.OnHand = 0;
             product.BrandId = productVM.BrandId;
@@ -211,7 +213,9 @@ namespace Services.Implement
         public void MapFProductUpdateVMTProduct(ProductUpdateVM productUpdateVM, Product product)
         {
             product.Name = productUpdateVM.Name;
-            product.NormalPrice = productUpdateVM.Price;
+            product.SalePrice = productUpdateVM.SalePrice;
+            product.OriginalPrice = productUpdateVM.OriginalPrice;
+            product.NormalPrice = productUpdateVM.NormalPrice;
             product.WholesalePrice = productUpdateVM.WholesalePrice;
             product.OnHand = productUpdateVM.Quantity;
             product.BrandId = productUpdateVM.BrandId;

@@ -172,12 +172,13 @@ namespace Services.Implement
 
         public async Task<List<ProductDto>> GetAllProductsAsync()
         {
-            var productDtos = new List<ProductDto>();
+            var products = await _dbContext.Products
+                                 .Include(x => x.Brand)
+                                 .Include(x => x.Category)
+                                 .Include(x => x.UserCreate)
+                                 .Where(x => !x.IsDeleted).ToListAsync();
 
-            var products = await _dbContext.Products.Where(x => !x.IsDeleted).ToListAsync();
-
-            MapListFProductsTProductDtos(products, productDtos);
-            await GetDetailProductAsync(productDtos);
+            var productDtos = GetDetailProductAsync(products);
 
             return productDtos.OrderByDescending(x => x.CreateDate).ToList();
         }
@@ -238,9 +239,13 @@ namespace Services.Implement
         /// <returns></returns>
         public async Task<List<ProductDto>> GetProductByBrandIdAsync(Guid brandId)
         {
-            var products = await _dbContext.Products.Where(x => x.BrandId == brandId && !x.IsDeleted).ToListAsync();
-            var productDtos = DataMapper.MapList<Product, ProductDto>(products);
-            await GetDetailProductAsync(productDtos);
+            var products = await _dbContext.Products
+                                .Include(x => x.Brand)
+                                .Include(x => x.Category)
+                                .Include(x => x.UserCreate)
+                                .Where(x => x.BrandId == brandId && !x.IsDeleted).ToListAsync();
+
+            var productDtos =  GetDetailProductAsync(products);
 
             return productDtos;
         }
@@ -252,9 +257,12 @@ namespace Services.Implement
         /// <returns></returns>
         public async Task<List<ProductDto>> GetProductByCategoryIdAsync(Guid categoryId)
         {
-            var products = await _dbContext.Products.Where(x => x.CategoryId == categoryId && !x.IsDeleted).ToListAsync();
-            List<ProductDto> productDtos = DataMapper.MapList<Product, ProductDto>(products);
-            await GetDetailProductAsync(productDtos);
+            var products = await _dbContext.Products
+                                 .Include(x => x.Brand)
+                                 .Include(x => x.Category)
+                                 .Include(x => x.UserCreate)
+                                 .Where(x => x.CategoryId == categoryId && !x.IsDeleted).ToListAsync();
+            var productDtos = GetDetailProductAsync(products);
 
             return productDtos;
         }
@@ -321,7 +329,8 @@ namespace Services.Implement
             var comboDto = new ComboDto();
             var comboDetails = new List<ComboDetail>();
 
-            var product = MapFComboVMTProduct(comboVM);
+            var product = DataMapper.Map<ComboVM, Product>(comboVM);
+
             product.Id = Guid.NewGuid();
             product.ProductTypeId = ProductConstants.PRODUCT_TYPE_COMBO;
 
@@ -352,7 +361,7 @@ namespace Services.Implement
             await _dbContext.ComboDetails.AddRangeAsync(comboDetails);
             await _dbContext.SaveChangesAsync();
 
-            MapFProductTComboDto(product, comboDto);
+            comboDto = DataMapper.Map<Product, ComboDto>(product);
 
             return comboDto;
         }
@@ -371,8 +380,7 @@ namespace Services.Implement
 
             var nameRelationOfProduct = await GetNameRelationOfProduct(comboVM.BrandId, comboVM.CategoryId, product.ProductTypeId, product.UserCreateId, product);
 
-            var comboDto = new ComboDto();
-            MapFProductTComboDto(product, comboDto);
+            var comboDto = DataMapper.Map<Product, ComboDto>(product);
 
             var comboDetailUpdates = await _dbContext.ComboDetails.Where(x => x.ComboId == product.Id).ToListAsync();
             comboDto.products = productDtos;
@@ -385,6 +393,14 @@ namespace Services.Implement
             return comboDto;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="productDtos"></param>
+        /// <param name="productInsideComboVMs"></param>
+        /// <param name="comboDetails"></param>
+        /// <param name="comboId"></param>
+        /// <returns></returns>
         public List<ComboDetail> UpdateProductInsideCombo(List<ProductDto> productDtos, List<ProductInsideComboVM> productInsideComboVMs, List<ComboDetail> comboDetails, Guid comboId)
         {
             var comboDetails1 = new List<ComboDetail>();
@@ -420,18 +436,25 @@ namespace Services.Implement
             return comboDetails1;
         }
 
-        public async Task GetDetailProductAsync(List<ProductDto> productDtos)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="products"></param>
+        /// <returns></returns>
+        public List<ProductDto> GetDetailProductAsync(List<Product> products)
         {
-            var brands = await _dbContext.Brands.ToListAsync();
-            var categorys = await _dbContext.Categories.ToListAsync();
-            var employees = await _dbContext.Employees.ToListAsync();
+            var productDtos = new List<ProductDto>();
 
-            foreach (var product in productDtos)
+            foreach (var product in products)
             {
-                product.BrandName = brands.FirstOrDefault(x => x.Id == product.BrandId)?.Name;
-                product.CategoryName = categorys.FirstOrDefault(x => x.Id == product.CategoryId)?.Name;
-                product.UserCreateName = employees.FirstOrDefault(x => x.Id == product.UserCreateId)?.Name;
+                var productDto = DataMapper.Map<Product, ProductDto>(product);
+                productDto.BrandName = product.Brand.Name;
+                productDto.CategoryName = product.Category.Name;
+                productDto.UserCreateName = product.UserCreate.Name;
+                productDtos.Add(productDto);
             }
+
+            return productDtos;
         }
     }
 }
