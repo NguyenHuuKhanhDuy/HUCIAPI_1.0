@@ -86,23 +86,6 @@ namespace API.Controllers
 
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="customerId"></param>
-        /// <returns></returns>
-        [HttpGet("[action]")]
-        public async Task<IActionResult> GetAllCustomerAsync()
-        {
-            _logger.LogInformation($"Start get all customer ");
-
-            var customer = await _customerServices.GetAllCustomerAsync();
-
-            _logger.LogInformation($"End get all customer");
-
-            return HandleResponse(customer, StatusCodeConstants.MESSAGE_SUCCESS, StatusCodeConstants.STATUS_SUCCESS);
-        }
-
         [HttpGet("[action]")]
         public async Task<IActionResult> GetCustomerForPaginationAsync(int page = BaseConstants.PageDefault, int pageSize = BaseConstants.PageSizeDefault)
         {

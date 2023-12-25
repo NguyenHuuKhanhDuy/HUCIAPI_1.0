@@ -134,51 +134,16 @@ namespace Services.Implement
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="customerId"></param>
-        /// <returns></returns>
-        public async Task<List<CustomerDto>> GetAllCustomerAsync()
-        {
-            var customers = await _dbContext.Customers.Where(x => !x.IsDeleted).OrderByDescending(x => x.CreateDate).ToListAsync();
-
-            var dtos = DataMapper.MapList<Customer, CustomerDto>(customers);
-            
-            return dtos;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
         /// <param name="page"></param>
         /// <param name="pageSize"></param>
         /// <returns></returns>
         public async Task<CustomerPaginationDto> GetCustomerForPagination(int page, int pageSize)
         {
-            var customerPagination = new CustomerPaginationDto
-            {
-                Page = page, 
-                PageSize = pageSize,
-                TotalPage = BaseConstants.INT_DEFAULT,
-                TotalCustomer = BaseConstants.INT_DEFAULT
-            };
+            var customerPagination = new CustomerPaginationDto();
 
-            var customers = await _dbContext.Customers.AsNoTracking().Where(x => !x.IsDeleted).OrderByDescending(x => x.CreateDate).ToListAsync();
-            var totalCustomer = customers.Count();
-
-            if (totalCustomer == 0)
-                return customerPagination;
-
-            customerPagination.TotalCustomer = totalCustomer;
-            customerPagination.TotalPage = (int)Math.Ceiling((double)totalCustomer / pageSize);
-
-            var customerPerPage = customers.OrderByDescending(x => x.CreateDate)
-                                        .Skip((page - 1) * pageSize)
-                                        .Take(pageSize)
-                                        .ToList();
-
-            foreach(var customer in customerPerPage)
-            {
-                customerPagination.customer.Add(MapFCustomerTCustomerDto(customer));
-            }
+            var customers = _dbContext.Customers.AsNoTracking().Where(x => !x.IsDeleted).OrderByDescending(x => x.CreateDate);
+            var customerPerPage = await customers.ToListPagedAsync(page, pageSize, customerPagination);
+            customerPagination.customer = DataMapper.MapList<Customer, CustomerDto>(customerPerPage);
 
             return customerPagination;
         }
