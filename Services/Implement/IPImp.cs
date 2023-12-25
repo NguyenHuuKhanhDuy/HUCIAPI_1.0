@@ -4,6 +4,7 @@ using ApplicationCore.ViewModels.IP;
 using Common.Constants;
 using Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
+using Services.Helper;
 using Services.Interface;
 
 namespace Services.Implement
@@ -59,10 +60,7 @@ namespace Services.Implement
         {
             var ips = await _dbContext.Ips.Where(x => !x.IsDeleted).ToListAsync();
             var dtos = new List<IPDto>();
-            foreach (var ip in ips)
-            {
-                dtos.Add(MapFIPTIPDto(ip));
-            }
+            dtos = DataMapper.MapList<Ip, IPDto>(ips);
 
             return dtos;
         }

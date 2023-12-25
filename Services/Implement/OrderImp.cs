@@ -453,7 +453,7 @@ namespace Services.Implement
             if (order.OrderStatusId == OrderConstants.OrderStatusSuccess)
             {
                 var commissions = await _dbContext.Commissions.Where(x => !x.IsDelete).ToListAsync();
-                var orderCommissions = await _dbContext.OrderCommissions.ToListAsync();
+                var orderCommissions = await _dbContext.OrderCommissions.AsNoTracking().Where(x => x.OrderId == order.Id && !x.IsDeleted).ToListAsync();
                 await CreateOrderCommission(order, commissions, orderCommissions);
             }
 
@@ -924,31 +924,64 @@ namespace Services.Implement
             {
                 if (order.OrderSourceId == OrderConstants.ORDER_SOURCE_NORMAL)
                 {
-                    var orderCommissionTemp = new OrderCommission
+                    var commissionPriceTemp = commissionPrice.HasValue ? commissionPrice.Value : 0;
+                    var orderCommissionTemps = new List<OrderCommission>();
+
+                    if (order.UserSeparateCommissionId != null)
+                    {
+                        commissionPriceTemp = SeparateCommission(commissionPriceTemp);
+                        orderCommissionTemps.Add(new OrderCommission
+                        {
+                            Id = Guid.NewGuid(),
+                            OrderId = order.Id,
+                            OrderTotal = order.OrderTotal,
+                            CreateDate = GetDateTimeNow(),
+                            EmployeeId = order.UserSeparateCommissionId.Value,
+                            OrderCommission1 = commissionPriceTemp
+                        });
+                    }
+
+                    orderCommissionTemps.Add( new OrderCommission
                     {
                         Id = Guid.NewGuid(),
                         OrderId = order.Id,
                         OrderTotal = order.OrderTotal,
                         CreateDate = GetDateTimeNow(),
                         EmployeeId = order.CreateEmployeeId,
-                        OrderCommission1 = commissionPrice.HasValue ? commissionPrice.Value : 0
-                    };
-                    await _dbContext.OrderCommissions.AddAsync(orderCommissionTemp);
-                    orderCommissions.Add(orderCommissionTemp);
+                        OrderCommission1 = commissionPriceTemp
+                    });
+
+                    await _dbContext.OrderCommissions.AddRangeAsync(orderCommissionTemps);
                 }
                 else if (order.OrderSourceId == OrderConstants.ORDER_SOURCE_TAKE_CARE)
                 {
-                    var orderCommissionTemp = new OrderCommission
+                    var commissionPriceTemp = (order.OrderTotal * percent) / 100;
+                    var orderCommissionTemps = new List<OrderCommission>();
+
+                    if (order.UserSeparateCommissionId != null)
+                    {
+                        commissionPriceTemp = SeparateCommission(commissionPriceTemp);
+                        orderCommissionTemps.Add(new OrderCommission
+                        {
+                            Id = Guid.NewGuid(),
+                            OrderId = order.Id,
+                            OrderTotal = order.OrderTotal,
+                            CreateDate = GetDateTimeNow(),
+                            EmployeeId = order.UserSeparateCommissionId.Value,
+                            OrderCommission1 = commissionPriceTemp
+                        });
+                    }
+
+                    orderCommissionTemps.Add(new OrderCommission
                     {
                         Id = Guid.NewGuid(),
                         OrderId = order.Id,
                         OrderTotal = order.OrderTotal,
                         CreateDate = GetDateTimeNow(),
                         EmployeeId = order.CreateEmployeeId,
-                        OrderCommission1 = (order.OrderTotal * percent) / 100
-                    };
-                    await _dbContext.OrderCommissions.AddAsync(orderCommissionTemp);
-                    orderCommissions.Add(orderCommissionTemp);
+                        OrderCommission1 = commissionPriceTemp
+                    });
+                    await _dbContext.OrderCommissions.AddRangeAsync(orderCommissionTemps);
                 }
             }
             else
@@ -1099,9 +1132,9 @@ namespace Services.Implement
             var ordersList = new List<OrderDto>();
             if (orders == null || !orders.Any())
                 return ordersList;
-
-            var orderDetails = await _dbContext.OrderDetails.AsNoTracking().Where(x => !x.IsDeleted && orders.Select(x => x.Id).Contains(x.OrderId)).ToListAsync();
-            var historyAction = await _dbContext.HistoryActions.Include(x => x.UserCreate).ToListAsync();
+            var orderIds = orders.Select(x => x.Id).ToList();
+            var orderDetails = await _dbContext.OrderDetails.AsNoTracking().Where(x => !x.IsDeleted && orderIds.Contains(x.OrderId)).ToListAsync();
+            var historyAction = await _dbContext.HistoryActions.Include(x => x.UserCreate).Where(x => orderIds.Contains(x.IdAction)).ToListAsync();
 
             foreach (var order in orders)
             {
@@ -1213,7 +1246,12 @@ namespace Services.Implement
 
                 statisticalOrderToday.TotalOrder.Total = orders.Count();
                 statisticalOrderToday.TotalOrder.TotalPrice = orders.Sum(x => x.TotalPayment);
-                statisticalOrderToday.TotalOrder.AveragePrice = (int)statisticalOrderToday.TotalOrder.TotalPrice / (int)orders.Count();
+
+                if (orders.Any())
+                {
+                    statisticalOrderToday.TotalOrder.AveragePrice = (int)statisticalOrderToday.TotalOrder.TotalPrice / (int)orders.Count();
+                }
+
                 statisticalOrderToday.TotalOrder.TotalPriceWaitingOrder = orders.Where(x => x.OrderSourceId == OrderConstants.OrderStatusWaiting).Sum(x => x.TotalPayment);
                 await GetOrderBySourceAsync(orders, statisticalOrderToday);
                 await GetOrderByRole(orders, statisticalOrderToday);
@@ -1384,6 +1422,16 @@ namespace Services.Implement
             order.IsUpSale = isUpSaleOrder;
 
             await _dbContext.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="commission"></param>
+        /// <returns></returns>
+        private int SeparateCommission(int commission)
+        {
+            return (int)Math.Ceiling((double)commission / 2);
         }
     }
 }

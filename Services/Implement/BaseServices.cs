@@ -373,6 +373,8 @@ namespace Services.Implement
             order.OrderSourceId = orderVM.OrderSourceId;
             order.OrderNote = !string.IsNullOrEmpty(orderVM.OrderNote) ? orderVM.OrderNote : string.Empty;
             order.CreateEmployeeId = orderVM.CreateEmployeeId;
+            order.ShippingFee = orderVM.ShippingFee;
+            order.UserSeparateCommissionId = orderVM.UserSeparateCommissionId;
         }
 
         public void MapFOrderUpdateVMTOrder(Order order, OrderUpdateVM orderVM)
@@ -387,6 +389,8 @@ namespace Services.Implement
             order.WardId = GetIntNewOrBefore(orderVM?.WardId, order.WardId);
             order.DistrictId = GetIntNewOrBefore(orderVM?.DistrictId, order.DistrictId);
             order.ProvinceId = GetIntNewOrBefore(orderVM?.ProvinceId, order.ProvinceId);
+            order.ShippingFee = orderVM.ShippingFee;
+            order.UserSeparateCommissionId = orderVM.UserSeparateCommissionId;
         }
 
         public OrderDto MapFOrderTOrderDto(Order order)

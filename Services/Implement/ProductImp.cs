@@ -22,6 +22,11 @@ namespace Services.Implement
             _categoryServices = categoryServices;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="productVM"></param>
+        /// <returns></returns>
         public async Task<ProductDto> CreateProductAsync(ProductVM productVM)
         {
             var product = DataMapper.Map<ProductVM, Product>(productVM);

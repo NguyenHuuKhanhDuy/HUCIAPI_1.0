@@ -67,9 +67,11 @@ public partial class Employee
 
     public virtual ICollection<OrderCommission> OrderCommissions { get; set; } = new List<OrderCommission>();
 
+    public virtual ICollection<Order> OrderCreateEmployees { get; set; } = new List<Order>();
+
     public virtual ICollection<OrderTakeCare> OrderTakeCares { get; set; } = new List<OrderTakeCare>();
 
-    public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
+    public virtual ICollection<Order> OrderUserSeparateCommissions { get; set; } = new List<Order>();
 
     public virtual ICollection<OtherCost> OtherCosts { get; set; } = new List<OtherCost>();
 

@@ -26,9 +26,10 @@ namespace Services.Implement
         /// <returns></returns>
         public async Task<ImportDto> CreateImportAsync(ImportVM vm)
         {
-            var employees = await _dbContext.Employees.AsNoTracking().Where(x => !x.IsDeleted).ToListAsync();
-            var suppliers = await _dbContext.Suppliers.AsNoTracking().Where(x => !x.IsDeleted).ToListAsync();
-            var products = await _dbContext.Products.Where(x => !x.IsDeleted).ToListAsync();
+            var productIds = vm.Products.Select(x => x.ProductId).ToList();
+            var employees = await _dbContext.Employees.AsNoTracking().Where(x => x.Id == vm.UserCreateId && !x.IsDeleted).FirstOrDefaultAsync();
+            var suppliers = await _dbContext.Suppliers.AsNoTracking().Where(x => x.Id == vm.SupplierId && !x.IsDeleted).FirstOrDefaultAsync();
+            var products = await _dbContext.Products.Where(x => productIds.Contains(x.Id) && !x.IsDeleted).ToListAsync();
             var statusImports = await _dbContext.StatusImports.AsNoTracking().ToListAsync();
             CheckInfoImport(vm, employees, suppliers, products);
             var imports = await _dbContext.Imports.AsNoTracking().ToListAsync();
@@ -57,16 +58,12 @@ namespace Services.Implement
         /// <param name="suppliers"></param>
         /// <param name="products"></param>
         /// <exception cref="BusinessException"></exception>
-        private void CheckInfoImport(ImportVM vm, List<Employee> employees, List<Supplier> suppliers, List<Product> products)
+        private void CheckInfoImport(ImportVM vm, Employee? employee, Supplier? supplier, List<Product> products)
         {
-            var employee = employees.FirstOrDefault(x => x.Id == vm.UserCreateId);
-
             if (employee == null)
             {
                 throw new BusinessException(EmployeeConstants.EMPLOYEE_NOT_EXIST);
             }
-
-            var supplier = suppliers.FirstOrDefault(x => x.Id == vm.SupplierId);
 
             if (supplier == null)
             {
@@ -171,12 +168,13 @@ namespace Services.Implement
                 throw new BusinessException(ImportConstants.ImportIsCompleted);
             }
 
-            var employees = await _dbContext.Employees.AsNoTracking().Where(x => !x.IsDeleted).ToListAsync();
-            var suppliers = await _dbContext.Suppliers.AsNoTracking().Where(x => !x.IsDeleted).ToListAsync();
-            var products = await _dbContext.Products.Where(x => !x.IsDeleted).ToListAsync();
+            var productIds = vm.Products.Select(x => x.ProductId).ToList();
+            var employee = await _dbContext.Employees.AsNoTracking().Where(x => x.Id == vm.UserCreateId && !x.IsDeleted).FirstOrDefaultAsync();
+            var supplier = await _dbContext.Suppliers.AsNoTracking().Where(x => x.Id == vm.SupplierId && !x.IsDeleted).FirstOrDefaultAsync();
+            var products = await _dbContext.Products.Where(x => productIds.Contains(x.Id) && !x.IsDeleted).ToListAsync();
             var statusImports = await _dbContext.StatusImports.AsNoTracking().ToListAsync();
 
-            CheckInfoImport(vm, employees, suppliers, products);
+            CheckInfoImport(vm, employee, supplier, products);
             MapFImportUpdateVMTImport(import, vm);
             import.StatusImportName = statusImports.FirstOrDefault(x => x.Id == import.StatusImportId)!.Name;
 

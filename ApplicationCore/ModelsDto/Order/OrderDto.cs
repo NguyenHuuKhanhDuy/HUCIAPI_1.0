@@ -62,6 +62,10 @@ namespace ApplicationCore.ModelsDto.Order
 
         public bool IsUpSale { get; set; }
 
+        public long ShippingFee { get; set; }
+
+        public Guid? UserSeparateCommissionId { get; set; }
+
         public List<OrderDetailDto> products { get; set; } = new List<OrderDetailDto>();
 
         public List<HistoryActionDto> History { get; set; } = new List<HistoryActionDto>();

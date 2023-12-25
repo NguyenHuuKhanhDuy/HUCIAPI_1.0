@@ -41,6 +41,10 @@ namespace ApplicationCore.ViewModels.Order
 
         public int WardId { get; set; }
 
+        public long ShippingFee { get; set; }
+
+        public Guid? UserSeparateCommissionId { get; set; }
+
         public List<ProductInsideOrderVM> products { get; set; } = new List<ProductInsideOrderVM>();
 
     }

@@ -154,7 +154,7 @@ namespace API.Controllers
             
             var orders = await _orderServices.GetOrdersWithPaginationAsync(date, employeeCreateId, customerId, brandId, page, pageSize, isGetWithoutDate, statusOrderId, sourceOrderId, orderShippingMethodId, phone, search, isGetOrderDeleted);
 
-            _logger.LogInformation($"End get order with page: {page}, pageSize: {pageSize} \r\n{GetStringFromJson(orders)}");
+            //_logger.LogInformation($"End get order with page: {page}, pageSize: {pageSize} \r\n{GetStringFromJson(orders)}");
 
             return HandleResponseStatusOk(orders);
         }

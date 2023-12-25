@@ -73,6 +73,10 @@ public partial class Order
 
     public bool IsOrderWholeSale { get; set; }
 
+    public long ShippingFee { get; set; }
+
+    public Guid? UserSeparateCommissionId { get; set; }
+
     public virtual Employee CreateEmployee { get; set; } = null!;
 
     public virtual Customer Customer { get; set; } = null!;
@@ -92,6 +96,8 @@ public partial class Order
     public virtual ICollection<OrderTakeCare> OrderTakeCares { get; set; } = new List<OrderTakeCare>();
 
     public virtual Location Province { get; set; } = null!;
+
+    public virtual Employee? UserSeparateCommission { get; set; }
 
     public virtual Location Ward { get; set; } = null!;
 }

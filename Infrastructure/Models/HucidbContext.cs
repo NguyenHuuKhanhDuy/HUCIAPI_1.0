@@ -404,7 +404,7 @@ public partial class HucidbContext : DbContext
                 .HasColumnType("datetime");
             entity.Property(e => e.WardName).HasDefaultValueSql("('')");
 
-            entity.HasOne(d => d.CreateEmployee).WithMany(p => p.Orders)
+            entity.HasOne(d => d.CreateEmployee).WithMany(p => p.OrderCreateEmployees)
                 .HasForeignKey(d => d.CreateEmployeeId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Order_Employee");
@@ -438,6 +438,10 @@ public partial class HucidbContext : DbContext
                 .HasForeignKey(d => d.ProvinceId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Order_Location2");
+
+            entity.HasOne(d => d.UserSeparateCommission).WithMany(p => p.OrderUserSeparateCommissions)
+                .HasForeignKey(d => d.UserSeparateCommissionId)
+                .HasConstraintName("FK_UserSeparateCommission_Employee");
 
             entity.HasOne(d => d.Ward).WithMany(p => p.OrderWards)
                 .HasForeignKey(d => d.WardId)
