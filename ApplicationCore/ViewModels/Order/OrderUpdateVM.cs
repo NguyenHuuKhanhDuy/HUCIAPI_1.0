@@ -45,6 +45,10 @@ namespace ApplicationCore.ViewModels.Order
 
         public Guid? UserSeparateCommissionId { get; set; }
 
+        public string OrderDescription { get; set; } = null!;
+
+        public bool IsNotCommission { get; set; }
+
         public List<ProductInsideOrderVM> products { get; set; } = new List<ProductInsideOrderVM>();
 
     }

@@ -51,7 +51,8 @@ namespace Services.Implement
                 OrderSourceId = BaseConstants.INT_DEFAULT,
                 IsOrderWholeSale = isWholeSale,
                 IsUpSale = false,
-                IsUseExcelFile = true
+                IsUseExcelFile = true,
+                IsNotCommission = false
             };
 
             MapFOrderVMTOrder(order, orderVM);
@@ -62,11 +63,11 @@ namespace Services.Implement
             order.OrderNumber = await GetOrderNumber();
             order.OrderDate = isSetOrderDate ? orderVM.OrderDate : GetDateTimeNow();
             order.IsDeleted = order.IsRemovedCallTakeCare = BaseConstants.IsDeletedDefault;
-
             var productDtos = await GetProductDtoByIdsAsync(orderVM.products);
             var orderDetails = await GetOrderDetailsAndCalculatePrice(order, productDtos, orderVM.products, isWholeSale);
-
             order.BenefitOrder = await CalculateBenefitOrder(order.OrderTotal, orderVM.products);
+            await SpecialCaseForOrder(order);
+
             await _dbContext.Orders.AddAsync(order);
             await _dbContext.SaveChangesAsync();
 
@@ -81,6 +82,31 @@ namespace Services.Implement
             }
 
             return dto;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="order"></param>
+        /// <returns></returns>
+        private async Task SpecialCaseForOrder(Order order)
+        {
+            if (order.OrderShippingMethodId == (int)ShippingMethodEnum.TuGiao)
+            {
+                var statusComplete = await _dbContext.StatusOrders.AsNoTracking().FirstOrDefaultAsync(x => x.Id == (int)StatusOrderEnum.Complete);
+                if (statusComplete != null)
+                {
+                    order.OrderStatusId = statusComplete.Id;
+                    order.OrderStatusName = statusComplete.Name;
+                }
+            }
+
+            if (order.OrderStatusId == (int)StatusOrderEnum.Complete)
+            {
+                var commissions = await _dbContext.Commissions.Where(x => !x.IsDelete).ToListAsync();
+                var orderCommissions = await _dbContext.OrderCommissions.AsNoTracking().Where(x => x.OrderId == order.Id && !x.IsDeleted).ToListAsync();
+                await CreateOrderCommission(order, commissions, orderCommissions);
+            }
         }
 
         /// <summary>
@@ -450,12 +476,7 @@ namespace Services.Implement
             await CheckInforForOrderForUpdate(order);
 
             await UpdateOrderDetailsForOrder(orderVM, order, isWholeSaleOrder);
-            if (order.OrderStatusId == OrderConstants.OrderStatusSuccess)
-            {
-                var commissions = await _dbContext.Commissions.Where(x => !x.IsDelete).ToListAsync();
-                var orderCommissions = await _dbContext.OrderCommissions.AsNoTracking().Where(x => x.OrderId == order.Id && !x.IsDeleted).ToListAsync();
-                await CreateOrderCommission(order, commissions, orderCommissions);
-            }
+            await SpecialCaseForOrder(order);
 
             await _dbContext.SaveChangesAsync();
 

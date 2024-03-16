@@ -375,6 +375,8 @@ namespace Services.Implement
             order.CreateEmployeeId = orderVM.CreateEmployeeId;
             order.ShippingFee = orderVM.ShippingFee;
             order.UserSeparateCommissionId = orderVM.UserSeparateCommissionId;
+            order.OrderDescription = orderVM.OrderDescription;
+            order.IsNotCommission = orderVM.IsNotCommission;
         }
 
         public void MapFOrderUpdateVMTOrder(Order order, OrderUpdateVM orderVM)
@@ -391,6 +393,8 @@ namespace Services.Implement
             order.ProvinceId = GetIntNewOrBefore(orderVM?.ProvinceId, order.ProvinceId);
             order.ShippingFee = orderVM.ShippingFee;
             order.UserSeparateCommissionId = orderVM.UserSeparateCommissionId;
+            order.OrderDescription = GetStringNewOrBefore(orderVM.OrderDescription, order.OrderDescription);
+            order.IsNotCommission = orderVM.IsNotCommission;
         }
 
         public OrderDto MapFOrderTOrderDto(Order order)

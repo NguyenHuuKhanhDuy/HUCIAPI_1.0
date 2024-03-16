@@ -65,6 +65,7 @@ builder.Services.AddTransient<IShiftServices, ShiftImp>();
 builder.Services.AddTransient<IOrderSourceServices, OrderSourceImp>();
 builder.Services.AddTransient<IImportServices, ImportImp>();
 builder.Services.AddTransient<IHistoryAction, HistoryActionImp>();
+builder.Services.AddTransient<IExternal, ExternalImp>();
 
 //add authen services
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>

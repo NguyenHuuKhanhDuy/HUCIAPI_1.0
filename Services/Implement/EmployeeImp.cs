@@ -424,5 +424,25 @@ namespace Services.Implement
 
             return rolesDto;
         }
+
+        public async Task ResetPasswordAsync(string userName, string secretKey)
+        {
+            var secretKeyAppSetting = _config.GetSection(EmployeeConstants.SecretKeyResetPasswordAppSetting).Value;
+
+            if (secretKeyAppSetting != secretKey)
+            {
+                throw new BusinessException("Reset password thất bại !");
+            }
+
+            var user = await _dbContext.Employees.FirstOrDefaultAsync(x => x.Username == userName && !x.IsDeleted);
+
+            if (user == null)
+            {
+                throw new BusinessException(EmployeeConstants.EMPLOYEE_NOT_EXIST);
+            }
+
+            user.Password = HashPassword(secretKeyAppSetting);
+            await _dbContext.SaveChangesAsync();
+        }
     }
 }

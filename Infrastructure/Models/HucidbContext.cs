@@ -392,6 +392,7 @@ public partial class HucidbContext : DbContext
             entity.Property(e => e.OrderDate)
                 .HasDefaultValueSql("(format(getdate(),'yyyy-MM-dd HH:mm'))")
                 .HasColumnType("datetime");
+            entity.Property(e => e.OrderDescription).HasDefaultValueSql("('')");
             entity.Property(e => e.OrderNote).HasDefaultValueSql("('')");
             entity.Property(e => e.OrderNumber)
                 .HasMaxLength(50)

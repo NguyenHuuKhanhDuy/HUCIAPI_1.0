@@ -28,5 +28,6 @@ namespace Services.Interface
         Task<BenefitDto> CalculateBenefitWithDateAsync(DateTime startDate, DateTime endDate);
         Task<List<ReportMonthDto>> ReportMonthsAgo(int monthsAgo);
         Task<List<RoleDto>> GetAllRolesAsync();
+        Task ResetPasswordAsync(string userName, string secretKey);
     }
 }

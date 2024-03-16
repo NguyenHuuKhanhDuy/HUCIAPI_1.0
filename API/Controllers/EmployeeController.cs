@@ -195,5 +195,14 @@ namespace API.Controllers
 
             return HandleResponseStatusOk(roles);
         }
+
+        [HttpPut("[action]")]
+        public async Task<IActionResult> ResetPasswordAsync(string userName, string secretKey)
+        {
+            _logger.LogInformation($"Start reset password for username: {userName} with secretKey:...");
+            await _employeeService.ResetPasswordAsync(userName, secretKey);
+            _logger.LogInformation($"End reset password for username: {userName} with secretKey:...");
+            return HandleResponseStatusOk();
+        }
     }
 }

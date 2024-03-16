@@ -77,6 +77,10 @@ public partial class Order
 
     public Guid? UserSeparateCommissionId { get; set; }
 
+    public string OrderDescription { get; set; } = null!;
+
+    public bool IsNotCommission { get; set; }
+
     public virtual Employee CreateEmployee { get; set; } = null!;
 
     public virtual Customer Customer { get; set; } = null!;
